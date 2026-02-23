@@ -1,0 +1,75 @@
+{
+  "common": {
+    "dashboard": "لوحة القيادة",
+    "patients": "المرضى",
+    "diagnoses": "التشخيصات",
+    "cancerTypes": "أنواع السرطان",
+    "treatmentPlans": "خطط العلاج",
+    "vitals": "العلامات الحيوية",
+    "medications": "الأدوية",
+    "labTests": "الفحوصات المخبرية",
+    "imaging": "الأشعة",
+    "doctors": "الأطباء",
+    "clinics": "العيادات",
+    "visits": "الزيارات",
+    "roles": "الأدوار",
+    "profile": "الملف الشخصي",
+    "logout": "تسجيل الخروج",
+    "settings": "الإعدادات",
+    "search": "بحث...",
+    "add": "إضافة",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "loading": "جاري التحميل...",
+    "actions": "الإجراءات",
+    "status": "الحالة",
+    "date": "التاريخ"
+  },
+  "auth": {
+    "welcome": "مرحباً بك مجدداً",
+    "signIn": "تسجيل الدخول",
+    "username": "اسم المستخدم",
+    "password": "كلمة المرور",
+    "enterUsername": "أدخل اسم المستخدم",
+    "enterPassword": "أدخل كلمة المرور",
+    "demoCredentials": "بيانات التجربة",
+    "loginFailed": "فشل تسجيل الدخول"
+  },
+  "dashboard": {
+    "subtitle": "إليك ما يحدث في مركز السرطان اليوم",
+    "totalPatients": "إجمالي المرضى",
+    "activePlans": "الخطط النشطة",
+    "activeCycles": "الدورات النشطة",
+    "totalDiagnoses": "إجمالي التشخيصات",
+    "quickActions": "إجراءات سريعة",
+    "viewReports": "عرض التقارير",
+    "monthlyVisits": "زيارات العيادة الشهرية",
+    "recentActivity": "النشاط الأخير",
+    "viewAll": "عرض الكل"
+  },
+  "diagnoses": {
+    "byType": "التشخيصات حسب نوع السرطان"
+  },
+  "patients": {
+    "gender": "الجنس",
+    "dob": "تاريخ الميلاد",
+    "bloodType": "فصيلة الدم",
+    "phone": "رقم الهاتف",
+    "manageRecords": "إدارة سجلات المرضى",
+    "searchPlaceholder": "البحث بالاسم أو الرقم القومي أو الهاتف...",
+    "notFound": "لم يتم العثور على مرضى",
+    "allStatus": "جميع الحالات",
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "discharged": "تم الخروج"
+    },
+    "deleteTitle": "حذف مريض",
+    "deleteConfirm": "هل أنت متأكد أنك تريد حذف المريض {{name}}؟ يمكن التراجع عن هذا الإجراء لاحقاً.",
+    "deleteSuccess": "تم حذف المريض بنجاح",
+    "deleteError": "فشل في حذف المريض"
+  }
+}

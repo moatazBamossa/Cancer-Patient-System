@@ -1,0 +1,75 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "patients": "Patients",
+    "diagnoses": "Diagnoses",
+    "cancerTypes": "Cancer Types",
+    "treatmentPlans": "Treatment Plans",
+    "vitals": "Vital Signs",
+    "medications": "Medications",
+    "labTests": "Lab Tests",
+    "imaging": "Imaging",
+    "doctors": "Doctors",
+    "clinics": "Clinics",
+    "visits": "Visits",
+    "roles": "Roles",
+    "profile": "Profile",
+    "logout": "Logout",
+    "settings": "Settings",
+    "search": "Search...",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date"
+  },
+  "auth": {
+    "welcome": "Welcome back",
+    "signIn": "Sign In",
+    "username": "Username",
+    "password": "Password",
+    "enterUsername": "Enter your username",
+    "enterPassword": "Enter your password",
+    "demoCredentials": "Demo Credentials",
+    "loginFailed": "Login failed"
+  },
+  "dashboard": {
+    "subtitle": "Here's what's happening at the Cancer Center today",
+    "totalPatients": "Total Patients",
+    "activePlans": "Active Plans",
+    "activeCycles": "Active Cycles",
+    "totalDiagnoses": "Total Diagnoses",
+    "quickActions": "Quick Actions",
+    "viewReports": "View Reports",
+    "monthlyVisits": "Monthly Clinic Visits",
+    "recentActivity": "Recent Activity",
+    "viewAll": "View All"
+  },
+  "diagnoses": {
+    "byType": "Diagnoses by Cancer Type"
+  },
+  "patients": {
+    "gender": "Gender",
+    "dob": "Date of Birth",
+    "bloodType": "Blood Group",
+    "phone": "Phone Number",
+    "manageRecords": "Manage patient records",
+    "searchPlaceholder": "Search by name, ID, or phone...",
+    "notFound": "No patients found",
+    "allStatus": "All Status",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "discharged": "Discharged"
+    },
+    "deleteTitle": "Delete Patient",
+    "deleteConfirm": "Are you sure you want to remove {{name}}? This action can be reversed.",
+    "deleteSuccess": "Patient removed successfully",
+    "deleteError": "Failed to delete patient"
+  }
+}

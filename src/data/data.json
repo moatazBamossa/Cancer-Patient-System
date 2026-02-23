@@ -1,0 +1,208 @@
+{
+  "roles": [
+    { "id": "role-1", "name": "Admin", "description": "Full system access", "permissions": ["all"], "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "role-2", "name": "Doctor", "description": "Clinical access", "permissions": ["patients.read", "patients.write", "diagnoses.read", "diagnoses.write", "treatment.read", "treatment.write", "vitals.read", "vitals.write", "lab.read", "imaging.read"], "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "role-3", "name": "Nurse", "description": "Patient care access", "permissions": ["patients.read", "vitals.read", "vitals.write", "medications.read"], "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "role-4", "name": "Receptionist", "description": "Front desk access", "permissions": ["patients.read", "visits.read", "visits.write"], "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "role-5", "name": "Lab Technician", "description": "Lab operations access", "permissions": ["lab.read", "lab.write", "patients.read"], "created_at": "2024-01-01T00:00:00Z" }
+  ],
+  "users": [
+    { "id": "user-1", "username": "admin", "password": "admin123", "email": "admin@cancercenter.org", "full_name": "Sarah Mitchell", "role_id": "role-1", "avatar": "", "phone": "+1-555-0101", "is_active": true, "created_at": "2024-01-15T08:00:00Z" },
+    { "id": "user-2", "username": "dr.ahmed", "password": "doctor123", "email": "ahmed@cancercenter.org", "full_name": "Dr. Ahmed Hassan", "role_id": "role-2", "avatar": "", "phone": "+1-555-0102", "is_active": true, "created_at": "2024-02-01T08:00:00Z" },
+    { "id": "user-3", "username": "dr.smith", "password": "doctor123", "email": "smith@cancercenter.org", "full_name": "Dr. Emily Smith", "role_id": "role-2", "avatar": "", "phone": "+1-555-0103", "is_active": true, "created_at": "2024-02-15T08:00:00Z" },
+    { "id": "user-4", "username": "nurse.jones", "password": "nurse123", "email": "jones@cancercenter.org", "full_name": "Lisa Jones", "role_id": "role-3", "avatar": "", "phone": "+1-555-0104", "is_active": true, "created_at": "2024-03-01T08:00:00Z" },
+    { "id": "user-5", "username": "dr.chen", "password": "doctor123", "email": "chen@cancercenter.org", "full_name": "Dr. Wei Chen", "role_id": "role-2", "avatar": "", "phone": "+1-555-0105", "is_active": true, "created_at": "2024-03-15T08:00:00Z" },
+    { "id": "user-6", "username": "reception", "password": "reception123", "email": "front@cancercenter.org", "full_name": "Maria Garcia", "role_id": "role-4", "avatar": "", "phone": "+1-555-0106", "is_active": true, "created_at": "2024-04-01T08:00:00Z" }
+  ],
+  "patients": [
+    { "id": "pat-1", "national_id": "NID-10001", "first_name": "John", "last_name": "Doe", "date_of_birth": "1965-03-15", "gender": "male", "blood_type": "A+", "phone": "+1-555-1001", "email": "john.doe@email.com", "address": "123 Oak Street, Springfield", "status": "active", "is_deleted": false, "created_at": "2024-01-20T10:00:00Z", "updated_at": "2024-06-15T14:30:00Z" },
+    { "id": "pat-2", "national_id": "NID-10002", "first_name": "Jane", "last_name": "Wilson", "date_of_birth": "1978-07-22", "gender": "female", "blood_type": "O-", "phone": "+1-555-1002", "email": "jane.wilson@email.com", "address": "456 Maple Ave, Riverside", "status": "active", "is_deleted": false, "created_at": "2024-02-10T09:00:00Z", "updated_at": "2024-07-20T11:15:00Z" },
+    { "id": "pat-3", "national_id": "NID-10003", "first_name": "Robert", "last_name": "Martinez", "date_of_birth": "1952-11-08", "gender": "male", "blood_type": "B+", "phone": "+1-555-1003", "email": "robert.m@email.com", "address": "789 Pine Road, Lakewood", "status": "active", "is_deleted": false, "created_at": "2024-03-05T14:00:00Z", "updated_at": "2024-08-10T09:45:00Z" },
+    { "id": "pat-4", "national_id": "NID-10004", "first_name": "Emily", "last_name": "Chen", "date_of_birth": "1985-01-30", "gender": "female", "blood_type": "AB+", "phone": "+1-555-1004", "email": "emily.chen@email.com", "address": "321 Elm Drive, Fairview", "status": "inactive", "is_deleted": false, "created_at": "2024-03-20T11:00:00Z", "updated_at": "2024-05-25T16:20:00Z" },
+    { "id": "pat-5", "national_id": "NID-10005", "first_name": "Michael", "last_name": "Brown", "date_of_birth": "1970-09-12", "gender": "male", "blood_type": "O+", "phone": "+1-555-1005", "email": "mike.brown@email.com", "address": "654 Cedar Lane, Hillcrest", "status": "active", "is_deleted": false, "created_at": "2024-04-01T08:30:00Z", "updated_at": "2024-09-05T13:10:00Z" },
+    { "id": "pat-6", "national_id": "NID-10006", "first_name": "Sophia", "last_name": "Taylor", "date_of_birth": "1990-04-18", "gender": "female", "blood_type": "A-", "phone": "+1-555-1006", "email": "sophia.t@email.com", "address": "987 Birch Blvd, Meadowbrook", "status": "active", "is_deleted": false, "created_at": "2024-04-15T10:00:00Z", "updated_at": "2024-09-20T08:00:00Z" },
+    { "id": "pat-7", "national_id": "NID-10007", "first_name": "David", "last_name": "Anderson", "date_of_birth": "1958-12-05", "gender": "male", "blood_type": "B-", "phone": "+1-555-1007", "email": "david.a@email.com", "address": "159 Walnut Ct, Brookside", "status": "active", "is_deleted": false, "created_at": "2024-05-01T13:00:00Z", "updated_at": "2024-10-01T15:30:00Z" },
+    { "id": "pat-8", "national_id": "NID-10008", "first_name": "Olivia", "last_name": "Thomas", "date_of_birth": "1975-06-25", "gender": "female", "blood_type": "AB-", "phone": "+1-555-1008", "email": "olivia.t@email.com", "address": "753 Spruce Way, Greenfield", "status": "discharged", "is_deleted": false, "created_at": "2024-05-20T07:45:00Z", "updated_at": "2024-08-30T12:00:00Z" }
+  ],
+  "cancer_types": [
+    { "id": "ct-1", "name": "Breast Cancer", "code": "BC", "color": "#E91E63", "description": "Cancer that forms in the cells of the breasts", "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "ct-2", "name": "Lung Cancer", "code": "LC", "color": "#607D8B", "description": "Cancer that begins in the lungs", "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "ct-3", "name": "Colorectal Cancer", "code": "CRC", "color": "#795548", "description": "Cancer of the colon or rectum", "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "ct-4", "name": "Prostate Cancer", "code": "PC", "color": "#2196F3", "description": "Cancer in the prostate gland", "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "ct-5", "name": "Lymphoma", "code": "LYM", "color": "#9C27B0", "description": "Cancer of the lymphatic system", "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "ct-6", "name": "Leukemia", "code": "LEU", "color": "#FF5722", "description": "Cancer of blood-forming tissues", "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "ct-7", "name": "Melanoma", "code": "MEL", "color": "#3F51B5", "description": "Cancer that begins in melanocytes", "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "ct-8", "name": "Pancreatic Cancer", "code": "PAN", "color": "#FF9800", "description": "Cancer of the pancreas organ", "created_at": "2024-01-01T00:00:00Z" }
+  ],
+  "diagnoses": [
+    { "id": "diag-1", "patient_id": "pat-1", "cancer_type_id": "ct-2", "doctor_id": "doc-1", "diagnosis_date": "2024-02-01", "notes": "Stage IIIA non-small cell lung cancer, adenocarcinoma subtype. Right upper lobe mass identified on CT scan.", "status": "confirmed", "created_at": "2024-02-01T10:00:00Z" },
+    { "id": "diag-2", "patient_id": "pat-2", "cancer_type_id": "ct-1", "doctor_id": "doc-2", "diagnosis_date": "2024-03-15", "notes": "Invasive ductal carcinoma, ER+/PR+/HER2-. Left breast, upper outer quadrant.", "status": "confirmed", "created_at": "2024-03-15T14:00:00Z" },
+    { "id": "diag-3", "patient_id": "pat-3", "cancer_type_id": "ct-4", "doctor_id": "doc-1", "diagnosis_date": "2024-04-10", "notes": "Prostate adenocarcinoma, Gleason score 7 (3+4). Detected via PSA screening.", "status": "confirmed", "created_at": "2024-04-10T09:30:00Z" },
+    { "id": "diag-4", "patient_id": "pat-5", "cancer_type_id": "ct-3", "doctor_id": "doc-3", "diagnosis_date": "2024-05-20", "notes": "Colorectal adenocarcinoma, sigmoid colon. Identified during routine colonoscopy.", "status": "confirmed", "created_at": "2024-05-20T11:00:00Z" },
+    { "id": "diag-5", "patient_id": "pat-6", "cancer_type_id": "ct-5", "doctor_id": "doc-2", "diagnosis_date": "2024-06-01", "notes": "Hodgkin lymphoma, nodular sclerosis subtype. Cervical lymphadenopathy.", "status": "confirmed", "created_at": "2024-06-01T15:00:00Z" },
+    { "id": "diag-6", "patient_id": "pat-7", "cancer_type_id": "ct-6", "doctor_id": "doc-1", "diagnosis_date": "2024-06-15", "notes": "Acute myeloid leukemia (AML). Abnormal blast count in peripheral blood.", "status": "confirmed", "created_at": "2024-06-15T08:00:00Z" },
+    { "id": "diag-7", "patient_id": "pat-4", "cancer_type_id": "ct-7", "doctor_id": "doc-3", "diagnosis_date": "2024-04-01", "notes": "Superficial spreading melanoma, Clark level III. Left forearm lesion.", "status": "confirmed", "created_at": "2024-04-01T13:00:00Z" },
+    { "id": "diag-8", "patient_id": "pat-8", "cancer_type_id": "ct-1", "doctor_id": "doc-2", "diagnosis_date": "2024-06-10", "notes": "Early-stage breast cancer, DCIS. Right breast, detected on mammogram.", "status": "resolved", "created_at": "2024-06-10T10:30:00Z" }
+  ],
+  "staging": [
+    { "id": "stg-1", "diagnosis_id": "diag-1", "stage": "IIIA", "t_stage": "T3", "n_stage": "N1", "m_stage": "M0", "grading": "G2", "date_assessed": "2024-02-05", "notes": "Locally advanced disease without distant metastasis" },
+    { "id": "stg-2", "diagnosis_id": "diag-2", "stage": "IIA", "t_stage": "T2", "n_stage": "N0", "m_stage": "M0", "grading": "G2", "date_assessed": "2024-03-20", "notes": "Moderate size tumor, no lymph node involvement" },
+    { "id": "stg-3", "diagnosis_id": "diag-3", "stage": "II", "t_stage": "T2", "n_stage": "N0", "m_stage": "M0", "grading": "G2", "date_assessed": "2024-04-15", "notes": "Confined to prostate gland" },
+    { "id": "stg-4", "diagnosis_id": "diag-4", "stage": "IIIB", "t_stage": "T4", "n_stage": "N1", "m_stage": "M0", "grading": "G3", "date_assessed": "2024-05-25", "notes": "Local invasion with regional lymph node involvement" },
+    { "id": "stg-5", "diagnosis_id": "diag-5", "stage": "II", "t_stage": "T2", "n_stage": "N1", "m_stage": "M0", "grading": "G1", "date_assessed": "2024-06-05", "notes": "Multiple lymph node regions above diaphragm" },
+    { "id": "stg-6", "diagnosis_id": "diag-6", "stage": "N/A", "t_stage": "N/A", "n_stage": "N/A", "m_stage": "N/A", "grading": "High", "date_assessed": "2024-06-20", "notes": "Hematological malignancy - TNM staging not applicable" },
+    { "id": "stg-7", "diagnosis_id": "diag-7", "stage": "IB", "t_stage": "T2a", "n_stage": "N0", "m_stage": "M0", "grading": "G2", "date_assessed": "2024-04-05", "notes": "1.5mm Breslow thickness without ulceration" },
+    { "id": "stg-8", "diagnosis_id": "diag-8", "stage": "0", "t_stage": "Tis", "n_stage": "N0", "m_stage": "M0", "grading": "G1", "date_assessed": "2024-06-15", "notes": "Carcinoma in situ - non-invasive" }
+  ],
+  "treatment_plans": [
+    { "id": "tp-1", "patient_id": "pat-1", "diagnosis_id": "diag-1", "doctor_id": "doc-1", "title": "NSCLC Chemo-Radiation Protocol", "description": "Concurrent chemoradiation with cisplatin/etoposide followed by consolidation durvalumab", "status": "ongoing", "start_date": "2024-02-15", "end_date": null, "created_at": "2024-02-10T09:00:00Z" },
+    { "id": "tp-2", "patient_id": "pat-2", "diagnosis_id": "diag-2", "doctor_id": "doc-2", "title": "Breast Cancer Adjuvant Therapy", "description": "AC-T regimen followed by endocrine therapy with tamoxifen", "status": "ongoing", "start_date": "2024-04-01", "end_date": null, "created_at": "2024-03-25T10:00:00Z" },
+    { "id": "tp-3", "patient_id": "pat-3", "diagnosis_id": "diag-3", "doctor_id": "doc-1", "title": "Prostate Cancer Active Surveillance", "description": "Active surveillance with periodic PSA monitoring and repeat biopsy", "status": "ongoing", "start_date": "2024-04-20", "end_date": null, "created_at": "2024-04-18T11:00:00Z" },
+    { "id": "tp-4", "patient_id": "pat-5", "diagnosis_id": "diag-4", "doctor_id": "doc-3", "title": "Colorectal FOLFOX Protocol", "description": "Neoadjuvant FOLFOX chemotherapy prior to surgical resection", "status": "ongoing", "start_date": "2024-06-01", "end_date": null, "created_at": "2024-05-28T14:00:00Z" },
+    { "id": "tp-5", "patient_id": "pat-6", "diagnosis_id": "diag-5", "doctor_id": "doc-2", "title": "ABVD Chemotherapy", "description": "Standard ABVD protocol for Hodgkin lymphoma - 6 cycles planned", "status": "ongoing", "start_date": "2024-06-15", "end_date": null, "created_at": "2024-06-10T09:00:00Z" },
+    { "id": "tp-6", "patient_id": "pat-7", "diagnosis_id": "diag-6", "doctor_id": "doc-1", "title": "AML Induction Therapy", "description": "7+3 induction chemotherapy with cytarabine and daunorubicin", "status": "ongoing", "start_date": "2024-07-01", "end_date": null, "created_at": "2024-06-25T08:00:00Z" },
+    { "id": "tp-7", "patient_id": "pat-8", "diagnosis_id": "diag-8", "doctor_id": "doc-2", "title": "DCIS Surgical Management", "description": "Lumpectomy with sentinel lymph node biopsy followed by radiation therapy", "status": "completed", "start_date": "2024-06-20", "end_date": "2024-08-15", "created_at": "2024-06-18T10:00:00Z" }
+  ],
+  "treatment_cycles": [
+    { "id": "tc-1", "treatment_plan_id": "tp-1", "cycle_number": 1, "start_date": "2024-02-15", "end_date": "2024-03-08", "status": "completed", "notes": "Well tolerated, mild nausea managed with antiemetics" },
+    { "id": "tc-2", "treatment_plan_id": "tp-1", "cycle_number": 2, "start_date": "2024-03-15", "end_date": "2024-04-05", "status": "completed", "notes": "Grade 2 fatigue, dose maintained" },
+    { "id": "tc-3", "treatment_plan_id": "tp-1", "cycle_number": 3, "start_date": "2024-04-15", "end_date": "2024-05-06", "status": "completed", "notes": "Neutropenia requiring G-CSF support" },
+    { "id": "tc-4", "treatment_plan_id": "tp-2", "cycle_number": 1, "start_date": "2024-04-01", "end_date": "2024-04-22", "status": "completed", "notes": "AC regimen - adriamycin + cyclophosphamide" },
+    { "id": "tc-5", "treatment_plan_id": "tp-2", "cycle_number": 2, "start_date": "2024-04-29", "end_date": "2024-05-20", "status": "completed", "notes": "AC cycle 2 - mild alopecia noted" },
+    { "id": "tc-6", "treatment_plan_id": "tp-4", "cycle_number": 1, "start_date": "2024-06-01", "end_date": "2024-06-15", "status": "completed", "notes": "FOLFOX cycle 1 - peripheral neuropathy screening baseline" },
+    { "id": "tc-7", "treatment_plan_id": "tp-5", "cycle_number": 1, "start_date": "2024-06-15", "end_date": "2024-07-13", "status": "completed", "notes": "ABVD cycle 1 - standard dosing" },
+    { "id": "tc-8", "treatment_plan_id": "tp-5", "cycle_number": 2, "start_date": "2024-07-15", "end_date": null, "status": "in_progress", "notes": "ABVD cycle 2 - ongoing" },
+    { "id": "tc-9", "treatment_plan_id": "tp-6", "cycle_number": 1, "start_date": "2024-07-01", "end_date": null, "status": "in_progress", "notes": "7+3 induction - day 1 initiated" }
+  ],
+  "vital_signs": [
+    { "id": "vs-1", "patient_id": "pat-1", "recorded_at": "2024-02-15T08:00:00Z", "temperature": 36.8, "systolic_bp": 130, "diastolic_bp": 85, "heart_rate": 78, "respiratory_rate": 18, "oxygen_saturation": 96, "weight": 82.5, "height": 178, "recorded_by": "user-4" },
+    { "id": "vs-2", "patient_id": "pat-1", "recorded_at": "2024-03-15T08:30:00Z", "temperature": 37.2, "systolic_bp": 125, "diastolic_bp": 80, "heart_rate": 82, "respiratory_rate": 20, "oxygen_saturation": 95, "weight": 80.1, "height": 178, "recorded_by": "user-4" },
+    { "id": "vs-3", "patient_id": "pat-1", "recorded_at": "2024-04-15T09:00:00Z", "temperature": 38.1, "systolic_bp": 118, "diastolic_bp": 75, "heart_rate": 92, "respiratory_rate": 22, "oxygen_saturation": 94, "weight": 78.3, "height": 178, "recorded_by": "user-4" },
+    { "id": "vs-4", "patient_id": "pat-2", "recorded_at": "2024-04-01T07:45:00Z", "temperature": 36.6, "systolic_bp": 115, "diastolic_bp": 72, "heart_rate": 68, "respiratory_rate": 16, "oxygen_saturation": 98, "weight": 65.0, "height": 165, "recorded_by": "user-4" },
+    { "id": "vs-5", "patient_id": "pat-2", "recorded_at": "2024-05-01T08:00:00Z", "temperature": 36.9, "systolic_bp": 120, "diastolic_bp": 78, "heart_rate": 72, "respiratory_rate": 16, "oxygen_saturation": 98, "weight": 63.5, "height": 165, "recorded_by": "user-4" },
+    { "id": "vs-6", "patient_id": "pat-3", "recorded_at": "2024-04-20T10:00:00Z", "temperature": 36.5, "systolic_bp": 142, "diastolic_bp": 90, "heart_rate": 74, "respiratory_rate": 17, "oxygen_saturation": 97, "weight": 95.2, "height": 175, "recorded_by": "user-4" },
+    { "id": "vs-7", "patient_id": "pat-5", "recorded_at": "2024-06-01T09:00:00Z", "temperature": 36.7, "systolic_bp": 128, "diastolic_bp": 82, "heart_rate": 76, "respiratory_rate": 18, "oxygen_saturation": 97, "weight": 88.0, "height": 182, "recorded_by": "user-4" },
+    { "id": "vs-8", "patient_id": "pat-6", "recorded_at": "2024-06-15T08:00:00Z", "temperature": 37.5, "systolic_bp": 110, "diastolic_bp": 70, "heart_rate": 88, "respiratory_rate": 19, "oxygen_saturation": 98, "weight": 58.0, "height": 170, "recorded_by": "user-4" },
+    { "id": "vs-9", "patient_id": "pat-7", "recorded_at": "2024-07-01T07:30:00Z", "temperature": 38.5, "systolic_bp": 105, "diastolic_bp": 65, "heart_rate": 102, "respiratory_rate": 24, "oxygen_saturation": 95, "weight": 72.0, "height": 180, "recorded_by": "user-4" },
+    { "id": "vs-10", "patient_id": "pat-1", "recorded_at": "2024-05-15T08:00:00Z", "temperature": 37.0, "systolic_bp": 122, "diastolic_bp": 78, "heart_rate": 80, "respiratory_rate": 18, "oxygen_saturation": 96, "weight": 77.5, "height": 178, "recorded_by": "user-4" }
+  ],
+  "medications": [
+    { "id": "med-1", "name": "Cisplatin", "generic_name": "Cisplatin", "category": "chemo", "dosage_form": "IV Infusion", "standard_dose": "75 mg/m²", "side_effects": "Nephrotoxicity, ototoxicity, nausea", "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "med-2", "name": "Etoposide", "generic_name": "Etoposide", "category": "chemo", "dosage_form": "IV Infusion", "standard_dose": "100 mg/m²", "side_effects": "Myelosuppression, alopecia, nausea", "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "med-3", "name": "Doxorubicin", "generic_name": "Doxorubicin HCl", "category": "chemo", "dosage_form": "IV Push", "standard_dose": "60 mg/m²", "side_effects": "Cardiotoxicity, myelosuppression, alopecia", "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "med-4", "name": "Cyclophosphamide", "generic_name": "Cyclophosphamide", "category": "chemo", "dosage_form": "IV Infusion", "standard_dose": "600 mg/m²", "side_effects": "Hemorrhagic cystitis, myelosuppression", "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "med-5", "name": "Tamoxifen", "generic_name": "Tamoxifen Citrate", "category": "hormonal", "dosage_form": "Oral Tablet", "standard_dose": "20 mg daily", "side_effects": "Hot flashes, thromboembolic events", "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "med-6", "name": "Oxaliplatin", "generic_name": "Oxaliplatin", "category": "chemo", "dosage_form": "IV Infusion", "standard_dose": "85 mg/m²", "side_effects": "Peripheral neuropathy, cold sensitivity", "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "med-7", "name": "Ondansetron", "generic_name": "Ondansetron", "category": "supportive", "dosage_form": "IV/Oral", "standard_dose": "8 mg", "side_effects": "Headache, constipation", "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "med-8", "name": "Dexamethasone", "generic_name": "Dexamethasone", "category": "supportive", "dosage_form": "IV/Oral", "standard_dose": "4-20 mg", "side_effects": "Hyperglycemia, insomnia, mood changes", "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "med-9", "name": "Filgrastim", "generic_name": "Filgrastim", "category": "supportive", "dosage_form": "SC Injection", "standard_dose": "5 mcg/kg/day", "side_effects": "Bone pain, injection site reactions", "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "med-10", "name": "Durvalumab", "generic_name": "Durvalumab", "category": "chemo", "dosage_form": "IV Infusion", "standard_dose": "10 mg/kg", "side_effects": "Pneumonitis, hepatitis, endocrinopathies", "created_at": "2024-01-01T00:00:00Z" }
+  ],
+  "cycle_medications": [
+    { "id": "cm-1", "cycle_id": "tc-1", "medication_id": "med-1", "dose": "75 mg/m²", "frequency": "Day 1, 8", "route": "IV", "start_date": "2024-02-15", "end_date": "2024-03-08" },
+    { "id": "cm-2", "cycle_id": "tc-1", "medication_id": "med-2", "dose": "100 mg/m²", "frequency": "Days 1-5", "route": "IV", "start_date": "2024-02-15", "end_date": "2024-03-08" },
+    { "id": "cm-3", "cycle_id": "tc-1", "medication_id": "med-7", "dose": "8 mg", "frequency": "Pre-chemo", "route": "IV", "start_date": "2024-02-15", "end_date": "2024-03-08" },
+    { "id": "cm-4", "cycle_id": "tc-4", "medication_id": "med-3", "dose": "60 mg/m²", "frequency": "Day 1", "route": "IV", "start_date": "2024-04-01", "end_date": "2024-04-22" },
+    { "id": "cm-5", "cycle_id": "tc-4", "medication_id": "med-4", "dose": "600 mg/m²", "frequency": "Day 1", "route": "IV", "start_date": "2024-04-01", "end_date": "2024-04-22" },
+    { "id": "cm-6", "cycle_id": "tc-6", "medication_id": "med-6", "dose": "85 mg/m²", "frequency": "Day 1", "route": "IV", "start_date": "2024-06-01", "end_date": "2024-06-15" },
+    { "id": "cm-7", "cycle_id": "tc-3", "medication_id": "med-9", "dose": "5 mcg/kg", "frequency": "Daily x 7 days", "route": "SC", "start_date": "2024-04-20", "end_date": "2024-04-27" },
+    { "id": "cm-8", "cycle_id": "tc-7", "medication_id": "med-8", "dose": "20 mg", "frequency": "Pre-chemo", "route": "IV", "start_date": "2024-06-15", "end_date": "2024-07-13" }
+  ],
+  "lab_tests": [
+    { "id": "lt-1", "name": "Complete Blood Count (CBC)", "code": "CBC", "category": "Hematology", "unit": "various", "normal_range_min": null, "normal_range_max": null, "description": "Panel of tests examining blood cells" },
+    { "id": "lt-2", "name": "White Blood Cell Count", "code": "WBC", "category": "Hematology", "unit": "x10³/µL", "normal_range_min": 4.5, "normal_range_max": 11.0, "description": "Total white blood cell count" },
+    { "id": "lt-3", "name": "Hemoglobin", "code": "HGB", "category": "Hematology", "unit": "g/dL", "normal_range_min": 12.0, "normal_range_max": 17.5, "description": "Oxygen-carrying protein in red blood cells" },
+    { "id": "lt-4", "name": "Platelet Count", "code": "PLT", "category": "Hematology", "unit": "x10³/µL", "normal_range_min": 150, "normal_range_max": 400, "description": "Number of platelets in blood" },
+    { "id": "lt-5", "name": "Creatinine", "code": "CREAT", "category": "Chemistry", "unit": "mg/dL", "normal_range_min": 0.6, "normal_range_max": 1.2, "description": "Kidney function marker" },
+    { "id": "lt-6", "name": "ALT", "code": "ALT", "category": "Chemistry", "unit": "U/L", "normal_range_min": 7, "normal_range_max": 56, "description": "Liver enzyme - alanine aminotransferase" },
+    { "id": "lt-7", "name": "PSA", "code": "PSA", "category": "Tumor Markers", "unit": "ng/mL", "normal_range_min": 0, "normal_range_max": 4.0, "description": "Prostate-specific antigen" },
+    { "id": "lt-8", "name": "CA 15-3", "code": "CA153", "category": "Tumor Markers", "unit": "U/mL", "normal_range_min": 0, "normal_range_max": 30, "description": "Breast cancer tumor marker" }
+  ],
+  "lab_test_results": [
+    { "id": "ltr-1", "patient_id": "pat-1", "lab_test_id": "lt-2", "value": 6.8, "date": "2024-02-14", "status": "normal", "notes": "Baseline pre-treatment", "ordered_by": "doc-1" },
+    { "id": "ltr-2", "patient_id": "pat-1", "lab_test_id": "lt-3", "value": 14.2, "date": "2024-02-14", "status": "normal", "notes": "Baseline pre-treatment", "ordered_by": "doc-1" },
+    { "id": "ltr-3", "patient_id": "pat-1", "lab_test_id": "lt-2", "value": 3.2, "date": "2024-03-12", "status": "low", "notes": "Post cycle 1 - expected nadir", "ordered_by": "doc-1" },
+    { "id": "ltr-4", "patient_id": "pat-1", "lab_test_id": "lt-3", "value": 11.8, "date": "2024-03-12", "status": "low", "notes": "Mild anemia post chemo", "ordered_by": "doc-1" },
+    { "id": "ltr-5", "patient_id": "pat-1", "lab_test_id": "lt-5", "value": 1.1, "date": "2024-02-14", "status": "normal", "notes": "Renal function baseline", "ordered_by": "doc-1" },
+    { "id": "ltr-6", "patient_id": "pat-2", "lab_test_id": "lt-8", "value": 45.2, "date": "2024-03-14", "status": "high", "notes": "Elevated tumor marker at diagnosis", "ordered_by": "doc-2" },
+    { "id": "ltr-7", "patient_id": "pat-2", "lab_test_id": "lt-8", "value": 32.1, "date": "2024-05-14", "status": "high", "notes": "Decreasing trend - responding to treatment", "ordered_by": "doc-2" },
+    { "id": "ltr-8", "patient_id": "pat-3", "lab_test_id": "lt-7", "value": 8.5, "date": "2024-04-10", "status": "high", "notes": "Elevated PSA at diagnosis", "ordered_by": "doc-1" },
+    { "id": "ltr-9", "patient_id": "pat-3", "lab_test_id": "lt-7", "value": 7.2, "date": "2024-07-10", "status": "high", "notes": "Slight decrease on active surveillance", "ordered_by": "doc-1" },
+    { "id": "ltr-10", "patient_id": "pat-5", "lab_test_id": "lt-2", "value": 5.5, "date": "2024-05-28", "status": "normal", "notes": "Pre-chemo baseline", "ordered_by": "doc-3" }
+  ],
+  "imaging_reports": [
+    { "id": "img-1", "patient_id": "pat-1", "type": "CT Scan", "body_part": "Chest", "date": "2024-01-25", "findings": "3.5cm mass in right upper lobe with mediastinal lymphadenopathy. No pleural effusion.", "impression": "Suspicious for primary lung malignancy with nodal involvement", "radiologist": "Dr. Park", "status": "completed" },
+    { "id": "img-2", "patient_id": "pat-1", "type": "PET-CT", "body_part": "Whole Body", "date": "2024-02-05", "findings": "FDG-avid right upper lobe mass (SUV max 12.4). FDG-avid right hilar and subcarinal lymph nodes.", "impression": "Stage IIIA NSCLC confirmed. No distant metastases.", "radiologist": "Dr. Park", "status": "completed" },
+    { "id": "img-3", "patient_id": "pat-2", "type": "Mammogram", "body_part": "Bilateral Breast", "date": "2024-03-10", "findings": "2.1cm irregular mass in left breast UOQ with associated microcalcifications. BIRADS 5.", "impression": "Highly suspicious for malignancy - biopsy recommended", "radiologist": "Dr. Kim", "status": "completed" },
+    { "id": "img-4", "patient_id": "pat-2", "type": "MRI", "body_part": "Breast", "date": "2024-03-18", "findings": "2.3cm enhancing mass in left breast. No chest wall invasion. No axillary lymphadenopathy.", "impression": "Localized breast cancer, suitable for breast-conserving surgery", "radiologist": "Dr. Kim", "status": "completed" },
+    { "id": "img-5", "patient_id": "pat-5", "type": "CT Scan", "body_part": "Abdomen/Pelvis", "date": "2024-05-15", "findings": "4cm sigmoid colon mass with pericolic fat stranding. Two enlarged mesenteric lymph nodes.", "impression": "Colorectal carcinoma with regional lymph node involvement", "radiologist": "Dr. Park", "status": "completed" },
+    { "id": "img-6", "patient_id": "pat-6", "type": "PET-CT", "body_part": "Whole Body", "date": "2024-06-03", "findings": "Multiple FDG-avid cervical and mediastinal lymph nodes. Largest 3.2cm in right cervical chain.", "impression": "Stage II Hodgkin lymphoma - limited to above diaphragm", "radiologist": "Dr. Park", "status": "completed" },
+    { "id": "img-7", "patient_id": "pat-1", "type": "CT Scan", "body_part": "Chest", "date": "2024-05-10", "findings": "Right upper lobe mass decreased to 2.1cm. Reduced mediastinal lymphadenopathy.", "impression": "Partial response to chemoradiation therapy", "radiologist": "Dr. Park", "status": "completed" },
+    { "id": "img-8", "patient_id": "pat-3", "type": "MRI", "body_part": "Pelvis", "date": "2024-04-12", "findings": "Prostate gland with 1.8cm lesion in peripheral zone. PI-RADS 4.", "impression": "Likely prostate carcinoma, correlate with biopsy", "radiologist": "Dr. Kim", "status": "completed" }
+  ],
+  "emergency_contacts": [
+    { "id": "ec-1", "patient_id": "pat-1", "name": "Mary Doe", "relationship": "Spouse", "phone": "+1-555-2001", "email": "mary.doe@email.com", "is_primary": true },
+    { "id": "ec-2", "patient_id": "pat-1", "name": "James Doe", "relationship": "Son", "phone": "+1-555-2002", "email": "james.doe@email.com", "is_primary": false },
+    { "id": "ec-3", "patient_id": "pat-2", "name": "Mark Wilson", "relationship": "Husband", "phone": "+1-555-2003", "email": "mark.wilson@email.com", "is_primary": true },
+    { "id": "ec-4", "patient_id": "pat-3", "name": "Linda Martinez", "relationship": "Wife", "phone": "+1-555-2004", "email": "linda.m@email.com", "is_primary": true },
+    { "id": "ec-5", "patient_id": "pat-5", "name": "Sarah Brown", "relationship": "Sister", "phone": "+1-555-2005", "email": "sarah.b@email.com", "is_primary": true },
+    { "id": "ec-6", "patient_id": "pat-6", "name": "Thomas Taylor", "relationship": "Father", "phone": "+1-555-2006", "email": "thomas.t@email.com", "is_primary": true },
+    { "id": "ec-7", "patient_id": "pat-7", "name": "Karen Anderson", "relationship": "Wife", "phone": "+1-555-2007", "email": "karen.a@email.com", "is_primary": true },
+    { "id": "ec-8", "patient_id": "pat-8", "name": "Richard Thomas", "relationship": "Husband", "phone": "+1-555-2008", "email": "richard.t@email.com", "is_primary": true }
+  ],
+  "clinics": [
+    { "id": "cln-1", "name": "Oncology Outpatient Clinic", "location": "Building A, Floor 2", "phone": "+1-555-3001", "operating_hours": "Mon-Fri 8:00-17:00", "is_active": true, "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "cln-2", "name": "Chemotherapy Infusion Center", "location": "Building B, Floor 1", "phone": "+1-555-3002", "operating_hours": "Mon-Sat 7:00-19:00", "is_active": true, "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "cln-3", "name": "Radiation Therapy Center", "location": "Building C, Basement", "phone": "+1-555-3003", "operating_hours": "Mon-Fri 7:00-18:00", "is_active": true, "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "cln-4", "name": "Surgical Oncology Clinic", "location": "Building A, Floor 3", "phone": "+1-555-3004", "operating_hours": "Mon-Fri 9:00-16:00", "is_active": true, "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "cln-5", "name": "Palliative Care Center", "location": "Building D, Floor 1", "phone": "+1-555-3005", "operating_hours": "Mon-Fri 8:00-17:00", "is_active": true, "created_at": "2024-01-01T00:00:00Z" }
+  ],
+  "doctors": [
+    { "id": "doc-1", "user_id": "user-2", "specialization": "Medical Oncology", "license_number": "MC-20150234", "clinic_id": "cln-1", "years_of_experience": 12, "qualifications": "MD, FACP, Board Certified Medical Oncologist", "is_active": true, "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "doc-2", "user_id": "user-3", "specialization": "Surgical Oncology", "license_number": "SC-20170189", "clinic_id": "cln-4", "years_of_experience": 8, "qualifications": "MD, FACS, Breast Surgical Oncology Fellowship", "is_active": true, "created_at": "2024-01-01T00:00:00Z" },
+    { "id": "doc-3", "user_id": "user-5", "specialization": "GI Oncology", "license_number": "GI-20180456", "clinic_id": "cln-1", "years_of_experience": 6, "qualifications": "MD, Gastroenterology and GI Oncology Fellowship", "is_active": true, "created_at": "2024-01-01T00:00:00Z" }
+  ],
+  "clinic_visits": [
+    { "id": "cv-1", "patient_id": "pat-1", "doctor_id": "doc-1", "clinic_id": "cln-1", "visit_date": "2024-02-01T09:00:00Z", "visit_type": "Initial Consultation", "chief_complaint": "Persistent cough and weight loss", "notes": "Initial oncology evaluation. CT findings reviewed. Biopsy results confirm NSCLC.", "status": "completed" },
+    { "id": "cv-2", "patient_id": "pat-1", "doctor_id": "doc-1", "clinic_id": "cln-2", "visit_date": "2024-02-15T08:00:00Z", "visit_type": "Treatment", "chief_complaint": "Cycle 1 chemotherapy", "notes": "First cycle of cisplatin/etoposide administered. Pre-medications given.", "status": "completed" },
+    { "id": "cv-3", "patient_id": "pat-2", "doctor_id": "doc-2", "clinic_id": "cln-4", "visit_date": "2024-03-15T10:00:00Z", "visit_type": "Initial Consultation", "chief_complaint": "Breast lump", "notes": "Biopsy-confirmed invasive ductal carcinoma. Discussed surgical and systemic treatment options.", "status": "completed" },
+    { "id": "cv-4", "patient_id": "pat-2", "doctor_id": "doc-2", "clinic_id": "cln-2", "visit_date": "2024-04-01T08:30:00Z", "visit_type": "Treatment", "chief_complaint": "AC chemotherapy cycle 1", "notes": "Adriamycin + cyclophosphamide administered. Well tolerated.", "status": "completed" },
+    { "id": "cv-5", "patient_id": "pat-3", "doctor_id": "doc-1", "clinic_id": "cln-1", "visit_date": "2024-04-10T14:00:00Z", "visit_type": "Initial Consultation", "chief_complaint": "Elevated PSA", "notes": "Prostate biopsy results reviewed. Discussed active surveillance vs treatment options.", "status": "completed" },
+    { "id": "cv-6", "patient_id": "pat-5", "doctor_id": "doc-3", "clinic_id": "cln-1", "visit_date": "2024-05-20T11:00:00Z", "visit_type": "Initial Consultation", "chief_complaint": "Change in bowel habits", "notes": "Colonoscopy findings reviewed. Sigmoid adenocarcinoma confirmed.", "status": "completed" },
+    { "id": "cv-7", "patient_id": "pat-6", "doctor_id": "doc-2", "clinic_id": "cln-1", "visit_date": "2024-06-01T09:30:00Z", "visit_type": "Initial Consultation", "chief_complaint": "Cervical lymphadenopathy", "notes": "Lymph node biopsy confirms Hodgkin lymphoma. PET-CT staging completed.", "status": "completed" },
+    { "id": "cv-8", "patient_id": "pat-1", "doctor_id": "doc-1", "clinic_id": "cln-1", "visit_date": "2024-05-15T10:00:00Z", "visit_type": "Follow-up", "chief_complaint": "Treatment response assessment", "notes": "CT shows partial response. Plan to continue current regimen.", "status": "completed" },
+    { "id": "cv-9", "patient_id": "pat-3", "doctor_id": "doc-1", "clinic_id": "cln-1", "visit_date": "2024-07-10T14:00:00Z", "visit_type": "Follow-up", "chief_complaint": "PSA monitoring", "notes": "PSA slightly decreased. Continue active surveillance. Repeat in 3 months.", "status": "completed" },
+    { "id": "cv-10", "patient_id": "pat-7", "doctor_id": "doc-1", "clinic_id": "cln-2", "visit_date": "2024-07-01T08:00:00Z", "visit_type": "Treatment", "chief_complaint": "AML induction chemotherapy", "notes": "7+3 induction regimen initiated. Patient admitted to inpatient unit.", "status": "completed" }
+  ],
+  "diagnosis_doctor_history": [
+    { "id": "ddh-1", "diagnosis_id": "diag-1", "doctor_id": "doc-1", "start_date": "2024-02-01", "end_date": null, "reason": "Primary oncologist from initial diagnosis", "is_current": true },
+    { "id": "ddh-2", "diagnosis_id": "diag-2", "doctor_id": "doc-2", "start_date": "2024-03-15", "end_date": null, "reason": "Primary surgical oncologist from initial diagnosis", "is_current": true },
+    { "id": "ddh-3", "diagnosis_id": "diag-3", "doctor_id": "doc-1", "start_date": "2024-04-10", "end_date": null, "reason": "Urologic oncology referral from primary care", "is_current": true },
+    { "id": "ddh-4", "diagnosis_id": "diag-4", "doctor_id": "doc-3", "start_date": "2024-05-20", "end_date": null, "reason": "GI oncology specialist managing colorectal case", "is_current": true },
+    { "id": "ddh-5", "diagnosis_id": "diag-5", "doctor_id": "doc-2", "start_date": "2024-06-01", "end_date": null, "reason": "Hematology-oncology referral for lymphoma management", "is_current": true },
+    { "id": "ddh-6", "diagnosis_id": "diag-7", "doctor_id": "doc-3", "start_date": "2024-04-01", "end_date": "2024-05-01", "reason": "Initial evaluation - transferred for specialized care", "is_current": false },
+    { "id": "ddh-7", "diagnosis_id": "diag-7", "doctor_id": "doc-2", "start_date": "2024-05-01", "end_date": null, "reason": "Surgical oncologist assumed care for wide excision", "is_current": true }
+  ],
+  "activity_logs": [
+    { "id": "al-1", "user_id": "user-1", "action": "login", "entity_type": "auth", "entity_id": null, "description": "Admin logged in", "timestamp": "2024-09-15T08:00:00Z" },
+    { "id": "al-2", "user_id": "user-2", "action": "create", "entity_type": "diagnosis", "entity_id": "diag-1", "description": "Dr. Ahmed created diagnosis for patient John Doe", "timestamp": "2024-02-01T10:00:00Z" },
+    { "id": "al-3", "user_id": "user-3", "action": "create", "entity_type": "treatment_plan", "entity_id": "tp-2", "description": "Dr. Smith created treatment plan for patient Jane Wilson", "timestamp": "2024-03-25T10:00:00Z" },
+    { "id": "al-4", "user_id": "user-2", "action": "update", "entity_type": "vital_signs", "entity_id": "vs-3", "description": "Vitals recorded for John Doe - elevated temperature", "timestamp": "2024-04-15T09:00:00Z" },
+    { "id": "al-5", "user_id": "user-5", "action": "create", "entity_type": "diagnosis", "entity_id": "diag-4", "description": "Dr. Chen created colorectal cancer diagnosis for Michael Brown", "timestamp": "2024-05-20T11:00:00Z" },
+    { "id": "al-6", "user_id": "user-1", "action": "create", "entity_type": "patient", "entity_id": "pat-6", "description": "Admin registered new patient Sophia Taylor", "timestamp": "2024-04-15T10:00:00Z" },
+    { "id": "al-7", "user_id": "user-3", "action": "update", "entity_type": "treatment_plan", "entity_id": "tp-7", "description": "Dr. Smith marked DCIS treatment plan as completed", "timestamp": "2024-08-15T14:00:00Z" },
+    { "id": "al-8", "user_id": "user-2", "action": "create", "entity_type": "lab_result", "entity_id": "ltr-3", "description": "Lab results entered for John Doe - low WBC", "timestamp": "2024-03-12T11:00:00Z" },
+    { "id": "al-9", "user_id": "user-4", "action": "create", "entity_type": "vital_signs", "entity_id": "vs-9", "description": "Nurse recorded vitals for David Anderson - fever noted", "timestamp": "2024-07-01T07:30:00Z" },
+    { "id": "al-10", "user_id": "user-2", "action": "create", "entity_type": "clinic_visit", "entity_id": "cv-8", "description": "Follow-up visit completed for John Doe", "timestamp": "2024-05-15T10:00:00Z" }
+  ],
+  "notifications": [
+    { "id": "notif-1", "user_id": "user-2", "title": "Lab Results Ready", "message": "WBC results for patient John Doe are below normal range", "type": "warning", "is_read": false, "created_at": "2024-03-12T11:30:00Z" },
+    { "id": "notif-2", "user_id": "user-2", "title": "Treatment Cycle Completed", "message": "Cycle 3 for patient John Doe has been completed", "type": "info", "is_read": true, "created_at": "2024-05-06T16:00:00Z" },
+    { "id": "notif-3", "user_id": "user-3", "title": "New Patient Assignment", "message": "Patient Sophia Taylor has been assigned to your care", "type": "info", "is_read": false, "created_at": "2024-06-01T15:30:00Z" },
+    { "id": "notif-4", "user_id": "user-1", "title": "System Alert", "message": "5 patients have upcoming treatment cycles this week", "type": "alert", "is_read": false, "created_at": "2024-07-14T08:00:00Z" },
+    { "id": "notif-5", "user_id": "user-5", "title": "Imaging Report Available", "message": "CT scan results for Michael Brown are ready for review", "type": "info", "is_read": true, "created_at": "2024-05-16T09:00:00Z" },
+    { "id": "notif-6", "user_id": "user-2", "title": "Critical Vital Signs", "message": "Patient David Anderson has fever 38.5°C and elevated heart rate", "type": "critical", "is_read": false, "created_at": "2024-07-01T07:45:00Z" },
+    { "id": "notif-7", "user_id": "user-3", "title": "Treatment Plan Review", "message": "Treatment plan for Jane Wilson is due for mid-cycle review", "type": "warning", "is_read": false, "created_at": "2024-05-15T08:00:00Z" },
+    { "id": "notif-8", "user_id": "user-1", "title": "New User Registration", "message": "A new lab technician account has been requested", "type": "info", "is_read": true, "created_at": "2024-06-20T10:00:00Z" }
+  ]
+}
