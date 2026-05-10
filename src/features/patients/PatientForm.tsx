@@ -4,26 +4,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { FormField } from '../../components/ui/FormField';
 import { patientService } from '../../services/patient.service';
 import type { Patient } from '../../types';
-
-const patientSchema = z.object({
-  national_id: z.string().min(1, 'National ID is required'),
-  first_name: z.string().min(1, 'First name is required'),
-  last_name: z.string().min(1, 'Last name is required'),
-  date_of_birth: z.string().min(1, 'Date of birth is required'),
-  gender: z.enum(['male', 'female'], { required_error: 'Gender is required' }),
-  blood_type: z.enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'], {
-    required_error: 'Blood type is required',
-  }),
-  phone: z.string().min(1, 'Phone is required'),
-  email: z.string().email('Invalid email').or(z.literal('')),
-  address: z.string().min(1, 'Address is required'),
-  status: z.enum(['active', 'inactive', 'discharged']),
-});
-
-type PatientFormData = z.infer<typeof patientSchema>;
 
 interface PatientFormProps {
   patient?: Patient | null;
@@ -31,51 +15,76 @@ interface PatientFormProps {
 }
 
 export function PatientForm({ patient, onSuccess }: PatientFormProps) {
+  const { t } = useTranslation();
+
+  const patientSchema = z.object({
+    national_id: z.string().min(1, t('patients.nationalIdRequired')),
+    full_name: z.string().min(1, t('patients.fullNameRequired')),
+    birth_date: z.string().min(1, t('patients.dobRequired')),
+    gender: z.enum(['male', 'female'], { required_error: t('patients.genderRequired') }),
+    blood_type: z.enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'], {
+      required_error: t('patients.bloodTypeRequired'),
+    }),
+    phone: z.string().min(1, t('patients.phoneRequired')),
+    mobile_number: z.string().optional().default(''),
+    email: z.string().email(t('patients.invalidEmail')).or(z.literal('')),
+    address: z.string().min(1, t('patients.addressRequired')),
+    nationality: z.string().min(1, t('patients.nationalityRequired')),
+    status: z.enum(['active', 'deceased', 'transferred']),
+    notes: z.string().optional().default(''),
+  });
+
+  type PatientFormData = z.infer<typeof patientSchema>;
+
   const methods = useForm<PatientFormData>({
     resolver: zodResolver(patientSchema),
     defaultValues: patient
       ? {
           national_id: patient.national_id,
-          first_name: patient.first_name,
-          last_name: patient.last_name,
-          date_of_birth: patient.date_of_birth,
+          full_name: patient.full_name,
+          birth_date: patient.birth_date,
           gender: patient.gender,
           blood_type: patient.blood_type,
           phone: patient.phone,
+          mobile_number: patient.mobile_number || '',
           email: patient.email,
           address: patient.address,
+          nationality: patient.nationality || '',
           status: patient.status,
+          notes: patient.notes || '',
         }
       : {
           national_id: '',
-          first_name: '',
-          last_name: '',
-          date_of_birth: '',
+          full_name: '',
+          birth_date: '',
           gender: 'male' as const,
           blood_type: 'O+' as const,
           phone: '',
+          mobile_number: '',
           email: '',
           address: '',
+          nationality: '',
           status: 'active' as const,
+          notes: '',
         },
   });
 
   const createMutation = useMutation({
     mutationFn: (data: PatientFormData) => patientService.create(data),
     onSuccess: () => {
-      toast.success('Patient created successfully');
+      toast.success(t('patients.createSuccess'));
       onSuccess();
     },
-    onError: () => toast.error('Failed to create patient'),
+    onError: () => toast.error(t('patients.createError')),
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: PatientFormData) => patientService.update(patient!.id, data),
+    mutationFn: (data: PatientFormData) => patientService.update(patient!.patient_id, data),
     onSuccess: () => {
-      toast.success('Patient updated successfully');
+      toast.success(t('patients.updateSuccess'));
       onSuccess();
     },
-    onError: () => toast.error('Failed to update patient'),
+    onError: () => toast.error(t('patients.updateError')),
   });
 
   const onSubmit = (data: PatientFormData) => {
@@ -92,23 +101,23 @@ export function PatientForm({ patient, onSuccess }: PatientFormProps) {
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField name="first_name" label="First Name" required placeholder="John" />
-          <FormField name="last_name" label="Last Name" required placeholder="Doe" />
-          <FormField name="national_id" label="National ID" required placeholder="NID-XXXXX" />
-          <FormField name="date_of_birth" label="Date of Birth" type="date" required />
+          <FormField name="full_name" label={t('patients.fullName')} required placeholder="محمد علي" />
+          <FormField name="national_id" label={t('patients.nationalId')} required placeholder="NID-XXXXX" />
+          <FormField name="birth_date" label={t('patients.dob')} type="date" required />
+          <FormField name="nationality" label={t('patients.nationality')} type="text" required placeholder="يمني" />
           <FormField
             name="gender"
-            label="Gender"
+            label={t('patients.gender')}
             type="select"
             required
             options={[
-              { value: 'male', label: 'Male' },
-              { value: 'female', label: 'Female' },
+              { value: 'male', label: t('patients.male') },
+              { value: 'female', label: t('patients.female') },
             ]}
           />
           <FormField
             name="blood_type"
-            label="Blood Type"
+            label={t('patients.bloodType')}
             type="select"
             required
             options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((v) => ({
@@ -116,20 +125,22 @@ export function PatientForm({ patient, onSuccess }: PatientFormProps) {
               label: v,
             }))}
           />
-          <FormField name="phone" label="Phone" type="tel" required placeholder="+1-555-0000" />
-          <FormField name="email" label="Email" type="email" placeholder="email@example.com" />
+          <FormField name="phone" label={t('patients.phone')} type="tel" required placeholder="+967-XXXXXXXXX" />
+          <FormField name="mobile_number" label={t('patients.mobileNumber')} type="tel" placeholder="+967-XXXXXXXXX" />
+          <FormField name="email" label={t('patients.email')} type="email" placeholder="email@example.com" />
           <FormField
             name="status"
-            label="Status"
+            label={t('common.status.label')}
             type="select"
             options={[
-              { value: 'active', label: 'Active' },
-              { value: 'inactive', label: 'Inactive' },
-              { value: 'discharged', label: 'Discharged' },
+              { value: 'active', label: t('patients.status.active') },
+              { value: 'deceased', label: t('patients.status.deceased') },
+              { value: 'transferred', label: t('patients.status.transferred') },
             ]}
           />
         </div>
-        <FormField name="address" label="Address" type="textarea" required placeholder="Full address..." />
+        <FormField name="address" label={t('patients.address')} type="textarea" required placeholder="..." />
+        <FormField name="notes" label={t('common.notes')} type="textarea" placeholder="..." />
 
         <div className="flex justify-end gap-3 pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
           <button
@@ -140,7 +151,8 @@ export function PatientForm({ patient, onSuccess }: PatientFormProps) {
             {isSubmitting ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : null}
-            {patient ? 'Update Patient' : 'Create Patient'}
+            {isSubmitting && t('patients.saving')}
+            {!isSubmitting && (patient ? t('patients.updatePatient') : t('patients.createPatient'))}
           </button>
         </div>
       </form>

@@ -11,7 +11,6 @@ import {
 } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import { getDataStore } from '../../services/mockApi';
-import { activityService } from '../../services/general.service';
 import { formatDateTime } from '../../lib/utils';
 import { useAuthStore } from '../../stores/authStore';
 import { PageSkeleton } from '../../components/ui/Skeleton';
@@ -34,24 +33,16 @@ export default function DashboardPage() {
 
   const isRtl = i18n.language === 'ar';
 
-  const { data: activities, isLoading } = useQuery({
-    queryKey: ['recent-activities'],
-    queryFn: () => activityService.getRecent(8),
-  });
-
-  if (isLoading) return <PageSkeleton />;
-
   // Stats
-  const totalPatients = store.patients.filter((p) => !p.is_deleted).length;
+  const totalPatients = store.patients.filter((p) => p.status !== 'deceased').length;
   const activePlans = store.treatment_plans.filter((tp) => tp.status === 'ongoing').length;
-  const activeCycles = store.treatment_cycles.filter((tc) => tc.status === 'in_progress').length;
+  const activeCycles = store.treatment_cycles.filter((tc) => tc.status === 'scheduled').length;
   const totalDiagnoses = store.diagnoses.length;
 
   // Diagnoses by cancer type
-  const cancerTypeMap = new Map(store.cancer_types.map((ct) => [ct.id, ct]));
   const diagByCancer = store.cancer_types.map((ct) => ({
-    name: ct.name,
-    value: store.diagnoses.filter((d) => d.cancer_type_id === ct.id).length,
+    name: ct.cancer_name,
+    value: store.diagnoses.filter((d) => d.cancer_id === ct.cancer_id).length,
     color: ct.color,
   })).filter((d) => d.value > 0);
 
@@ -70,11 +61,26 @@ export default function DashboardPage() {
   ];
 
   const quickActions = [
-    { label: t('common.add') + ' ' + t('common.patients').slice(0, -1), icon: Plus, path: '/patients?action=add', color: '#6366f1' },
+    { label: t('common.add') + ' ' + t('common.patient'), icon: Plus, path: '/patients?action=add', color: '#6366f1' },
     { label: t('common.diagnoses'), icon: Stethoscope, path: '/diagnoses?action=add', color: '#ec4899' },
     { label: t('common.visits'), icon: Calendar, path: '/visits?action=add', color: '#14b8a6' },
     { label: t('dashboard.viewReports'), icon: FileText, path: '/lab-tests', color: '#f59e0b' },
   ];
+
+  // Dummy recent activity built from latest entries
+  const recentDiagnoses = store.diagnoses.slice(-3).map(d => ({
+    id: `id_d_${d.diagnosis_id}`,
+    userId: d.supervising_doctor_id,
+    desc: 'Added a new diagnosis record.',
+    date: d.created_at
+  }));
+  const recentVisits = store.clinic_visits.slice(-3).map(v => ({
+    id: `id_v_${v.visit_id}`,
+    userId: v.doctor_id,
+    desc: 'Scheduled a new visit.',
+    date: v.created_at
+  }));
+  const activities = [...recentDiagnoses, ...recentVisits].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 6);
 
   return (
     <div className="space-y-6">
@@ -86,7 +92,7 @@ export default function DashboardPage() {
           className="text-2xl font-bold"
           style={{ color: 'var(--text-primary)' }}
         >
-          {isRtl ? 'مرحباً بك مجدداً، ' : 'Welcome back, '} {user?.full_name?.split(' ')[0]} 👋
+          {t('dashboard.welcomeBack')} {user?.user_name} 👋
         </motion.h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
           {t('dashboard.subtitle')}
@@ -118,20 +124,12 @@ export default function DashboardPage() {
                 <stat.icon size={24} style={{ color: stat.color }} />
               </div>
             </div>
-            <div className="flex items-center gap-1 mt-3">
-              <TrendingUp size={14} className="text-emerald-500" />
-              <span className="text-xs text-emerald-500 font-medium">+12%</span>
-              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                {isRtl ? 'مقارنة بالشهر الماضي' : 'vs last month'}
-              </span>
-            </div>
           </motion.div>
         ))}
       </div>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Diagnoses by Cancer Type */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -139,7 +137,7 @@ export default function DashboardPage() {
           className="glass-card p-6"
         >
           <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
-            {t('diagnoses.byType', { defaultValue: 'Diagnoses by Cancer Type' })}
+            {t('diagnoses.byType')}
           </h3>
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
@@ -174,7 +172,6 @@ export default function DashboardPage() {
           </ResponsiveContainer>
         </motion.div>
 
-        {/* Monthly Visits */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -182,7 +179,7 @@ export default function DashboardPage() {
           className="glass-card p-6"
         >
           <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
-            {t('dashboard.monthlyVisits', { defaultValue: 'Monthly Clinic Visits' })}
+            {t('dashboard.monthlyVisits')}
           </h3>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={visitsByMonth}>
@@ -206,7 +203,6 @@ export default function DashboardPage() {
 
       {/* Bottom Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Quick Actions */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -228,7 +224,7 @@ export default function DashboardPage() {
                      style={{ background: `${action.color}15` }}>
                   <action.icon size={20} style={{ color: action.color }} />
                 </div>
-                <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+                <span className="text-xs font-medium text-center" style={{ color: 'var(--text-secondary)' }}>
                   {action.label}
                 </span>
               </button>
@@ -236,7 +232,6 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-        {/* Recent Activity */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -247,29 +242,23 @@ export default function DashboardPage() {
             <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
               {t('dashboard.recentActivity')}
             </h3>
-            <button
-              className="text-xs font-medium flex items-center gap-1"
-              style={{ color: 'var(--accent-primary)' }}
-            >
-              {t('dashboard.viewAll')} <ArrowRight size={12} className={isRtl ? "rotate-180" : ""} />
-            </button>
           </div>
           <div className="space-y-3">
-            {activities?.slice(0, 6).map((activity) => {
-              const actUser = store.users.find((u) => u.id === activity.user_id);
+            {activities?.map((activity) => {
+              const actDoc = store.doctors.find((u) => u.doctor_id === activity.userId);
               return (
                 <div key={activity.id} className="flex items-start gap-3 p-3 rounded-xl transition-colors"
                      style={{ background: 'var(--bg-tertiary)' }}>
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
                        style={{ background: 'var(--accent-gradient)' }}>
-                    {actUser ? actUser.full_name.charAt(0) : '?'}
+                    {actDoc ? actDoc.full_name.charAt(0) : '?'}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm truncate" style={{ color: 'var(--text-primary)' }}>
-                      {activity.description}
+                      {activity.desc}
                     </p>
                     <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                      {formatDateTime(activity.timestamp)}
+                      {formatDateTime(activity.date!)}
                     </p>
                   </div>
                 </div>

@@ -74,7 +74,7 @@ export default function LoginPage() {
             <Activity size={28} className="text-white" />
           </div>
           <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-            {isRtl ? 'مركز السرطان' : 'Cancer Center'}
+            {t('sidebar.cancerCenter')}
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
             {t('auth.signIn')}
@@ -162,10 +162,10 @@ export default function LoginPage() {
           </p>
           <div className="space-y-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
             <p>
-              <span className="font-medium">{isRtl ? 'المشرف:' : 'Admin:'}</span> admin / admin123
+              <span className="font-medium">{t('common.admin')}:</span> admin / admin123
             </p>
             <p>
-              <span className="font-medium">{isRtl ? 'الطبيب:' : 'Doctor:'}</span> dr.ahmed / doctor123
+              <span className="font-medium">{t('common.doctor')}:</span> dr.ahmed / doctor123
             </p>
           </div>
         </div>

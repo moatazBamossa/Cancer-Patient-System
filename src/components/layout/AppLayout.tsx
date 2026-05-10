@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -29,6 +29,96 @@ const navigation = [
   { name: 'roles', path: '/roles', icon: ShieldCheck },
 ];
 
+interface SidebarContentProps {
+  collapsed: boolean;
+  setMobileOpen: (open: boolean) => void;
+  t: (key: string) => string;
+  user: any;
+  role: any;
+  handleLogout: () => void;
+}
+
+const SidebarContent = memo(({ collapsed, setMobileOpen, t, user, role, handleLogout }: SidebarContentProps) => (
+  <div className="flex flex-col h-full">
+    {/* Logo */}
+    <div className="flex items-center gap-3 px-5 py-6 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+           style={{ background: 'var(--accent-gradient)' }}>
+        <Activity size={20} className="text-white" />
+      </div>
+      <AnimatePresence>
+        {!collapsed && (
+          <motion.div
+            initial={{ opacity: 0, width: 0 }}
+            animate={{ opacity: 1, width: 'auto' }}
+            exit={{ opacity: 0, width: 0 }}
+            className="overflow-hidden whitespace-nowrap"
+          >
+            <h1 className="text-sm font-bold text-white">
+              {t('sidebar.cancerCenter')}
+            </h1>
+            <p className="text-[10px] text-slate-400">
+              {t('sidebar.managementSystem')}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+
+    {/* Navigation */}
+    <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+      {navigation.map((item) => (
+        <NavLink
+          key={item.path}
+          to={item.path}
+          onClick={() => setMobileOpen(false)}
+          className={({ isActive }) =>
+            cn('sidebar-link', isActive && 'active', collapsed && 'justify-center px-2')
+          }
+        >
+          <item.icon size={20} className="flex-shrink-0" />
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.span
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                className="overflow-hidden whitespace-nowrap"
+              >
+                {t(`common.${item.name}`)}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </NavLink>
+      ))}
+    </nav>
+
+    {/* User section */}
+    <div className="border-t p-3 space-y-2" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+      <NavLink
+        to="/profile"
+        onClick={() => setMobileOpen(false)}
+        className={({ isActive }) =>
+          cn('sidebar-link', isActive && 'active', collapsed && 'justify-center px-2')
+        }
+      >
+        <UserCircle size={20} className="flex-shrink-0" />
+        {!collapsed && <span>{t('common.profile')}</span>}
+      </NavLink>
+      <button
+        onClick={handleLogout}
+        className={cn(
+          'sidebar-link w-full hover:!bg-red-500/10 hover:!text-red-400',
+          collapsed && 'justify-center px-2'
+        )}
+      >
+        <LogOut size={20} className="flex-shrink-0" />
+        {!collapsed && <span>{t('common.logout')}</span>}
+      </button>
+    </div>
+  </div>
+));
+
 export function AppLayout() {
   const { t, i18n } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
@@ -39,91 +129,10 @@ export function AppLayout() {
 
   const isRtl = i18n.language === 'ar';
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     navigate('/login');
-  };
-
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full">
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-6 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-             style={{ background: 'var(--accent-gradient)' }}>
-          <Activity size={20} className="text-white" />
-        </div>
-        <AnimatePresence>
-          {!collapsed && (
-            <motion.div
-              initial={{ opacity: 0, width: 0 }}
-              animate={{ opacity: 1, width: 'auto' }}
-              exit={{ opacity: 0, width: 0 }}
-              className="overflow-hidden whitespace-nowrap"
-            >
-              <h1 className="text-sm font-bold text-white">
-                {isRtl ? 'مركز السرطان' : 'Cancer Center'}
-              </h1>
-              <p className="text-[10px] text-slate-400">
-                {isRtl ? 'نظام الإدارة' : 'Management System'}
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-        {navigation.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            onClick={() => setMobileOpen(false)}
-            className={({ isActive }) =>
-              cn('sidebar-link', isActive && 'active', collapsed && 'justify-center px-2')
-            }
-          >
-            <item.icon size={20} className="flex-shrink-0" />
-            <AnimatePresence>
-              {!collapsed && (
-                <motion.span
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: 'auto' }}
-                  exit={{ opacity: 0, width: 0 }}
-                  className="overflow-hidden whitespace-nowrap"
-                >
-                  {t(`common.${item.name}`)}
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </NavLink>
-        ))}
-      </nav>
-
-      {/* User section */}
-      <div className="border-t p-3 space-y-2" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-        <NavLink
-          to="/profile"
-          onClick={() => setMobileOpen(false)}
-          className={({ isActive }) =>
-            cn('sidebar-link', isActive && 'active', collapsed && 'justify-center px-2')
-          }
-        >
-          <UserCircle size={20} className="flex-shrink-0" />
-          {!collapsed && <span>{t('common.profile')}</span>}
-        </NavLink>
-        <button
-          onClick={handleLogout}
-          className={cn(
-            'sidebar-link w-full hover:!bg-red-500/10 hover:!text-red-400',
-            collapsed && 'justify-center px-2'
-          )}
-        >
-          <LogOut size={20} className="flex-shrink-0" />
-          {!collapsed && <span>{t('common.logout')}</span>}
-        </button>
-      </div>
-    </div>
-  );
+  }, [logout, navigate]);
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
@@ -134,7 +143,14 @@ export function AppLayout() {
         className="hidden lg:flex flex-col flex-shrink-0 border-r relative"
         style={{ background: 'var(--sidebar-bg)', borderColor: 'rgba(255,255,255,0.06)' }}
       >
-        <SidebarContent />
+        <SidebarContent 
+          collapsed={collapsed} 
+          setMobileOpen={setMobileOpen} 
+          t={t} 
+          user={user} 
+          role={role} 
+          handleLogout={handleLogout} 
+        />
         <button
           onClick={() => setCollapsed(!collapsed)}
           className={cn(
@@ -159,14 +175,21 @@ export function AppLayout() {
               onClick={() => setMobileOpen(false)}
             />
             <motion.aside
-              initial={{ x: -280 }}
+              initial={{ x: isRtl ? 280 : -280 }}
               animate={{ x: 0 }}
-              exit={{ x: -280 }}
+              exit={{ x: isRtl ? 280 : -280 }}
               transition={{ type: 'spring', damping: 25 }}
-              className="fixed inset-y-0 left-0 w-[260px] z-50 lg:hidden"
+              className={cn("fixed inset-y-0 w-[260px] z-50 lg:hidden", isRtl ? "right-0" : "left-0")}
               style={{ background: 'var(--sidebar-bg)' }}
             >
-              <SidebarContent />
+              <SidebarContent 
+                collapsed={collapsed} 
+                setMobileOpen={setMobileOpen} 
+                t={t} 
+                user={user} 
+                role={role} 
+                handleLogout={handleLogout} 
+              />
             </motion.aside>
           </>
         )}
@@ -216,12 +239,12 @@ export function AppLayout() {
                    style={{ background: 'var(--accent-gradient)' }}>
                 {user ? getInitials(user.full_name) : 'U'}
               </div>
-              <div className="hidden sm:block">
+              <div className="hidden sm:block text-left">
                 <p className="text-sm font-medium leading-tight" style={{ color: 'var(--text-primary)' }}>
                   {user?.full_name}
                 </p>
                 <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
-                  {role?.name}
+                  {role?.role_name}
                 </p>
               </div>
             </div>

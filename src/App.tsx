@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AppLayout } from './components/layout/AppLayout';
+const AppLayout = lazy(() => import('./components/layout/AppLayout').then(m => ({ default: m.AppLayout })));
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { PageSkeleton } from './components/ui/Skeleton';
@@ -39,14 +39,13 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <ErrorBoundary>
-          <Suspense fallback={<PageSkeleton />}>
             <Routes>
               {/* Public Routes */}
-              <Route path="/login" element={<LoginPage />} />
+              <Route path="/login" element={<Suspense fallback={<div className="h-screen flex items-center justify-center">Loading...</div>}><LoginPage /></Suspense>} />
 
               {/* Protected Workspace Routes */}
               <Route element={<ProtectedRoute />}>
-                <Route element={<AppLayout />}>
+                <Route element={<Suspense fallback={<PageSkeleton />}><AppLayout /></Suspense>}>
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/patients" element={<PatientsPage />} />
                   <Route path="/patients/:id" element={<PatientDetailsPage />} />
@@ -71,7 +70,6 @@ export default function App() {
               {/* Catch-all redirect */}
               <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
-          </Suspense>
         </ErrorBoundary>
         <Toaster position="top-right" />
       </BrowserRouter>

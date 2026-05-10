@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, User, Stethoscope, FileBarChart, Activity, Pill,
-  FlaskConical, ImageIcon, Calendar, Phone, Printer,
+  FlaskConical, ImageIcon, Calendar, Phone, Printer, AlertCircle
 } from 'lucide-react';
 import { patientService } from '../../services/patient.service';
 import { diagnosisService } from '../../services/diagnosis.service';
@@ -13,30 +13,32 @@ import { labService, imagingService } from '../../services/general.service';
 import { doctorService } from '../../services/doctor.service';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { PageSkeleton } from '../../components/ui/Skeleton';
-import { formatDate, formatDateTime, calculateBMI, getBMICategory } from '../../lib/utils';
+import { formatDate, formatDateTime, getBMICategory } from '../../lib/utils';
 import { getDataStore } from '../../services/mockApi';
+import { useTranslation } from 'react-i18next';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer,
 } from 'recharts';
 
-const tabs = [
-  { id: 'overview', label: 'Overview', icon: User },
-  { id: 'diagnoses', label: 'Diagnoses', icon: Stethoscope },
-  { id: 'treatment', label: 'Treatment', icon: FileBarChart },
-  { id: 'vitals', label: 'Vitals', icon: Activity },
-  { id: 'medications', label: 'Medications', icon: Pill },
-  { id: 'lab', label: 'Lab Results', icon: FlaskConical },
-  { id: 'imaging', label: 'Imaging', icon: ImageIcon },
-  { id: 'visits', label: 'Visits', icon: Calendar },
-  { id: 'contacts', label: 'Contacts', icon: Phone },
-];
-
 export default function PatientDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('overview');
   const store = getDataStore();
+  
+  const tabs = [
+    { id: 'overview', label: t('patientDetails.overview'), icon: User },
+    { id: 'diagnoses', label: t('patientDetails.diagnoses'), icon: Stethoscope },
+    { id: 'treatment', label: t('patientDetails.treatment'), icon: FileBarChart },
+    { id: 'vitals', label: t('patientDetails.vitals'), icon: Activity },
+    { id: 'medications', label: t('patientDetails.medications'), icon: Pill },
+    { id: 'lab', label: t('patientDetails.labResults'), icon: FlaskConical },
+    { id: 'imaging', label: t('patientDetails.imaging'), icon: ImageIcon },
+    { id: 'visits', label: t('patientDetails.visits'), icon: Calendar },
+    { id: 'contacts', label: t('patientDetails.contacts'), icon: Phone },
+  ];
 
   const { data: patient, isLoading } = useQuery({
     queryKey: ['patient', id],
@@ -53,7 +55,7 @@ export default function PatientDetailsPage() {
   const { data: plans } = useQuery({
     queryKey: ['patient-plans', id],
     queryFn: () => treatmentService.getPlansByPatient(id!),
-    enabled: !!id,
+    enabled: !!id && !!diagnoses,
   });
 
   const { data: cycles } = useQuery({
@@ -93,15 +95,14 @@ export default function PatientDetailsPage() {
   });
 
   if (isLoading) return <PageSkeleton />;
-  if (!patient) return <div>Patient not found</div>;
+  if (!patient) return <div>{t('patients.notFoundPage')}</div>;
 
   const age = Math.floor(
-    (Date.now() - new Date(patient.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000)
+    (Date.now() - new Date(patient.birth_date).getTime()) / (365.25 * 24 * 60 * 60 * 1000)
   );
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      {/* Header */}
       <div className="flex items-center gap-4">
         <button onClick={() => navigate('/patients')} className="p-2 rounded-lg" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
           <ArrowLeft size={20} />
@@ -110,25 +111,24 @@ export default function PatientDetailsPage() {
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold text-white"
                  style={{ background: 'var(--accent-gradient)' }}>
-              {patient.first_name.charAt(0)}{patient.last_name.charAt(0)}
+              {patient.full_name.split(' ').map(n => n.charAt(0)).join('').substring(0, 2)}
             </div>
             <div>
               <h1 className="text-xl font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-                {patient.first_name} {patient.last_name}
+                {patient.full_name}
                 <StatusBadge status={patient.status} />
               </h1>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                {patient.national_id} • {age} years • {patient.gender} • {patient.blood_type}
+                {patient.national_id} • {age} {t('patients.years')} • {patient.gender === 'male' ? t('patients.male') : t('patients.female')} • {patient.blood_type}
               </p>
             </div>
           </div>
         </div>
         <button onClick={() => window.print()} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium no-print" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
-          <Printer size={16} /> Print
+          <Printer size={16} /> {t('patients.print')}
         </button>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-1 overflow-x-auto pb-1 no-print">
         {tabs.map((tab) => (
           <button
@@ -149,18 +149,17 @@ export default function PatientDetailsPage() {
         ))}
       </div>
 
-      {/* Tab Content */}
       <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="glass-card p-5 space-y-3">
-              <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Personal Information</h3>
+              <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{t('patientDetails.personalInfo')}</h3>
               {[
-                ['Phone', patient.phone],
-                ['Email', patient.email],
-                ['Address', patient.address],
-                ['DOB', formatDate(patient.date_of_birth)],
-                ['Blood Type', patient.blood_type],
+                [t('patients.phone'), patient.phone],
+                [t('patients.email'), patient.email],
+                [t('patients.address'), patient.address],
+                [t('patients.dob'), formatDate(patient.birth_date)],
+                [t('patients.bloodType'), patient.blood_type],
               ].map(([label, value]) => (
                 <div key={label} className="flex justify-between text-sm">
                   <span style={{ color: 'var(--text-muted)' }}>{label}</span>
@@ -169,14 +168,14 @@ export default function PatientDetailsPage() {
               ))}
             </div>
             <div className="glass-card p-5 space-y-3">
-              <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Summary</h3>
+              <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{t('patientDetails.summary')}</h3>
               {[
-                ['Diagnoses', diagnoses?.length ?? 0],
-                ['Treatment Plans', plans?.length ?? 0],
-                ['Active Cycles', cycles?.filter((c) => c.status === 'in_progress').length ?? 0],
-                ['Lab Results', labResults?.length ?? 0],
-                ['Imaging Reports', imaging?.length ?? 0],
-                ['Clinic Visits', visits?.length ?? 0],
+                [t('patientDetails.diagnoses'), diagnoses?.length ?? 0],
+                [t('common.treatmentPlans'), plans?.length ?? 0],
+                [t('patientDetails.activeCycles'), cycles?.filter((c) => c.status === 'scheduled').length ?? 0],
+                [t('patientDetails.labResults'), labResults?.length ?? 0],
+                [t('patientDetails.imagingReports'), imaging?.length ?? 0],
+                [t('patientDetails.clinicVisits'), visits?.length ?? 0],
               ].map(([label, value]) => (
                 <div key={String(label)} className="flex justify-between text-sm">
                   <span style={{ color: 'var(--text-muted)' }}>{label}</span>
@@ -189,22 +188,21 @@ export default function PatientDetailsPage() {
 
         {activeTab === 'diagnoses' && (
           <div className="space-y-3">
-            {diagnoses?.length === 0 && <EmptyState message="No diagnoses recorded" />}
+            {diagnoses?.length === 0 && <EmptyState message={t('patientDetails.noDiagnoses')} />}
             {diagnoses?.map((d) => {
-              const ct = store.cancer_types.find((c) => c.id === d.cancer_type_id);
-              const doc = store.doctors.find((dc) => dc.id === d.doctor_id);
-              const docUser = doc ? store.users.find((u) => u.id === doc.user_id) : null;
+              const ct = store.cancer_types.find((c) => c.cancer_id === d.cancer_id);
+              const doc = store.doctors.find((dc) => dc.doctor_id === d.supervising_doctor_id);
               return (
-                <div key={d.id} className="glass-card p-5">
+                <div key={d.diagnosis_id} className="glass-card p-5">
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="w-3 h-3 rounded-full" style={{ background: ct?.color }} />
-                        <h4 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{ct?.name}</h4>
+                        <h4 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{ct?.cancer_name}</h4>
                         <StatusBadge status={d.status} />
                       </div>
                       <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                        {formatDate(d.diagnosis_date)} • Dr. {docUser?.full_name}
+                        {formatDate(d.diagnosis_date)} • Dr. {doc?.full_name}
                       </p>
                     </div>
                   </div>
@@ -217,26 +215,25 @@ export default function PatientDetailsPage() {
 
         {activeTab === 'treatment' && (
           <div className="space-y-3">
-            {plans?.length === 0 && <EmptyState message="No treatment plans" />}
+            {plans?.length === 0 && <EmptyState message={t('patientDetails.noTreatment')} />}
             {plans?.map((tp) => (
-              <div key={tp.id} className="glass-card p-5">
+              <div key={tp.plan_id} className="glass-card p-5">
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <h4 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{tp.title}</h4>
+                    <h4 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{tp.protocol_name}</h4>
                     <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                      {formatDate(tp.start_date)}{tp.end_date ? ` — ${formatDate(tp.end_date)}` : ' — Ongoing'}
+                      {formatDate(tp.start_date)}{tp.end_date ? ` — ${formatDate(tp.end_date)}` : ` — ${t('treatment.ongoing')}`}
                     </p>
                   </div>
                   <StatusBadge status={tp.status} />
                 </div>
-                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{tp.description}</p>
-                {/* Cycles */}
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{tp.notes}</p>
                 <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--border-color)' }}>
-                  <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-muted)' }}>Cycles</p>
+                  <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-muted)' }}>{t('treatment.cycles')}</p>
                   <div className="flex gap-2 flex-wrap">
-                    {cycles?.filter((c) => c.treatment_plan_id === tp.id).map((c) => (
-                      <div key={c.id} className="text-xs px-3 py-1.5 rounded-lg" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
-                        Cycle {c.cycle_number} • <StatusBadge status={c.status} />
+                    {cycles?.filter((c) => c.plan_id === tp.plan_id).map((c) => (
+                      <div key={c.cycle_id} className="text-xs px-3 py-1.5 rounded-lg" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
+                        {t('treatment.cycle')} {c.cycle_number} • <StatusBadge status={c.status} />
                       </div>
                     ))}
                   </div>
@@ -250,44 +247,43 @@ export default function PatientDetailsPage() {
           <div className="space-y-4">
             {vitals && vitals.length > 0 && (
               <div className="glass-card p-5">
-                <h3 className="font-semibold text-sm mb-4" style={{ color: 'var(--text-primary)' }}>Vital Signs Trend</h3>
+                <h3 className="font-semibold text-sm mb-4" style={{ color: 'var(--text-primary)' }}>{t('patientDetails.vitalsTrend')}</h3>
                 <ResponsiveContainer width="100%" height={250}>
                   <LineChart data={vitals.map((v) => ({
                     date: formatDate(v.recorded_at),
                     Temp: v.temperature,
-                    Weight: v.weight,
+                    Weight: v.weight_kg,
                     HR: v.heart_rate,
-                    SpO2: v.oxygen_saturation,
+                    SpO2: v.spo2,
                   }))}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
                     <XAxis dataKey="date" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} />
                     <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 11 }} />
                     <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-primary)', fontSize: 12 }} />
-                    <Line type="monotone" dataKey="Temp" stroke="#ef4444" dot={{ r: 3 }} />
-                    <Line type="monotone" dataKey="Weight" stroke="#6366f1" dot={{ r: 3 }} />
-                    <Line type="monotone" dataKey="HR" stroke="#14b8a6" dot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="Temp" name={t('vitals.temp')} stroke="#ef4444" dot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="Weight" name={t('vitals.weightLabel')} stroke="#6366f1" dot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="HR" name={t('vitals.hr')} stroke="#14b8a6" dot={{ r: 3 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
             )}
             <div className="space-y-2">
-              {vitals?.length === 0 && <EmptyState message="No vitals recorded" />}
+              {vitals?.length === 0 && <EmptyState message={t('patientDetails.noVitals')} />}
               {vitals?.map((v) => {
-                const bmi = calculateBMI(v.weight, v.height);
-                const bmiCat = getBMICategory(bmi);
+                const bmiCat = getBMICategory(v.bmi);
                 const isHighTemp = v.temperature > 37.5;
-                const isHighBP = v.systolic_bp > 140 || v.diastolic_bp > 90;
+                const isHighBP = v.blood_pressure_sys > 140 || v.blood_pressure_dia > 90;
                 return (
-                  <div key={v.id} className="glass-card p-4">
+                  <div key={v.vital_id} className="glass-card p-4">
                     <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-muted)' }}>{formatDateTime(v.recorded_at)}</p>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-                      <div><span className="text-xs" style={{ color: 'var(--text-muted)' }}>Temp</span><p className={`font-semibold ${isHighTemp ? 'text-red-500' : ''}`} style={!isHighTemp ? { color: 'var(--text-primary)' } : {}}>{v.temperature}°C</p></div>
-                      <div><span className="text-xs" style={{ color: 'var(--text-muted)' }}>BP</span><p className={`font-semibold ${isHighBP ? 'text-red-500' : ''}`} style={!isHighBP ? { color: 'var(--text-primary)' } : {}}>{v.systolic_bp}/{v.diastolic_bp}</p></div>
-                      <div><span className="text-xs" style={{ color: 'var(--text-muted)' }}>HR</span><p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{v.heart_rate} bpm</p></div>
-                      <div><span className="text-xs" style={{ color: 'var(--text-muted)' }}>SpO₂</span><p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{v.oxygen_saturation}%</p></div>
-                      <div><span className="text-xs" style={{ color: 'var(--text-muted)' }}>Weight</span><p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{v.weight} kg</p></div>
-                      <div><span className="text-xs" style={{ color: 'var(--text-muted)' }}>BMI</span><p className={`font-semibold ${bmiCat.color}`}>{bmi} ({bmiCat.label})</p></div>
-                      <div><span className="text-xs" style={{ color: 'var(--text-muted)' }}>RR</span><p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{v.respiratory_rate}/min</p></div>
+                      <div><span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('vitals.temp')}</span><p className={`font-semibold ${isHighTemp ? 'text-red-500' : ''}`} style={!isHighTemp ? { color: 'var(--text-primary)' } : {}}>{v.temperature}°C</p></div>
+                      <div><span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('vitals.bp')}</span><p className={`font-semibold ${isHighBP ? 'text-red-500' : ''}`} style={!isHighBP ? { color: 'var(--text-primary)' } : {}}>{v.blood_pressure_sys}/{v.blood_pressure_dia}</p></div>
+                      <div><span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('vitals.hr')}</span><p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{v.heart_rate}</p></div>
+                      <div><span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('vitals.spo2')}</span><p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{v.spo2}%</p></div>
+                      <div><span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('vitals.weightLabel')}</span><p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{v.weight_kg} kg</p></div>
+                      <div><span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('vitals.bmi')}</span><p className={`font-semibold ${bmiCat.color}`}>{v.bmi} ({bmiCat.label})</p></div>
+                      <div><span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('vitals.rr')}</span><p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{v.respiratory_rate}</p></div>
                     </div>
                   </div>
                 );
@@ -298,18 +294,18 @@ export default function PatientDetailsPage() {
 
         {activeTab === 'medications' && (
           <div className="space-y-3">
-            {cycles?.length === 0 && <EmptyState message="No medication records" />}
+            {cycles?.length === 0 && <EmptyState message={t('patientDetails.noMedications')} />}
             {cycles?.map((cycle) => {
-              const meds = store.cycle_medications.filter((cm) => cm.cycle_id === cycle.id);
+              const meds = store.cycle_medications.filter((cm) => cm.cycle_id === cycle.cycle_id);
               if (meds.length === 0) return null;
               return (
-                <div key={cycle.id} className="glass-card p-5">
+                <div key={cycle.cycle_id} className="glass-card p-5">
                   <h4 className="font-semibold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>
-                    Treatment Cycle {cycle.cycle_number}
+                    {t('treatment.treatmentCycle')} {cycle.cycle_number}
                   </h4>
                   <div className="space-y-2">
                     {meds.map((cm) => {
-                      const med = store.medications.find((m) => m.id === cm.medication_id);
+                      const med = store.medications.find((m) => m.medication_id === cm.medication_id);
                       return (
                         <div key={cm.id} className="flex items-center justify-between p-3 rounded-lg" style={{ background: 'var(--bg-tertiary)' }}>
                           <div>
@@ -329,26 +325,28 @@ export default function PatientDetailsPage() {
 
         {activeTab === 'lab' && (
           <div className="space-y-3">
-            {labResults?.length === 0 && <EmptyState message="No lab results" />}
+            {labResults?.length === 0 && <EmptyState message={t('patientDetails.noLabResults')} />}
             {labResults?.map((r) => {
-              const test = store.lab_tests.find((t) => t.id === r.lab_test_id);
-              const isAbnormal = r.status !== 'normal';
+              const test = store.lab_tests.find((t) => t.lab_test_id === r.lab_test_id);
+              const isAbnormal = r.is_abnormal;
               return (
-                <div key={r.id} className="glass-card p-4 flex items-center justify-between">
+                <div key={r.lab_test_patient_id} className="glass-card p-4 flex items-center justify-between">
                   <div>
-                    <h4 className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{test?.name}</h4>
-                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{formatDate(r.date)} • {r.notes}</p>
+                    <h4 className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{test?.test_name}</h4>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{formatDate(r.test_date)} • {r.notes}</p>
                   </div>
-                  <div className="text-right">
-                    <p className={`text-lg font-bold ${isAbnormal ? 'text-red-500' : ''}`} style={!isAbnormal ? { color: 'var(--accent-primary)' } : {}}>
-                      {r.value} <span className="text-xs font-normal" style={{ color: 'var(--text-muted)' }}>{test?.unit}</span>
-                    </p>
-                    {test?.normal_range_min != null && (
-                      <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
-                        Normal: {test.normal_range_min}–{test.normal_range_max}
+                  <div className="text-right flex items-center gap-2">
+                    <div>
+                      <p className={`text-lg font-bold ${isAbnormal ? 'text-red-500' : ''}`} style={!isAbnormal ? { color: 'var(--emerald-500)' } : {}}>
+                        {r.result_value} <span className="text-xs font-normal" style={{ color: 'var(--text-muted)' }}>{test?.units}</span>
                       </p>
-                    )}
-                    <StatusBadge status={r.status} />
+                      {test?.normal_range != null && (
+                        <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                          {t('patientDetails.normal')}: {test.normal_range}
+                        </p>
+                      )}
+                    </div>
+                    {isAbnormal && <AlertCircle className="text-red-500" size={16} />}
                   </div>
                 </div>
               );
@@ -358,16 +356,16 @@ export default function PatientDetailsPage() {
 
         {activeTab === 'imaging' && (
           <div className="space-y-3">
-            {imaging?.length === 0 && <EmptyState message="No imaging reports" />}
+            {imaging?.length === 0 && <EmptyState message={t('patientDetails.noImaging')} />}
             {imaging?.map((img) => (
-              <div key={img.id} className="glass-card p-5">
+              <div key={img.image_id} className="glass-card p-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="px-2 py-0.5 rounded text-xs font-semibold" style={{ background: 'var(--bg-tertiary)', color: 'var(--accent-primary)' }}>{img.type}</span>
-                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{img.body_part} • {formatDate(img.date)}</span>
+                  <span className="px-2 py-0.5 rounded text-xs font-semibold" style={{ background: 'var(--bg-tertiary)', color: 'var(--accent-primary)' }}>{img.imaging_type}</span>
+                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{img.body_part} • {formatDate(img.imaging_date)}</span>
                 </div>
-                <p className="text-sm mb-1" style={{ color: 'var(--text-primary)' }}><strong>Findings:</strong> {img.findings}</p>
-                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}><strong>Impression:</strong> {img.impression}</p>
-                <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>Radiologist: {img.radiologist}</p>
+                <p className="text-sm mb-1" style={{ color: 'var(--text-primary)' }}><strong>{t('patientDetails.findings')}:</strong> {img.findings}</p>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}><strong>{t('patientDetails.impression')}:</strong> {img.impression}</p>
+                <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>{t('patientDetails.radiologist')}: {store.doctors.find(d => d.doctor_id === img.ordered_by)?.full_name || img.ordered_by}</p>
               </div>
             ))}
           </div>
@@ -375,19 +373,18 @@ export default function PatientDetailsPage() {
 
         {activeTab === 'visits' && (
           <div className="space-y-3">
-            {visits?.length === 0 && <EmptyState message="No visits recorded" />}
+            {visits?.length === 0 && <EmptyState message={t('patientDetails.noVisits')} />}
             {visits?.map((v) => {
-              const doc = store.doctors.find((d) => d.id === v.doctor_id);
-              const docUser = doc ? store.users.find((u) => u.id === doc.user_id) : null;
+              const doc = store.doctors.find((d) => d.doctor_id === v.doctor_id);
               return (
-                <div key={v.id} className="glass-card p-4">
+                <div key={v.visit_id} className="glass-card p-4">
                   <div className="flex justify-between mb-1">
-                    <span className="text-xs font-semibold" style={{ color: 'var(--accent-primary)' }}>{v.visit_type}</span>
+                    <span className="text-xs font-semibold uppercase" style={{ color: 'var(--accent-primary)' }}>{v.visit_type.replace('_', ' ')}</span>
                     <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{formatDateTime(v.visit_date)}</span>
                   </div>
-                  <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{v.chief_complaint}</p>
-                  <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{v.notes}</p>
-                  <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>Doctor: {docUser?.full_name}</p>
+                  <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{v.reason_for_visit}</p>
+                  <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{v.clinical_notes}</p>
+                  <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>Dr. {doc?.full_name}</p>
                 </div>
               );
             })}
@@ -396,17 +393,15 @@ export default function PatientDetailsPage() {
 
         {activeTab === 'contacts' && (
           <div className="space-y-3">
-            {contacts?.length === 0 && <EmptyState message="No emergency contacts" />}
+            {contacts?.length === 0 && <EmptyState message={t('patientDetails.noContacts')} />}
             {contacts?.map((c) => (
-              <div key={c.id} className="glass-card p-4 flex items-center justify-between">
+              <div key={c.contact_id} className="glass-card p-4 flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{c.name}</h4>
+                  <h4 className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{c.full_name}</h4>
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{c.relationship}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{c.phone}</p>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{c.email}</p>
-                  {c.is_primary && <span className="text-[10px] font-semibold text-emerald-500">PRIMARY</span>}
                 </div>
               </div>
             ))}

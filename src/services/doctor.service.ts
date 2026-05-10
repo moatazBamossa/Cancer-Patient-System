@@ -10,16 +10,16 @@ export const doctorService = {
 
   async getById(id: string): Promise<Doctor> {
     return simulateApiCall(() => {
-      const doc = getDataStore().doctors.find((d) => d.id === id);
+      const doc = getDataStore().doctors.find((d) => d.doctor_id === id);
       if (!doc) throw new Error('Doctor not found');
       return doc;
     });
   },
 
-  async create(data: Omit<Doctor, 'id' | 'created_at'>): Promise<Doctor> {
+  async create(data: Omit<Doctor, 'doctor_id' | 'created_at' | 'updated_at'>): Promise<Doctor> {
     return simulateApiCall(() => {
       const store = getDataStore();
-      const doc: Doctor = { ...data, id: generateId('doc'), created_at: new Date().toISOString() };
+      const doc: Doctor = { ...data, doctor_id: generateId('doc'), created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
       store.doctors.push(doc);
       return doc;
     });
@@ -28,9 +28,9 @@ export const doctorService = {
   async update(id: string, updates: Partial<Doctor>): Promise<Doctor> {
     return simulateApiCall(() => {
       const store = getDataStore();
-      const idx = store.doctors.findIndex((d) => d.id === id);
+      const idx = store.doctors.findIndex((d) => d.doctor_id === id);
       if (idx === -1) throw new Error('Doctor not found');
-      store.doctors[idx] = { ...store.doctors[idx], ...updates };
+      store.doctors[idx] = { ...store.doctors[idx], ...updates, updated_at: new Date().toISOString() };
       return store.doctors[idx];
     });
   },
@@ -38,7 +38,7 @@ export const doctorService = {
   async getDoctorDiagnoses(doctorId: string) {
     return simulateApiCall(() => {
       const store = getDataStore();
-      return store.diagnoses.filter((d) => d.doctor_id === doctorId);
+      return store.diagnoses.filter((d) => d.supervising_doctor_id === doctorId);
     });
   },
 
@@ -47,10 +47,10 @@ export const doctorService = {
     return simulateApiCall(() => getDataStore().clinics);
   },
 
-  async createClinic(data: Omit<Clinic, 'id' | 'created_at'>): Promise<Clinic> {
+  async createClinic(data: Omit<Clinic, 'clinic_id' | 'created_at'>): Promise<Clinic> {
     return simulateApiCall(() => {
       const store = getDataStore();
-      const clinic: Clinic = { ...data, id: generateId('cln'), created_at: new Date().toISOString() };
+      const clinic: Clinic = { ...data, clinic_id: generateId('cln'), created_at: new Date().toISOString() };
       store.clinics.push(clinic);
       return clinic;
     });
@@ -59,7 +59,7 @@ export const doctorService = {
   async updateClinic(id: string, updates: Partial<Clinic>): Promise<Clinic> {
     return simulateApiCall(() => {
       const store = getDataStore();
-      const idx = store.clinics.findIndex((c) => c.id === id);
+      const idx = store.clinics.findIndex((c) => c.clinic_id === id);
       if (idx === -1) throw new Error('Clinic not found');
       store.clinics[idx] = { ...store.clinics[idx], ...updates };
       return store.clinics[idx];
@@ -79,7 +79,7 @@ export const doctorService = {
       return paginateData(
         visits as unknown as Record<string, unknown>[],
         params,
-        ['chief_complaint', 'notes', 'visit_type'] as never[]
+        ['reason_for_visit', 'clinical_notes', 'visit_type'] as never[]
       ) as unknown as PaginatedResponse<ClinicVisit>;
     });
   },
@@ -91,10 +91,10 @@ export const doctorService = {
     });
   },
 
-  async createVisit(data: Omit<ClinicVisit, 'id'>): Promise<ClinicVisit> {
+  async createVisit(data: Omit<ClinicVisit, 'visit_id' | 'created_at'>): Promise<ClinicVisit> {
     return simulateApiCall(() => {
       const store = getDataStore();
-      const visit: ClinicVisit = { ...data, id: generateId('cv') };
+      const visit: ClinicVisit = { ...data, visit_id: generateId('cv'), created_at: new Date().toISOString() };
       store.clinic_visits.push(visit);
       return visit;
     });
