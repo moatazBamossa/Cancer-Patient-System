@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 const AppLayout = lazy(() => import('./components/layout/AppLayout').then(m => ({ default: m.AppLayout })));
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
-import { PageSkeleton } from './components/ui/Skeleton';
 
 // Lazy load features
 const LoginPage = lazy(() => import('./features/auth/LoginPage'));
@@ -45,7 +44,7 @@ export default function App() {
 
               {/* Protected Workspace Routes */}
               <Route element={<ProtectedRoute />}>
-                <Route element={<Suspense fallback={<PageSkeleton />}><AppLayout /></Suspense>}>
+                <Route element={<Suspense fallback={<div className="h-screen flex flex-col items-center justify-center space-y-4 shadow-xl shadow-indigo-500/10"><div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div></div>}><AppLayout /></Suspense>}>
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/patients" element={<PatientsPage />} />
                   <Route path="/patients/:id" element={<PatientDetailsPage />} />
