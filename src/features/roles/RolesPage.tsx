@@ -1,126 +1,115 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Edit2, ShieldAlert } from 'lucide-react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
-import { roleService } from '../../services/general.service';
+import { useTranslation } from 'react-i18next';
+import { getDataStore, simulateApiCall } from '../../services/mockApi';
 import { DataTable, type Column } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { FormField } from '../../components/ui/FormField';
-import { formatDate } from '../../lib/utils';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import type { Role } from '../../types';
 
-const roleSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  description: z.string().min(1, 'Description is required'),
-});
-
-type RoleForm = z.infer<typeof roleSchema>;
-
 export default function RolesPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
-  const [editRole, setEditRole] = useState<Role | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Role | null>(null);
+  const [editItem, setEditItem] = useState<Role | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const roleSchema = z.object({
+    role_name: z.string().min(1, t('roles.nameRequired')),
+  });
+
+  type RoleForm = z.infer<typeof roleSchema>;
 
   const { data: roles, isLoading } = useQuery({
     queryKey: ['roles'],
-    queryFn: () => roleService.getAll(),
+    queryFn: () => simulateApiCall(() => getDataStore().roles),
   });
 
   const createMut = useMutation({
-    mutationFn: (d: RoleForm) => roleService.create({ ...d, permissions: [] }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['roles'] }); toast.success('Role created'); setShowForm(false); },
+    mutationFn: (d: RoleForm) => simulateApiCall(() => {
+        const store = getDataStore();
+        const newRole: Role = { role_id: `role_${Date.now()}`, role_name: d.role_name };
+        store.roles.push(newRole);
+        return newRole;
+    }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['roles'] }); toast.success(t('roles.roleCreated')); setShowForm(false); },
   });
-
   const updateMut = useMutation({
-    mutationFn: (d: RoleForm) => roleService.update(editRole!.id, d),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['roles'] }); toast.success('Role updated'); setShowForm(false); setEditRole(null); },
+    mutationFn: (d: RoleForm & { role_id: string }) => simulateApiCall(() => {
+        const store = getDataStore();
+        const role = store.roles.find(r => r.role_id === d.role_id);
+        if (role) role.role_name = d.role_name;
+        return role;
+    }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['roles'] }); toast.success(t('roles.roleUpdated')); setShowForm(false); setEditItem(null); },
   });
-
   const deleteMut = useMutation({
-    mutationFn: (id: string) => roleService.remove(id),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['roles'] }); toast.success('Role deleted'); },
+    mutationFn: (id: string) => simulateApiCall(() => {
+        const store = getDataStore();
+        store.roles = store.roles.filter(r => r.role_id !== id);
+        return true;
+    }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['roles'] }); toast.success(t('roles.roleDeleted')); setDeleteId(null); },
   });
 
-  const methods = useForm<RoleForm>({
-    resolver: zodResolver(roleSchema),
-    defaultValues: { name: '', description: '' },
-  });
-
-  const openEdit = (role: Role) => {
-    setEditRole(role);
-    methods.reset({ name: role.name, description: role.description });
-    setShowForm(true);
-  };
-
-  const openAdd = () => {
-    setEditRole(null);
-    methods.reset({ name: '', description: '' });
-    setShowForm(true);
-  };
-
-  const onSubmit = (d: RoleForm) => editRole ? updateMut.mutate(d) : createMut.mutate(d);
+  const methods = useForm<RoleForm>({ resolver: zodResolver(roleSchema) });
 
   const columns: Column<Role>[] = [
-    { key: 'name', header: 'Role Name', sortable: true, render: (v) => <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{String(v)}</span> },
-    { key: 'description', header: 'Description' },
-    { key: 'created_at', header: 'Created', render: (v) => formatDate(String(v)) },
+    { key: 'role_name', header: t('roles.roleName'), sortable: true, render: (v) => <span className="font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}><ShieldAlert size={14} className="text-indigo-500" />{String(v)}</span> },
   ];
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Roles</h1>
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Manage user roles and permissions</p>
-        </div>
+      <div>
+        <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{t('roles.title')}</h1>
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{t('roles.subtitle')}</p>
       </div>
 
       <DataTable
         columns={columns}
-        data={(roles || []) as unknown as Record<string, unknown>[]}
+        data={roles || []}
         isLoading={isLoading}
         headerActions={
-          <button onClick={openAdd} className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5">
-            <Plus size={16} /> Add Role
+          <button onClick={() => { setEditItem(null); methods.reset({ role_name: '' }); setShowForm(true); }} className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5">
+            <Plus size={16} /> {t('roles.addRole')}
           </button>
         }
-        actions={(row) => {
-          const role = row as unknown as Role;
-          return (
-            <div className="flex gap-1">
-              <button onClick={() => openEdit(role)} className="p-1.5 rounded-lg hover:bg-amber-500/10" style={{ color: 'var(--text-muted)' }}><Edit2 size={16} /></button>
-              <button onClick={() => setDeleteTarget(role)} className="p-1.5 rounded-lg hover:bg-red-500/10" style={{ color: 'var(--text-muted)' }}><Trash2 size={16} /></button>
-            </div>
-          );
-        }}
+        actions={(row) => (
+          <div className="flex gap-1">
+            <button
+              onClick={() => { setEditItem(row); methods.reset({ role_name: row.role_name }); setShowForm(true); }}
+              className="p-1.5 rounded-lg hover:bg-amber-500/10 text-amber-500"
+            >
+              <Edit2 size={16} />
+            </button>
+          </div>
+        )}
       />
 
-      <Modal isOpen={showForm} onClose={() => { setShowForm(false); setEditRole(null); }} title={editRole ? 'Edit Role' : 'Add Role'} size="sm">
+      <Modal isOpen={showForm} onClose={() => { setShowForm(false); setEditItem(null); }} title={editItem ? t('roles.editRole') : t('roles.addRoleTitle')} size="sm">
         <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField name="name" label="Role Name" required />
-            <FormField name="description" label="Description" type="textarea" required />
-            <div className="flex justify-end pt-4">
-              <button type="submit" className="gradient-btn px-6 py-2.5 text-sm">
-                {editRole ? 'Update' : 'Create'}
-              </button>
-            </div>
+          <form onSubmit={methods.handleSubmit((d) => editItem ? updateMut.mutate({ ...d, role_id: editItem.role_id }) : createMut.mutate(d))} className="space-y-4">
+            <FormField name="role_name" label={t('roles.roleName')} required placeholder="e.g. administrator" />
+            <div className="flex justify-end pt-4"><button type="submit" className="gradient-btn px-6 py-2.5 text-sm">{editItem ? t('common.update') : t('common.create')}</button></div>
           </form>
         </FormProvider>
       </Modal>
 
       <ConfirmDialog
-        isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
-        onConfirm={() => deleteTarget && deleteMut.mutate(deleteTarget.id)}
-        title="Delete Role"
-        message={`Delete role "${deleteTarget?.name}"? This cannot be undone.`}
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={() => deleteId && deleteMut.mutate(deleteId)}
+        title={t('roles.deleteTitle')}
+        message={t('roles.deleteConfirm', { name: roles?.find(r => r.role_id === deleteId)?.role_name })}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
       />
     </motion.div>
   );

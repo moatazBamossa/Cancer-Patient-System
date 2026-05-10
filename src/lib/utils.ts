@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import i18next from 'i18next';
 
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
@@ -10,7 +11,7 @@ export function generateId(prefix: string): string {
 }
 
 export function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', {
+  return new Date(dateString).toLocaleDateString(i18next.language, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -18,10 +19,17 @@ export function formatDate(dateString: string): string {
 }
 
 export function formatDateTime(dateString: string): string {
-  return new Date(dateString).toLocaleString('en-US', {
+  return new Date(dateString).toLocaleString(i18next.language, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+export function formatTime(dateString: string): string {
+  return new Date(dateString).toLocaleTimeString(i18next.language, {
     hour: '2-digit',
     minute: '2-digit',
   });
@@ -33,10 +41,10 @@ export function calculateBMI(weight: number, heightCm: number): number {
 }
 
 export function getBMICategory(bmi: number): { label: string; color: string } {
-  if (bmi < 18.5) return { label: 'Underweight', color: 'text-yellow-500' };
-  if (bmi < 25) return { label: 'Normal', color: 'text-green-500' };
-  if (bmi < 30) return { label: 'Overweight', color: 'text-orange-500' };
-  return { label: 'Obese', color: 'text-red-500' };
+  if (bmi < 18.5) return { label: i18next.t('vitals.underweight'), color: 'text-yellow-500' };
+  if (bmi < 25) return { label: i18next.t('vitals.normal'), color: 'text-green-500' };
+  if (bmi < 30) return { label: i18next.t('vitals.overweight'), color: 'text-orange-500' };
+  return { label: i18next.t('vitals.obese'), color: 'text-red-500' };
 }
 
 export function getInitials(name: string): string {

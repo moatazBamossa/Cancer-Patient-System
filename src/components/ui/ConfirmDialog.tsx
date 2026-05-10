@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -19,10 +20,12 @@ export function ConfirmDialog({
   onConfirm,
   title,
   message,
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
+  confirmText,
+  cancelText,
   variant = 'danger',
 }: ConfirmDialogProps) {
+  const { t } = useTranslation();
+  
   const colors = {
     danger: 'bg-red-600 hover:bg-red-700',
     warning: 'bg-amber-600 hover:bg-amber-700',
@@ -61,13 +64,13 @@ export function ConfirmDialog({
                 className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
                 style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}
               >
-                {cancelText}
+                {cancelText || t('common.cancel')}
               </button>
               <button
                 onClick={() => { onConfirm(); onClose(); }}
                 className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-white transition-colors ${colors[variant]}`}
               >
-                {confirmText}
+                {confirmText || t('common.confirm')}
               </button>
             </div>
           </motion.div>

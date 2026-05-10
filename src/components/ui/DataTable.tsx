@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 
 export interface Column<T> {
@@ -28,7 +29,7 @@ interface DataTableProps<T> {
   onRowClick?: (row: T) => void;
 }
 
-export function DataTable<T extends Record<string, unknown>>({
+export function DataTable<T>({
   columns,
   data,
   totalItems,
@@ -37,16 +38,22 @@ export function DataTable<T extends Record<string, unknown>>({
   onPageChange,
   onSearch,
   onSort,
-  searchPlaceholder = 'Search...',
+  searchPlaceholder,
   isLoading = false,
-  emptyMessage = 'No data found',
+  emptyMessage,
   actions,
   headerActions,
   onRowClick,
 }: DataTableProps<T>) {
+  const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  const isRtl = i18n.language === 'ar';
+
+  const defaultSearchPlaceholder = t('common.search');
+  const defaultEmptyMessage = t('dataTable.noData');
 
   const total = totalItems ?? data.length;
   const totalPages = Math.ceil(total / pageSize);
@@ -72,8 +79,8 @@ export function DataTable<T extends Record<string, unknown>>({
   const sortedData = useMemo(() => {
     if (!sortKey || onSort) return data;
     return [...data].sort((a, b) => {
-      const aVal = a[sortKey];
-      const bVal = b[sortKey];
+      const aVal = (a as any)[sortKey];
+      const bVal = (b as any)[sortKey];
       if (aVal == null) return 1;
       if (bVal == null) return -1;
       const dir = sortOrder === 'desc' ? -1 : 1;
@@ -94,15 +101,15 @@ export function DataTable<T extends Record<string, unknown>>({
           <div className="relative w-full sm:w-72">
             <Search
               size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2"
+              className={cn("absolute top-1/2 -translate-y-1/2", isRtl ? "right-3" : "left-3")}
               style={{ color: 'var(--text-muted)' }}
             />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder={searchPlaceholder}
-              className="input-field pl-9"
+              placeholder={searchPlaceholder || defaultSearchPlaceholder}
+              className={cn("input-field", isRtl ? "pr-9" : "pl-9")}
             />
           </div>
         )}
@@ -126,7 +133,7 @@ export function DataTable<T extends Record<string, unknown>>({
                   </div>
                 </th>
               ))}
-              {actions && <th className="w-20">Actions</th>}
+              {actions && <th className="w-20">{t('dataTable.actions')}</th>}
             </tr>
           </thead>
           <tbody>
@@ -149,15 +156,15 @@ export function DataTable<T extends Record<string, unknown>>({
               <tr>
                 <td colSpan={columns.length + (actions ? 1 : 0)}>
                   <div className="py-12 text-center" style={{ color: 'var(--text-muted)' }}>
-                    <p className="text-lg font-medium">{emptyMessage}</p>
-                    <p className="text-sm mt-1">Try adjusting your search or filters</p>
+                    <p className="text-lg font-medium">{emptyMessage || defaultEmptyMessage}</p>
+                    <p className="text-sm mt-1">{t('dataTable.tryAdjusting')}</p>
                   </div>
                 </td>
               </tr>
             ) : (
               sortedData.map((row, index) => (
                 <motion.tr
-                  key={String(row['id'] ?? index)}
+                  key={String((row as any)['id'] ?? index)}
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.02 }}
@@ -166,7 +173,7 @@ export function DataTable<T extends Record<string, unknown>>({
                 >
                   {columns.map((col) => (
                     <td key={col.key} className={col.className}>
-                      {col.render ? col.render(row[col.key], row) : String(row[col.key] ?? '')}
+                      {col.render ? col.render((row as any)[col.key], row) : String((row as any)[col.key] ?? '')}
                     </td>
                   ))}
                   {actions && <td>{actions(row)}</td>}
@@ -181,20 +188,20 @@ export function DataTable<T extends Record<string, unknown>>({
       {onPageChange && totalPages > 1 && (
         <div className="flex items-center justify-between px-2">
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} of {total}
+            {t('dataTable.showing', { start: (page - 1) * pageSize + 1, end: Math.min(page * pageSize, total), total: total })}
           </p>
           <div className="flex items-center gap-1">
             <PaginationButton
               onClick={() => onPageChange(1)}
               disabled={page === 1}
             >
-              <ChevronsLeft size={16} />
+              {isRtl ? <ChevronsRight size={16} /> : <ChevronsLeft size={16} />}
             </PaginationButton>
             <PaginationButton
               onClick={() => onPageChange(page - 1)}
               disabled={page === 1}
             >
-              <ChevronLeft size={16} />
+              {isRtl ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
             </PaginationButton>
 
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -216,13 +223,13 @@ export function DataTable<T extends Record<string, unknown>>({
               onClick={() => onPageChange(page + 1)}
               disabled={page === totalPages}
             >
-              <ChevronRight size={16} />
+              {isRtl ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
             </PaginationButton>
             <PaginationButton
               onClick={() => onPageChange(totalPages)}
               disabled={page === totalPages}
             >
-              <ChevronsRight size={16} />
+              {isRtl ? <ChevronsLeft size={16} /> : <ChevronsRight size={16} />}
             </PaginationButton>
           </div>
         </div>

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Plus, FlaskConical, Activity } from 'lucide-react';
+import { Plus, FlaskConical, AlertCircle } from 'lucide-react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { labService } from '../../services/general.service';
 import { DataTable, type Column } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
@@ -13,178 +14,136 @@ import { FormField } from '../../components/ui/FormField';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { formatDate } from '../../lib/utils';
 import { getDataStore } from '../../services/mockApi';
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Legend,
-} from 'recharts';
-import type { LabTest, LabTestResult } from '../../types';
+import type { LabTestResult } from '../../types';
 
-const testSchema = z.object({
-  name: z.string().min(1),
-  code: z.string().min(1),
-  category: z.string().min(1),
-  unit: z.string().min(1),
-  normal_range_min: z.number().nullable().optional(),
-  normal_range_max: z.number().nullable().optional(),
-  description: z.string().min(1),
-});
-
-const resultSchema = z.object({
+const labResultSchema = z.object({
   patient_id: z.string().min(1),
   lab_test_id: z.string().min(1),
-  value: z.number(),
-  date: z.string().min(1),
-  notes: z.string().optional(),
-  status: z.enum(['normal', 'low', 'high', 'critical']),
+  test_date: z.string().min(1),
+  result_value: z.string().min(1),
+  is_abnormal: z.boolean(),
+  notes: z.string().optional().default(''),
+  ordered_by: z.string().min(1),
 });
 
-type TestForm = z.infer<typeof testSchema>;
-type ResultForm = z.infer<typeof resultSchema>;
+type LabResultForm = z.infer<typeof labResultSchema>;
 
 export default function LabTestsPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const store = getDataStore();
-  const [showTestForm, setShowTestForm] = useState(false);
-  const [showResultForm, setShowResultForm] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState('');
-  const [selectedTest, setSelectedTest] = useState('');
+  const [showForm, setShowForm] = useState(false);
 
-  const { data: tests, isLoading: testsLoading } = useQuery({
-    queryKey: ['lab-tests'],
-    queryFn: () => labService.getTests(),
+  const { data: results, isLoading } = useQuery({
+    queryKey: ['lab-results'],
+    queryFn: async () => store.lab_test_results,
   });
 
-  const results = store.lab_test_results
-    .filter((r) => (!selectedPatient || r.patient_id === selectedPatient) && (!selectedTest || r.lab_test_id === selectedTest))
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-  const createTestMut = useMutation({
-    mutationFn: (d: TestForm) => labService.addTest({ ...d, normal_range_min: d.normal_range_min ?? null, normal_range_max: d.normal_range_max ?? null }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['lab-tests'] }); toast.success('Test definition added'); setShowTestForm(false); },
+  const createMut = useMutation({
+    mutationFn: (d: LabResultForm) => labService.addResult({ ...d, cycle_id: null, visit_id: null }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['lab-results'] }); toast.success(t('lab.resultAdded')); setShowForm(false); },
   });
 
-  const createResultMut = useMutation({
-    mutationFn: (d: ResultForm) => labService.addResult({ ...d, ordered_by: 'user-2', notes: d.notes || '' }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['lab-results'] }); toast.success('Result recorded'); setShowResultForm(false); },
-  });
-
-  const testMethods = useForm<TestForm>({ resolver: zodResolver(testSchema) });
-  const resultMethods = useForm<ResultForm>({ resolver: zodResolver(resultSchema), defaultValues: { status: 'normal' } });
+  const methods = useForm<LabResultForm>({ resolver: zodResolver(labResultSchema), defaultValues: { is_abnormal: false } });
 
   const columns: Column<LabTestResult>[] = [
-    { key: 'date', header: 'Date', render: (v) => formatDate(String(v)) },
-    { key: 'patient_id', header: 'Patient', render: (v) => {
-      const p = store.patients.find(pt => pt.id === v);
-      return p ? `${p.first_name} ${p.last_name}` : 'Unknown';
+    { key: 'test_date', header: t('common.date'), render: (v) => formatDate(String(v)) },
+    { key: 'patient_id', header: t('diagnoses.patient'), render: (v) => {
+      const p = store.patients.find(pt => pt.patient_id === v);
+      return <span className="font-medium text-emerald-500">{p ? p.full_name : t('common.unknown')}</span>;
     }},
-    { key: 'lab_test_id', header: 'Test', render: (v) => store.lab_tests.find(t => t.id === v)?.name || 'Unknown' },
-    { key: 'value', header: 'Result', render: (v, row) => {
-      const t = store.lab_tests.find(test => test.id === row.lab_test_id);
-      return <span className="font-bold">{String(v)} {t?.unit}</span>;
+    { key: 'lab_test_id', header: t('lab.testName'), render: (v) => {
+      const test = store.lab_tests.find(t => t.lab_test_id === v);
+      return <span className="font-medium text-indigo-500">{test?.test_name}</span>;
     }},
-    { key: 'status', header: 'Status', render: (v) => <StatusBadge status={String(v)} /> },
+    { key: 'result_value', header: t('lab.result'), render: (_, row) => {
+      const test = store.lab_tests.find(t => t.lab_test_id === row.lab_test_id);
+      return (
+        <div className="flex items-center gap-2">
+          <span className={`font-bold ${row.is_abnormal ? 'text-red-500' : 'text-emerald-500'}`}>
+            {row.result_value} {test?.units}
+          </span>
+          {row.is_abnormal && <AlertCircle size={14} className="text-red-500" />}
+        </div>
+      );
+    }},
+    { key: 'is_abnormal', header: t('common.status.label'), render: (v) => (
+      <StatusBadge status={v ? 'low' : 'normal'} /> // Using 'low' as a generic abnormal color
+    )},
   ];
-
-  const chartData = results.filter(r => r.lab_test_id === selectedTest).map(r => ({
-    date: formatDate(r.date),
-    value: r.value,
-  }));
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Laboratory Tests</h1>
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Monitor lab results and trends</p>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{t('lab.title')}</h1>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{t('lab.subtitle')}</p>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => setShowTestForm(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
-            <Plus size={16} /> New Test Def
-          </button>
-          <button onClick={() => setShowResultForm(true)} className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5">
-            <Plus size={16} /> Add Result
-          </button>
+        <button onClick={() => setShowForm(true)} className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5">
+          <Plus size={16} /> {t('lab.addResult')}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="glass-card p-4 flex items-center gap-4 border-l-4 border-indigo-500">
+          <div className="p-3 bg-indigo-500/10 rounded-xl text-indigo-500">
+            <FlaskConical size={24} />
+          </div>
+          <div>
+            <p className="text-sm text-slate-500">{t('lab.totalTests')}</p>
+            <p className="text-2xl font-bold">{store.lab_tests.length}</p>
+          </div>
+        </div>
+        <div className="glass-card p-4 flex items-center gap-4 border-l-4 border-emerald-500">
+          <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-500">
+            <FlaskConical size={24} />
+          </div>
+          <div>
+            <p className="text-sm text-slate-500">{t('lab.resultsRecorded')}</p>
+            <p className="text-2xl font-bold">{results?.length || 0}</p>
+          </div>
+        </div>
+        <div className="glass-card p-4 flex items-center gap-4 border-l-4 border-red-500">
+          <div className="p-3 bg-red-500/10 rounded-xl text-red-500">
+            <AlertCircle size={24} />
+          </div>
+          <div>
+            <p className="text-sm text-slate-500">{t('lab.abnormalResults')}</p>
+            <p className="text-2xl font-bold text-red-500">{results?.filter(r => r.is_abnormal).length || 0}</p>
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-4 items-center p-4 glass-card">
-        <div className="flex-1 min-w-[200px]">
-          <label className="text-xs font-semibold mb-1.5 block" style={{ color: 'var(--text-muted)' }}>Filter by Patient</label>
-          <select value={selectedPatient} onChange={(e) => setSelectedPatient(e.target.value)} className="input-field text-sm">
-            <option value="">All Patients</option>
-            {store.patients.map(p => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}
-          </select>
-        </div>
-        <div className="flex-1 min-w-[200px]">
-          <label className="text-xs font-semibold mb-1.5 block" style={{ color: 'var(--text-muted)' }}>Filter by Test</label>
-          <select value={selectedTest} onChange={(e) => setSelectedTest(e.target.value)} className="input-field text-sm">
-            <option value="">All Tests</option>
-            {store.lab_tests.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-          </select>
-        </div>
-      </div>
-
-      {selectedTest && chartData.length > 1 && (
-        <div className="glass-card p-6">
-          <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-            <Activity size={16} className="text-indigo-500" />
-            {store.lab_tests.find(t => t.id === selectedTest)?.name} Trend
-          </h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-              <XAxis dataKey="date" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 11 }} />
-              <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '10px', fontSize: 12 }} />
-              <Line type="monotone" dataKey="value" stroke="var(--accent-primary)" strokeWidth={2} dot={{ r: 4, fill: 'var(--accent-primary)' }} activeDot={{ r: 6 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
-      <DataTable
+      <DataTable<LabTestResult>
         columns={columns}
-        data={results as unknown as Record<string, unknown>[]}
-        isLoading={testsLoading}
-        emptyMessage="No lab results matching filters"
+        data={results || []}
+        isLoading={isLoading}
+        searchPlaceholder={t('lab.searchPlaceholder')}
+        emptyMessage={t('lab.noResults')}
       />
 
-      {/* New Test Modal */}
-      <Modal isOpen={showTestForm} onClose={() => setShowTestForm(false)} title="Define New Lab Test" size="md">
-        <FormProvider {...testMethods}>
-          <form onSubmit={testMethods.handleSubmit(d => createTestMut.mutate(d))} className="space-y-4">
+      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title={t('lab.addResultTitle')} size="lg">
+        <FormProvider {...methods}>
+          <form onSubmit={methods.handleSubmit(d => createMut.mutate(d))} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <FormField name="name" label="Test Name" required />
-              <FormField name="code" label="Code" required />
-              <FormField name="category" label="Category" required />
-              <FormField name="unit" label="Unit" required />
-              <FormField name="normal_range_min" label="Normal Min" type="number" />
-              <FormField name="normal_range_max" label="Normal Max" type="number" />
+              <FormField name="patient_id" label={t('diagnoses.patient')} type="select" required options={store.patients.map(p => ({ value: p.patient_id, label: p.full_name }))} />
+              <FormField name="lab_test_id" label={t('lab.testName')} type="select" required options={store.lab_tests.map(t => ({ value: t.lab_test_id, label: `${t.test_name} (${t.category})` }))} />
+              <FormField name="test_date" label={t('lab.date')} type="datetime-local" required />
+              <FormField name="ordered_by" label={t('imaging.radiologist')} type="select" required options={store.doctors.map(d => ({ value: d.doctor_id, label: d.full_name }))} />
             </div>
-            <FormField name="description" label="Description" type="textarea" required />
-            <div className="flex justify-end pt-4"><button type="submit" className="gradient-btn px-6 py-2.5 text-sm">Define Test</button></div>
-          </form>
-        </FormProvider>
-      </Modal>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <FormField name="result_value" label={t('lab.resultValue')} required />
+              <div className="space-y-1.5 flex flex-col justify-end">
+                <label className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-2">
+                  <input type="checkbox" {...methods.register('is_abnormal')} className="rounded border-slate-300" />
+                  {t('common.status.low')} / {t('common.status.high')} (Is Abnormal)
+                </label>
+              </div>
+            </div>
 
-      {/* Add Result Modal */}
-      <Modal isOpen={showResultForm} onClose={() => setShowResultForm(false)} title="Add Lab Result" size="md">
-        <FormProvider {...resultMethods}>
-          <form onSubmit={resultMethods.handleSubmit(d => createResultMut.mutate(d))} className="space-y-4">
-            <FormField name="patient_id" label="Patient" type="select" required options={store.patients.map(p => ({ value: p.id, label: `${p.first_name} ${p.last_name}` }))} />
-            <FormField name="lab_test_id" label="Lab Test" type="select" required options={store.lab_tests.map(t => ({ value: t.id, label: t.name }))} />
-            <div className="grid grid-cols-2 gap-4">
-              <FormField name="value" label="Value" type="number" required />
-              <FormField name="date" label="Test Date" type="date" required />
-              <FormField name="status" label="Status" type="select" options={[
-                { value: 'normal', label: 'Normal' },
-                { value: 'low', label: 'Low' },
-                { value: 'high', label: 'High' },
-                { value: 'critical', label: 'Critical' },
-              ]} />
-            </div>
-            <FormField name="notes" label="Notes" type="textarea" />
-            <div className="flex justify-end pt-4"><button type="submit" className="gradient-btn px-6 py-2.5 text-sm">Save Result</button></div>
+            <FormField name="notes" label={t('common.notes')} type="textarea" />
+            <div className="flex justify-end pt-4"><button type="submit" className="gradient-btn px-6 py-2.5 text-sm">{t('lab.saveResult')}</button></div>
           </form>
         </FormProvider>
       </Modal>

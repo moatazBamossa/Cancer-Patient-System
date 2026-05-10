@@ -1,7 +1,8 @@
 import React, { Component, type ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { withTranslation, WithTranslation } from 'react-i18next';
 
-interface Props {
+interface Props extends WithTranslation {
   children: ReactNode;
   fallback?: ReactNode;
 }
@@ -11,7 +12,7 @@ interface State {
   error: Error | null;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundaryInternal extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -22,6 +23,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   render() {
+    const { t } = this.props;
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
 
@@ -32,17 +34,17 @@ export class ErrorBoundary extends Component<Props, State> {
               <AlertTriangle className="text-red-500" size={32} />
             </div>
             <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-              Something went wrong
+              {t('common.somethingWentWrong')}
             </h2>
             <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-              {this.state.error?.message || 'An unexpected error occurred'}
+              {this.state.error?.message || t('common.unexpectedError')}
             </p>
             <button
               onClick={() => this.setState({ hasError: false, error: null })}
               className="gradient-btn px-6 py-2.5 inline-flex items-center gap-2"
             >
               <RefreshCw size={16} />
-              Try Again
+              {t('common.tryAgain')}
             </button>
           </div>
         </div>
@@ -52,3 +54,5 @@ export class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
+
+export const ErrorBoundary = withTranslation()(ErrorBoundaryInternal);

@@ -24,19 +24,20 @@ export const diagnosisService = {
   async getById(id: string): Promise<Diagnosis> {
     return simulateApiCall(() => {
       const store = getDataStore();
-      const diagnosis = store.diagnoses.find((d) => d.id === id);
+      const diagnosis = store.diagnoses.find((d) => d.diagnosis_id === id);
       if (!diagnosis) throw new Error('Diagnosis not found');
       return diagnosis;
     });
   },
 
-  async create(data: Omit<Diagnosis, 'id' | 'created_at'>): Promise<Diagnosis> {
+  async create(data: Omit<Diagnosis, 'diagnosis_id' | 'created_at' | 'updated_at'>): Promise<Diagnosis> {
     return simulateApiCall(() => {
       const store = getDataStore();
       const diagnosis: Diagnosis = {
         ...data,
-        id: generateId('diag'),
+        diagnosis_id: generateId('diag'),
         created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
       store.diagnoses.push(diagnosis);
       return diagnosis;
@@ -46,10 +47,17 @@ export const diagnosisService = {
   async update(id: string, updates: Partial<Diagnosis>): Promise<Diagnosis> {
     return simulateApiCall(() => {
       const store = getDataStore();
-      const idx = store.diagnoses.findIndex((d) => d.id === id);
+      const idx = store.diagnoses.findIndex((d) => d.diagnosis_id === id);
       if (idx === -1) throw new Error('Diagnosis not found');
-      store.diagnoses[idx] = { ...store.diagnoses[idx], ...updates };
+      store.diagnoses[idx] = { ...store.diagnoses[idx], ...updates, updated_at: new Date().toISOString() };
       return store.diagnoses[idx];
+    });
+  },
+
+  async delete(id: string): Promise<void> {
+    return simulateApiCall(() => {
+      const store = getDataStore();
+      store.diagnoses = store.diagnoses.filter((d) => d.diagnosis_id !== id);
     });
   },
 
@@ -60,10 +68,10 @@ export const diagnosisService = {
     });
   },
 
-  async addStaging(data: Omit<Staging, 'id'>): Promise<Staging> {
+  async addStaging(data: Omit<Staging, 'staging_id' | 'created_at'>): Promise<Staging> {
     return simulateApiCall(() => {
       const store = getDataStore();
-      const staging: Staging = { ...data, id: generateId('stg') };
+      const staging: Staging = { ...data, staging_id: generateId('stg'), created_at: new Date().toISOString() };
       store.staging.push(staging);
       return staging;
     });
@@ -76,10 +84,10 @@ export const diagnosisService = {
     });
   },
 
-  async addDoctorHistory(data: Omit<DiagnosisDoctorHistory, 'id'>): Promise<DiagnosisDoctorHistory> {
+  async addDoctorHistory(data: Omit<DiagnosisDoctorHistory, 'history_id'>): Promise<DiagnosisDoctorHistory> {
     return simulateApiCall(() => {
       const store = getDataStore();
-      const history: DiagnosisDoctorHistory = { ...data, id: generateId('ddh') };
+      const history: DiagnosisDoctorHistory = { ...data, history_id: generateId('ddh') };
       store.diagnosis_doctor_history.push(history);
       return history;
     });
@@ -93,13 +101,12 @@ export const diagnosisService = {
     });
   },
 
-  async addCancerType(data: Omit<CancerType, 'id' | 'created_at'>): Promise<CancerType> {
+  async addCancerType(data: Omit<CancerType, 'cancer_id'>): Promise<CancerType> {
     return simulateApiCall(() => {
       const store = getDataStore();
       const ct: CancerType = {
         ...data,
-        id: generateId('ct'),
-        created_at: new Date().toISOString(),
+        cancer_id: generateId('ct'),
       };
       store.cancer_types.push(ct);
       return ct;
@@ -109,7 +116,7 @@ export const diagnosisService = {
   async updateCancerType(id: string, updates: Partial<CancerType>): Promise<CancerType> {
     return simulateApiCall(() => {
       const store = getDataStore();
-      const idx = store.cancer_types.findIndex((ct) => ct.id === id);
+      const idx = store.cancer_types.findIndex((ct) => ct.cancer_id === id);
       if (idx === -1) throw new Error('Cancer type not found');
       store.cancer_types[idx] = { ...store.cancer_types[idx], ...updates };
       return store.cancer_types[idx];
