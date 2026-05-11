@@ -23,6 +23,7 @@ const ClinicsPage = lazy(() => import('./features/doctors/ClinicsPage'));
 const VisitsPage = lazy(() => import('./features/doctors/VisitsPage'));
 const RolesPage = lazy(() => import('./features/roles/RolesPage'));
 const ProfilePage = lazy(() => import('./features/profile/ProfilePage'));
+const UpcomingVisitsPage = lazy(() => import('./features/doctors/UpcomingVisitsPage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,6 +61,7 @@ export default function App() {
                   <Route path="/visits" element={<VisitsPage />} />
                   <Route path="/roles" element={<RolesPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/upcoming-visits" element={<UpcomingVisitsPage />} />
                   
                   {/* Default redirect within AppLayout */}
                   <Route path="/" element={<Navigate to="/dashboard" replace />} />

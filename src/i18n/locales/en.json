@@ -58,6 +58,8 @@
     "color": "Color",
     "notes": "Notes",
     "title": "Title",
+    "email": "Email",
+    "phone": "Phone",
     "unknown": "Unknown",
     "showing": "Showing",
     "of": "of",
@@ -148,7 +150,11 @@
     "cycles": "Cycles",
     "cycle": "Cycle",
     "treatmentCycle": "Treatment Cycle",
-    "noTreatmentPlans": "No treatment plans"
+    "noTreatmentPlans": "No treatment plans",
+    "goal": "Treatment Goal",
+    "planType": "Plan Type",
+    "priority": "Priority",
+    "expectedEndDate": "Expected End Date"
   },
   "patients": {
     "gender": "Gender",
@@ -195,7 +201,9 @@
     "years": "years",
     "print": "Print",
     "saving": "Saving...",
-    "saveChanges": "Save Changes"
+    "saveChanges": "Save Changes",
+    "fullName": "Full Name",
+    "mobileNumber": "Mobile Number"
   },
   "patientDetails": {
     "overview": "Overview",
@@ -239,7 +247,9 @@
     "specialization": "Specialization",
     "qualification": "Qualification",
     "yearsExperience": "Years of Experience",
-    "yearsExp": "Years Experience"
+    "yearsExp": "Years Experience",
+    "fullName": "Full Name",
+    "licenseNumber": "License Number"
   },
   "clinics": {
     "title": "Clinics & Departments",
@@ -269,7 +279,12 @@
     "followUp": "Follow Up",
     "chemoSession": "Chemo Session",
     "searchPlaceholder": "Search visits...",
-    "noVisits": "No visits scheduled"
+    "noVisits": "No visits scheduled",
+    "reasonForVisit": "Reason for Visit",
+    "recommendations": "Recommendations",
+    "nextVisitDate": "Next Visit Date",
+    "routine": "Routine",
+    "postTreatment": "Post-treatment"
   },
   "vitals": {
     "title": "Vital Signs",
@@ -347,7 +362,12 @@
     "normal": "Normal",
     "low": "Low",
     "high": "High",
-    "critical": "Critical"
+    "critical": "Critical",
+    "totalTests": "Total Tests",
+    "resultsRecorded": "Results Recorded",
+    "abnormalResults": "Abnormal Results",
+    "date": "Date",
+    "resultValue": "Result Value"
   },
   "imaging": {
     "title": "Imaging Reports",
@@ -410,5 +430,19 @@
     "actions": "Actions",
     "noData": "No data found",
     "tryAdjusting": "Try adjusting your search or filters"
+  },
+  "upcomingVisits": {
+    "title": "Upcoming Visits",
+    "subtitle": "{{count}} patient scheduled in the next 2 days",
+    "subtitle_plural": "{{count}} patients scheduled in the next 2 days",
+    "visitsBadge": "{{count}} visit",
+    "visitsBadge_plural": "{{count}} visits",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "in2days": "In 2 days",
+    "view": "View",
+    "subtitle_full": "Detailed view of all patients scheduled in the next 48 hours.",
+    "keepTrack": "Stay Ahead of Schedule",
+    "trackDesc": "This page aggregates all urgent visits across the clinic to help you prepare for patient arrivals."
   }
 }

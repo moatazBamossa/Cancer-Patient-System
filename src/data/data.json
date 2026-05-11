@@ -7,7 +7,7 @@
     { "role_id": "role-5", "role_name": "Lab Technician" }
   ],
   "users": [
-    { "id": "user-1", "user_name": "admin", "password": "admin123", "full_name": "Sarah Mitchell", "role_id": "role-1", "specialty": "", "phone": "+1-555-0101", "is_active": true, "created_at": "2024-01-15T08:00:00Z", "updated_at": "2024-01-15T08:00:00Z" },
+    { "id": "user-1", "user_name": "1", "password": "1", "full_name": "Sarah Mitchell", "role_id": "role-1", "specialty": "", "phone": "+1-555-0101", "is_active": true, "created_at": "2024-01-15T08:00:00Z", "updated_at": "2024-01-15T08:00:00Z" },
     { "id": "user-2", "user_name": "dr.ahmed", "password": "doctor123", "full_name": "Dr. Ahmed Hassan", "role_id": "role-2", "specialty": "Medical Oncology", "phone": "+1-555-0102", "is_active": true, "created_at": "2024-02-01T08:00:00Z", "updated_at": "2024-02-01T08:00:00Z" },
     { "id": "user-3", "user_name": "dr.smith", "password": "doctor123", "full_name": "Dr. Emily Smith", "role_id": "role-2", "specialty": "Surgical Oncology", "phone": "+1-555-0103", "is_active": true, "created_at": "2024-02-15T08:00:00Z", "updated_at": "2024-02-15T08:00:00Z" },
     { "id": "user-4", "user_name": "nurse.jones", "password": "nurse123", "full_name": "Lisa Jones", "role_id": "role-3", "specialty": "", "phone": "+1-555-0104", "is_active": true, "created_at": "2024-03-01T08:00:00Z", "updated_at": "2024-03-01T08:00:00Z" },
