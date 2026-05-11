@@ -58,6 +58,8 @@
     "color": "اللون",
     "notes": "ملاحظات",
     "title": "العنوان",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
     "unknown": "غير معروف",
     "showing": "عرض",
     "of": "من",
@@ -148,7 +150,11 @@
     "cycles": "الدورات",
     "cycle": "دورة",
     "treatmentCycle": "دورة العلاج",
-    "noTreatmentPlans": "لا توجد خطط علاج"
+    "noTreatmentPlans": "لا توجد خطط علاج",
+    "goal": "هدف العلاج",
+    "planType": "نوع الخطة",
+    "priority": "الأولوية",
+    "expectedEndDate": "تاريخ الانتهاء المتوقع"
   },
   "patients": {
     "gender": "الجنس",
@@ -195,7 +201,9 @@
     "years": "سنة",
     "print": "طباعة",
     "saving": "جاري الحفظ...",
-    "saveChanges": "حفظ التغييرات"
+    "saveChanges": "حفظ التغييرات",
+    "fullName": "الاسم الكامل",
+    "mobileNumber": "رقم الجوال"
   },
   "patientDetails": {
     "overview": "نظرة عامة",
@@ -239,7 +247,9 @@
     "specialization": "التخصص",
     "qualification": "المؤهل",
     "yearsExperience": "سنوات الخبرة",
-    "yearsExp": "سنوات خبرة"
+    "yearsExp": "سنوات خبرة",
+    "fullName": "الاسم الكامل",
+    "licenseNumber": "رقم الترخيص"
   },
   "clinics": {
     "title": "العيادات والأقسام",
@@ -269,7 +279,12 @@
     "followUp": "متابعة",
     "chemoSession": "جلسة كيميائي",
     "searchPlaceholder": "بحث في الزيارات...",
-    "noVisits": "لا توجد زيارات مجدولة"
+    "noVisits": "لا توجد زيارات مجدولة",
+    "reasonForVisit": "سبب الزيارة",
+    "recommendations": "التوصيات",
+    "nextVisitDate": "تاريخ الزيارة القادمة",
+    "routine": "روتينية",
+    "postTreatment": "ما بعد العلاج"
   },
   "vitals": {
     "title": "العلامات الحيوية",
@@ -347,7 +362,12 @@
     "normal": "طبيعي",
     "low": "منخفض",
     "high": "مرتفع",
-    "critical": "حرج"
+    "critical": "حرج",
+    "totalTests": "إجمالي الفحوصات",
+    "resultsRecorded": "النتائج المسجلة",
+    "abnormalResults": "النتائج غير الطبيعية",
+    "date": "التاريخ",
+    "resultValue": "قيمة النتيجة"
   },
   "imaging": {
     "title": "تقارير الأشعة",
@@ -410,5 +430,19 @@
     "actions": "الإجراءات",
     "noData": "لا توجد بيانات",
     "tryAdjusting": "حاول تعديل البحث أو الفلاتر"
+  },
+  "upcomingVisits": {
+    "title": "الزيارات القادمة",
+    "subtitle": "{{count}} مريض مجدول في اليومين القادمين",
+    "subtitle_plural": "{{count}} مرضى مجدولين في اليومين القادمين",
+    "visitsBadge": "{{count}} زيارة",
+    "visitsBadge_plural": "{{count}} زيارات",
+    "today": "اليوم",
+    "tomorrow": "غداً",
+    "in2days": "بعد يومين",
+    "view": "عرض",
+    "subtitle_full": "عرض مفصل لجميع المرضى المقرر حضورهم خلال الـ 48 ساعة القادمة.",
+    "keepTrack": "ابق على اطلاع بجدولك",
+    "trackDesc": "تجمع هذه الصفحة جميع الزيارات العاجلة في العيادة لمساعدتك في الاستعداد لوصول المرضى."
   }
 }

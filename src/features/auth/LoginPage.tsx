@@ -162,7 +162,7 @@ export default function LoginPage() {
           </p>
           <div className="space-y-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
             <p>
-              <span className="font-medium">{t('common.admin')}:</span> admin / admin123
+              <span className="font-medium">{t('common.admin')}:</span> 1 / 1
             </p>
             <p>
               <span className="font-medium">{t('common.doctor')}:</span> dr.ahmed / doctor123

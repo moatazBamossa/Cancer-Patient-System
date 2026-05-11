@@ -15,6 +15,7 @@ import { formatDateTime } from '../../lib/utils';
 import { useAuthStore } from '../../stores/authStore';
 import { PageSkeleton } from '../../components/ui/Skeleton';
 import { useTranslation } from 'react-i18next';
+import UpcomingVisitsAlert from './UpcomingVisitsAlert';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -84,6 +85,8 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      <UpcomingVisitsAlert onViewPatient={(id) => navigate(`/patients/${id}`)} />
+
       {/* Header */}
       <div>
         <motion.h1

@@ -13,6 +13,7 @@ import { cn, getInitials } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 import { PageSkeleton } from '../ui/Skeleton';
+import { getUpcomingVisits } from '../../lib/visit-notifications';
 
 const navigation = [
   { name: 'dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -129,6 +130,7 @@ export function AppLayout() {
   const navigate = useNavigate();
 
   const isRtl = i18n.language === 'ar';
+  const upcomingCount = getUpcomingVisits().length;
 
   const handleLogout = useCallback(() => {
     logout();
@@ -224,11 +226,14 @@ export function AppLayout() {
             </button>
 
             <button
+              onClick={() => navigate('/upcoming-visits')}
               className="p-2 rounded-lg relative transition-colors"
               style={{ color: 'var(--text-muted)', background: 'var(--bg-tertiary)' }}
             >
               <Bell size={18} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
+              {upcomingCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
+              )}
             </button>
 
             <div
