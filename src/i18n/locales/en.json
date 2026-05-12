@@ -14,6 +14,7 @@
     "clinics": "Clinics",
     "visits": "Visits",
     "roles": "Roles",
+    "addUsers": "Add Users",
     "profile": "Profile",
     "logout": "Logout",
     "settings": "Settings",
@@ -154,7 +155,8 @@
     "goal": "Treatment Goal",
     "planType": "Plan Type",
     "priority": "Priority",
-    "expectedEndDate": "Expected End Date"
+    "expectedEndDate": "Expected End Date",
+    "totalCycles": "Total Cycles"
   },
   "patients": {
     "gender": "Gender",
@@ -430,6 +432,62 @@
     "actions": "Actions",
     "noData": "No data found",
     "tryAdjusting": "Try adjusting your search or filters"
+  },
+  "addUsers": {
+    "title": "Add New User",
+    "subtitle": "Create a new system user account",
+    "fullName": "Full Name",
+    "username": "Username",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "email": "Email",
+    "phone": "Phone",
+    "role": "Role",
+    "specialty": "Specialty",
+    "activeAccount": "Active User Account",
+    "reset": "Reset",
+    "createUser": "Create User",
+    "recentUsers": "Recent Users",
+    "noUsers": "No users created yet",
+    "status": "Status",
+    "created": "Created",
+    "active": "Active",
+    "inactive": "Inactive",
+    "successMessage": "User \"{{name}}\" has been created successfully!",
+    "errorMessage": "Failed to create user. Please try again.",
+    "validation": {
+      "nameMin": "Full name must be at least 3 characters",
+      "nameMax": "Full name must not exceed 100 characters",
+      "usernameMin": "Username must be at least 4 characters",
+      "usernameMax": "Username must not exceed 50 characters",
+      "usernameFormat": "Username can only contain letters, numbers, and underscores",
+      "usernameTaken": "Username already taken",
+      "passwordMin": "Password must be at least 8 characters",
+      "passwordUpper": "Password must contain at least one uppercase letter",
+      "passwordNumber": "Password must contain at least one number",
+      "passwordSpecial": "Password must contain at least one special character (!@#$%^&*...)",
+      "passwordMatch": "Passwords do not match",
+      "emailFormat": "Invalid email format",
+      "phoneFormat": "Invalid phone number format",
+      "specialtyRequired": "Specialty is required for Doctors and Radiologists"
+    },
+    "passwordStrength": {
+      "noPassword": "No password",
+      "weak": "Weak",
+      "fair": "Fair",
+      "good": "Good",
+      "strong": "Strong",
+      "veryStrong": "Very Strong"
+    },
+    "placeholders": {
+      "fullName": "e.g. Dr. Mohammed Saleh",
+      "username": "e.g. dr_mohammed",
+      "password": "Min 8 chars, 1 uppercase, 1 number, 1 special...",
+      "confirmPassword": "Re-enter password",
+      "email": "user@example.com",
+      "phone": "0501234567",
+      "specialty": "e.g. Oncology, Surgery"
+    }
   },
   "upcomingVisits": {
     "title": "Upcoming Visits",

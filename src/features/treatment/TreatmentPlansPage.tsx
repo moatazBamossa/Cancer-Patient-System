@@ -108,12 +108,12 @@ export default function TreatmentPlansPage() {
               <FormField name="protocol_name" label={t('common.title')} required />
               <FormField name="diagnosis_id" label={t('treatment.diagnosis')} type="select" required options={diagnoses.map((d) => ({ value: d.diagnosis_id, label: `${d.diagnosis_id} - ${formatDate(d.diagnosis_date)}` }))} />
               <FormField name="treating_doctor_id" label={t('diagnoses.doctor')} type="select" required options={doctors.map((d) => ({ value: d.doctor_id, label: `${t('common.doctorPrefix')} ${d.full_name}` }))} />
-              <FormField name="plan_type" label="Plan Type" type="select" required options={[{ value: 'Chemotherapy', label: 'Chemotherapy' }, { value: 'Radiation', label: 'Radiation' }, { value: 'Surgery', label: 'Surgery' }, { value: 'Palliative', label: 'Palliative' }]} />
-              <FormField name="treatment_goal" label="Treatment Goal" type="select" required options={[{ value: 'Curative', label: 'Curative' }, { value: 'Palliative', label: 'Palliative' }, { value: 'Preventive', label: 'Preventive' }]} />
-              <FormField name="priority" label="Priority" type="select" required options={[{ value: 'urgent', label: 'Urgent' }, { value: 'high', label: 'High' }, { value: 'normal', label: 'Normal' }]} />
-              <FormField name="total_cycles" label="Total Cycles" type="number" required />
+              <FormField name="plan_type" label={t('treatment.planType')} type="select" required options={[{ value: 'Chemotherapy', label: 'Chemotherapy' }, { value: 'Radiation', label: 'Radiation' }, { value: 'Surgery', label: 'Surgery' }, { value: 'Palliative', label: 'Palliative' }]} />
+              <FormField name="treatment_goal" label={t('treatment.goal')} type="select" required options={[{ value: 'Curative', label: 'Curative' }, { value: 'Palliative', label: 'Palliative' }, { value: 'Preventive', label: 'Preventive' }]} />
+              <FormField name="priority" label={t('treatment.priority')} type="select" required options={[{ value: 'urgent', label: 'Urgent' }, { value: 'high', label: 'High' }, { value: 'normal', label: 'Normal' }]} />
+              <FormField name="total_cycles" label={t('treatment.totalCycles')} type="number" required />
               <FormField name="start_date" label={t('treatment.startDate')} type="date" required />
-              <FormField name="expected_end_date" label="Expected End Date" type="date" required />
+              <FormField name="expected_end_date" label={t('treatment.expectedEndDate')} type="date" required />
               <FormField name="status" label={t('common.status.label')} type="select" options={[{ value: 'ongoing', label: 'Ongoing' }, { value: 'on-hold', label: 'On Hold' }]} />
             </div>
             <FormField name="notes" label={t('common.description')} type="textarea" />

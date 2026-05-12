@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Users, UserCog, Stethoscope, Activity,
   Pill, FlaskConical, ImageIcon, Building2, Calendar,
-  ShieldCheck, UserCircle, LogOut, ChevronLeft, ChevronRight,
+  ShieldCheck, UserCircle, LogOut, ChevronLeft, ChevronRight, UserPlus,
   Moon, Sun, Bell, Menu, X, Heart, Microscope, FileBarChart,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
@@ -29,6 +29,7 @@ const navigation = [
   { name: 'clinics', path: '/clinics', icon: Building2 },
   { name: 'visits', path: '/visits', icon: Calendar },
   { name: 'roles', path: '/roles', icon: ShieldCheck },
+  { name: 'addUsers', path: '/users/add', icon: UserPlus },
 ];
 
 interface SidebarContentProps {
