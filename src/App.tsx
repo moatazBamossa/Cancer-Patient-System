@@ -22,6 +22,7 @@ const DoctorsPage = lazy(() => import('./features/doctors/DoctorsPage'));
 const ClinicsPage = lazy(() => import('./features/doctors/ClinicsPage'));
 const VisitsPage = lazy(() => import('./features/doctors/VisitsPage'));
 const RolesPage = lazy(() => import('./features/roles/RolesPage'));
+const AddUsersPage = lazy(() => import('./features/users/AddUsersPage'));
 const ProfilePage = lazy(() => import('./features/profile/ProfilePage'));
 const UpcomingVisitsPage = lazy(() => import('./features/doctors/UpcomingVisitsPage'));
 
@@ -60,6 +61,7 @@ export default function App() {
                   <Route path="/clinics" element={<ClinicsPage />} />
                   <Route path="/visits" element={<VisitsPage />} />
                   <Route path="/roles" element={<RolesPage />} />
+                  <Route path="/users/add" element={<AddUsersPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/upcoming-visits" element={<UpcomingVisitsPage />} />
                   
