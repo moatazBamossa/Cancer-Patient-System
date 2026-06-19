@@ -1,49 +1,69 @@
-import type { LabTest, LabTestResult, ImagingReport, Role } from '../types';
+import type { LabTest, LabTestResult, Role } from '../types';
 import { getDataStore, simulateApiCall } from './mockApi';
 import { generateId } from '../lib/utils';
+import { supabase } from '../lib/supabaseClient';
+import { rpcCall } from '../utils/rpcCall';
 
 export const labService = {
   async getTests(): Promise<LabTest[]> {
-    return simulateApiCall(() => getDataStore().lab_tests);
+    const { data, error } = await supabase.from('lab_test').select('*');
+    if (error) throw new Error(error.message);
+    return (data as LabTest[]) ?? [];
   },
   async addTest(data: Omit<LabTest, 'lab_test_id'>): Promise<LabTest> {
-    return simulateApiCall(() => {
-      const store = getDataStore();
-      const test: LabTest = { ...data, lab_test_id: generateId('lt') };
-      store.lab_tests.push(test);
-      return test;
+    return rpcCall<LabTest>('lab_test_create', {
+      p_test_name: data.test_name,
+      p_category: data.category,
+      p_units: data.units,
+      p_normal_range: data.normal_range,
+      p_description: data.description,
     });
+  },
+  async updateTest(id: string, data: Omit<LabTest, 'lab_test_id'>): Promise<LabTest> {
+    return rpcCall<LabTest>('lab_test_update', {
+      p_lab_test_id: id,
+      p_test_name: data.test_name,
+      p_category: data.category,
+      p_units: data.units,
+      p_normal_range: data.normal_range,
+      p_description: data.description,
+    });
+  },
+  async getResults(): Promise<LabTestResult[]> {
+    const { data, error } = await supabase.from('lab_test_patient').select('*');
+    if (error) throw new Error(error.message);
+    return (data as LabTestResult[]) ?? [];
   },
   async getResultsByPatient(patientId: string): Promise<LabTestResult[]> {
-    return simulateApiCall(() =>
-      getDataStore().lab_test_results.filter((r) => r.patient_id === patientId)
-    );
+    const { data, error } = await supabase.from('lab_test_patient').select('*').eq('patient_id', patientId);
+    if (error) throw new Error(error.message);
+    return (data as LabTestResult[]) ?? [];
   },
   async addResult(data: Omit<LabTestResult, 'lab_test_patient_id'>): Promise<LabTestResult> {
-    return simulateApiCall(() => {
-      const store = getDataStore();
-      const result: LabTestResult = { ...data, lab_test_patient_id: generateId('ltr') };
-      store.lab_test_results.push(result);
-      return result;
+    return rpcCall<LabTestResult>('lab_test_patient_create', {
+      p_patient_id: data.patient_id,
+      p_lab_test_id: data.lab_test_id,
+      p_cycle_id: data.cycle_id,
+      p_visit_id: data.visit_id,
+      p_result_value: data.result_value,
+      p_is_abnormal: data.is_abnormal,
+      p_test_date: data.test_date,
+      p_ordered_by: data.ordered_by,
+      p_notes: data.notes ?? null,
     });
   },
-};
-
-export const imagingService = {
-  async getByPatient(patientId: string): Promise<ImagingReport[]> {
-    return simulateApiCall(() =>
-      getDataStore().imaging_reports.filter((r) => r.patient_id === patientId)
-    );
-  },
-  async getAll(): Promise<ImagingReport[]> {
-    return simulateApiCall(() => getDataStore().imaging_reports);
-  },
-  async create(data: Omit<ImagingReport, 'image_id' | 'created_at'>): Promise<ImagingReport> {
-    return simulateApiCall(() => {
-      const store = getDataStore();
-      const report: ImagingReport = { ...data, image_id: generateId('img'), created_at: new Date().toISOString() };
-      store.imaging_reports.push(report);
-      return report;
+  async updateResult(data: LabTestResult): Promise<LabTestResult> {
+    return rpcCall<LabTestResult>('lab_test_patient_update', {
+      p_lab_test_patient_id: data.lab_test_patient_id,
+      p_patient_id: data.patient_id,
+      p_lab_test_id: data.lab_test_id,
+      p_cycle_id: data.cycle_id,
+      p_visit_id: data.visit_id,
+      p_result_value: data.result_value,
+      p_is_abnormal: data.is_abnormal,
+      p_test_date: data.test_date,
+      p_ordered_by: data.ordered_by,
+      p_notes: data.notes ?? null,
     });
   },
 };

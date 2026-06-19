@@ -1,24 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm, FormProvider } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { Field } from 'react-final-form';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
 import { Activity, LogIn, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { authService } from '../../services/auth.service';
-import { useAuthStore } from '../../stores/authStore';
+import { AppForm } from '../../components/ui/AppForm';
 import { cn } from '../../lib/utils';
+import { getFieldError } from '../../lib/formUtils';
+import { zodValidator } from '../../lib/zodValidator';
 import { LanguageSwitcher } from '../../components/ui/LanguageSwitcher';
 import type { LoginCredentials } from '../../types';
+
+// Redux Integration
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { loginUser } from '../../store/slices/authSlice';
 
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const login = useAuthStore((s) => s.login);
+
+  // Redux Auth State
+  const dispatch = useAppDispatch();
+  const { loading: isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth);
 
   const isRtl = i18n.language === 'ar';
 
@@ -27,23 +32,17 @@ export default function LoginPage() {
     password: z.string().min(1, t('auth.passwordRequired', { defaultValue: 'Password is required' })),
   });
 
-  const methods = useForm<LoginCredentials>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { username: '', password: '' },
-  });
+  const loginInitialValues: LoginCredentials = { username: '', password: '' };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/welcome');
+    }
+  }, [isAuthenticated, navigate]);
 
   const onSubmit = async (data: LoginCredentials) => {
-    setError('');
-    setIsLoading(true);
-    try {
-      const { user, role } = await authService.login(data);
-      login(user, role);
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('auth.loginFailed'));
-    } finally {
-      setIsLoading(false);
-    }
+    // Redux Dispatch triggers the RPC and populates the store
+    dispatch(loginUser({ username: data.username, password: data.password }));
   };
 
   return (
@@ -94,66 +93,73 @@ export default function LoginPage() {
         )}
 
         {/* Form */}
-        <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-5">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
-                {t('auth.username')}
-              </label>
-              <input
-                {...methods.register('username')}
-                type="text"
-                placeholder={t('auth.enterUsername')}
-                className="input-field"
-                autoComplete="username"
-              />
-              {methods.formState.errors.username && (
-                <p className="text-xs text-red-500">{methods.formState.errors.username.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
-                {t('auth.password')}
-              </label>
-              <div className="relative">
+        <AppForm<LoginCredentials>
+          initialValues={loginInitialValues}
+          validate={zodValidator(loginSchema)}
+          onSubmit={onSubmit}
+          className="space-y-5"
+        >
+          <Field name="username">
+            {({ input, meta }) => (
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                  {t('auth.username')}
+                </label>
                 <input
-                  {...methods.register('password')}
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder={t('auth.enterPassword')}
-                  className={cn("input-field", isRtl ? "pl-10" : "pr-10")}
-                  autoComplete="current-password"
+                  {...input}
+                  type="text"
+                  placeholder={t('auth.enterUsername')}
+                  className="input-field"
+                  autoComplete="username"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className={cn("absolute top-1/2 -translate-y-1/2 p-1", isRtl ? "left-3" : "right-3")}
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
+                {getFieldError(meta) && <p className="text-xs text-red-500">{getFieldError(meta)}</p>}
               </div>
-              {methods.formState.errors.password && (
-                <p className="text-xs text-red-500">{methods.formState.errors.password.message}</p>
-              )}
-            </div>
+            )}
+          </Field>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="gradient-btn w-full py-3 flex items-center justify-center gap-2 text-sm disabled:opacity-60"
-            >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  <LogIn size={18} className={isRtl ? "rotate-180" : ""} />
-                  {t('auth.signIn')}
-                </>
-              )}
-            </button>
-          </form>
-        </FormProvider>
+          <Field name="password">
+            {({ input, meta }) => (
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                  {t('auth.password')}
+                </label>
+                <div className="relative">
+                  <input
+                    {...input}
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder={t('auth.enterPassword')}
+                    className={cn('input-field', isRtl ? 'pl-10' : 'pr-10')}
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className={cn('absolute top-1/2 -translate-y-1/2 p-1', isRtl ? 'left-3' : 'right-3')}
+                    style={{ color: 'var(--text-muted)' }}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                {getFieldError(meta) && <p className="text-xs text-red-500">{getFieldError(meta)}</p>}
+              </div>
+            )}
+          </Field>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="gradient-btn w-full py-3 flex items-center justify-center gap-2 text-sm disabled:opacity-60"
+          >
+            {isLoading ? (
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <>
+                <LogIn size={18} className={isRtl ? 'rotate-180' : ''} />
+                {t('auth.signIn')}
+              </>
+            )}
+          </button>
+        </AppForm>
 
         {/* Demo credentials */}
         <div className="mt-6 p-4 rounded-xl" style={{ background: 'var(--bg-tertiary)' }}>

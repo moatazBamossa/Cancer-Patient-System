@@ -4,9 +4,12 @@
 // ============================================================
 
 // ─── TABLE: roles ───────────────────────────────────────────
+import type { RolePermissions } from '../modules/roles/types';
+
 export interface Role {
   role_id: string;
   role_name: string;
+  permissions?: RolePermissions;
 }
 
 // ─── TABLE: user_profiles ───────────────────────────────────
@@ -21,6 +24,7 @@ export interface User {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  role_name?: string;
 }
 
 // ─── TABLE: patients ────────────────────────────────────────
@@ -59,7 +63,7 @@ export interface EmergencyContact {
 
 // ─── TABLE: cancer ──────────────────────────────────────────
 export interface CancerType {
-  cancer_id: string;
+  cancer_id: number;
   cancer_name: string;
   color: string;
   icd10_code: string;
@@ -79,6 +83,11 @@ export interface Diagnosis {
   status: DiagnosisStatus;
   created_at: string;
   updated_at: string;
+  // Resolved properties from RPCs
+  cancer_name?: string;
+  cancer_color?: string;
+  doctor_name?: string;
+  patient_name?: string;
 }
 
 // ─── TABLE: cancer_staging ──────────────────────────────────
@@ -118,6 +127,29 @@ export interface Clinic {
   created_at: string;
 }
 
+/** Clinic record returned by Supabase clinic RPCs. */
+export interface ClinicListItem {
+  clinic_id: number;
+  clinic_name: string;
+  address: string;
+  phone: string;
+  created_at: string;
+}
+
+export interface ClinicRpcPayload {
+  success: boolean;
+  message: string;
+  clinics?: ClinicListItem[];
+}
+
+export interface ClinicMutationPayload {
+  success: boolean;
+  message: string;
+  clinic?: ClinicListItem;
+}
+
+export type ClinicFormInput = Omit<Clinic, 'clinic_id' | 'created_at'>;
+
 // ─── TABLE: doctors ─────────────────────────────────────────
 export interface Doctor {
   doctor_id: string;
@@ -131,6 +163,37 @@ export interface Doctor {
   created_at: string;
   updated_at: string;
 }
+
+/** Doctor record returned by Supabase doctor RPCs (includes clinic name). */
+export interface DoctorListItem {
+  doctor_id: number;
+  full_name: string;
+  specialty: string;
+  clinic_id: number;
+  clinic_name: string;
+  license_number: string;
+  phone: string;
+  email: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DoctorRpcPayload {
+  success: boolean;
+  message: string;
+  doctors?: DoctorListItem[];
+}
+
+export interface DoctorMutationPayload {
+  success: boolean;
+  message: string;
+  doctor?: DoctorListItem;
+}
+
+export type DoctorFormInput = Omit<Doctor, 'doctor_id' | 'created_at' | 'updated_at'> & {
+  clinic_name?: string;
+};
 
 // ─── TABLE: medications ─────────────────────────────────────
 export type MedicationCategory = 'chemo' | 'hormonal' | 'supportive';
@@ -270,6 +333,62 @@ export interface ImagingReport {
   impression: string;
   imaging_date: string;
   created_at: string;
+  patient_name?: string;
+  radiologist_name?: string;
+}
+
+export interface ImagingReportRpcItem {
+  image_id: number | string;
+  patient_id: number | string;
+  diagnosis_id?: number | string | null;
+  ordered_by: number | string;
+  imaging_type: string | null;
+  body_part: string | null;
+  report_text?: string | null;
+  findings?: string | null;
+  impression?: string | null;
+  imaging_date?: string | null;
+  created_at?: string | null;
+  patient_name?: string | null;
+  radiologist_name?: string | null;
+}
+
+export interface ImagingReportsListPayload {
+  success?: boolean;
+  message?: string;
+  imaging_reports?: ImagingReportRpcItem[];
+}
+
+export interface ImagingReportMutationPayload {
+  success?: boolean;
+  message?: string;
+  imaging_report?: ImagingReportRpcItem;
+}
+
+export interface ImagingReportListFilters {
+  p_patient_id?: string | null;
+  p_diagnosis_id?: string | null;
+  p_doctors_id?: string | null;
+  p_imaging_type?: string | null;
+  p_from_date?: string | null;
+  p_to_date?: string | null;
+  p_search?: string | null;
+}
+
+export interface ImagingReportCreateInput {
+  p_patient_id: string;
+  p_diagnosis_id?: string | null;
+  p_doctors_id: string;
+  p_imaging_type: ImagingType;
+  p_body_part: string;
+  p_report_text?: string | null;
+  p_findings: string;
+  p_impression: string;
+  p_imaging_date: string;
+}
+
+export interface ImagingReportUpdateInput extends ImagingReportCreateInput {
+  p_image_id: string;
 }
 
 // ============================================================
@@ -297,6 +416,123 @@ export interface PaginationParams {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
+
+export interface PatientRpcResponse {
+  patient_list: {
+    message: string;
+    success: boolean;
+    patients: Patient[];
+  };
+}
+
+export type PatientDetailsRpcResponse = {
+  get_patient_details?: {
+    patient_id: number;
+    full_name: string | null;
+    national_id: string | null;
+    birth_date: string | null;
+    gender: string | null;
+    blood_type: string | null;
+    phone: string | null;
+    email: string | null;
+    address: string | null;
+    status: string | null;
+
+    contacts: Array<{
+      full_name: string | null;
+      relationship: string | null;
+      phone: string | null;
+      alt_phone: string | null;
+      notes: string | null;
+    }>;
+
+    diagnoses: Array<{
+      diagnosis_id: number;
+      diagnosis_date: string | null;
+      status: string | null;
+      notes: string | null;
+      cancer_name: string | null;
+      cancer_color: string | null;
+      doctor_name: string | null;
+    }>;
+
+    treatment_plans: Array<{
+      plan_id: number;
+      protocol_name: string | null;
+      start_date: string | null;
+      end_date: string | null;
+      status: string | null;
+      notes: string | null;
+      cycles: Array<{
+        cycle_id: number;
+        cycle_number: number | null;
+        status: string | null;
+        cycle_date: string | null;
+        side_effects: string | null;
+        progress_notes: string | null;
+        medications: Array<{
+          dose: number | null;
+          dose_unit: string | null;
+          route: string | null;
+          frequency: string | null;
+          name: string | null;
+          category: string | null;
+        }>;
+      }>;
+    }>;
+
+    vitals: Array<{
+      vital_id: number;
+      recorded_at: string | null;
+      temperature: number | null;
+      blood_pressure_sys: number | null;
+      blood_pressure_dia: number | null;
+      heart_rate: number | null;
+      respiratory_rate: number | null;
+      spo2: number | null;
+      weight_kg: number | null;
+      height_cm: number | null;
+      bmi: number | null;
+      notes: string | null;
+    }>;
+
+    lab_results: Array<{
+      lab_test_patient_id: number;
+      test_date: string | null;
+      result_value: string | null;
+      is_abnormal: boolean | null;
+      notes: string | null;
+      test_name: string | null;
+      units: string | null;
+      normal_range: string | null;
+    }>;
+
+    imaging_reports: Array<{
+      image_id: number;
+      imaging_type: string | null;
+      body_part: string | null;
+      imaging_date: string | null;
+      findings: string | null;
+      impression: string | null;
+      radiologist_name: string | null;
+    }>;
+
+    visits: Array<{
+      visit_id: number;
+      visit_date: string | null;
+      visit_type: string | null;
+      reason_for_visit: string | null;
+      clinical_notes: string | null;
+      recommendations: string | null;
+      next_visit_date: string | null;
+      doctor_name: string | null;
+      diagnosis_summary: {
+        cancer_name: string | null;
+        doctor_name: string | null;
+      } | null;
+    }>;
+  };
+};
 
 // ============================================================
 // Mock Data Store Shape
@@ -338,3 +574,5 @@ export interface LoginCredentials {
   username: string;
   password: string;
 }
+
+export * from './user-profile';

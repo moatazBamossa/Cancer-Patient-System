@@ -142,6 +142,17 @@ body {
     transform: translateY(0);
   }
 
+  .gradient-disabled-btn {
+    background: var(--sidebar-active);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: not-allowed;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(44, 45, 91, 0.35);
+  }
+
   .input-field {
     width: 100%;
     padding: 10px 14px;

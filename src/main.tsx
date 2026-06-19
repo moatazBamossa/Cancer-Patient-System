@@ -4,8 +4,13 @@ import App from './App';
 import './index.css';
 import './i18n/config';
 
+import { Provider } from 'react-redux';
+import { store } from './store';
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+      <App />
+    </Provider>
   </React.StrictMode>
 );

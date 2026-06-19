@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { UserCircle, Phone, ShieldCheck, Key } from 'lucide-react';
-import { useForm, FormProvider } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { useAuthStore } from '../../stores/authStore';
+import { useAppSelector } from '../../store/hooks';
+import { AppForm } from '../../components/ui/AppForm';
 import { FormField } from '../../components/ui/FormField';
+import { zodValidator } from '../../lib/zodValidator';
 import { formatDate } from '../../lib/utils';
 
 export default function ProfilePage() {
   const { t } = useTranslation();
-  const { user, role } = useAuthStore();
+  const { user, role } = useAppSelector(state => state.auth);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const profileSchema = z.object({
@@ -22,10 +22,10 @@ export default function ProfilePage() {
 
   type ProfileForm = z.infer<typeof profileSchema>;
 
-  const methods = useForm<ProfileForm>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: { full_name: user?.full_name || '', phone: user?.phone || '' },
-  });
+  const profileInitialValues: ProfileForm = {
+    full_name: user?.full_name || '',
+    phone: user?.phone || '',
+  };
 
   const onSubmit = async (data: ProfileForm) => {
     setIsUpdating(true);
@@ -69,23 +69,27 @@ export default function ProfilePage() {
           <h2 className="text-lg font-bold mb-6 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
             <UserCircle size={20} className="text-indigo-500" /> {t('profile.accountDetails')}
           </h2>
-          <FormProvider {...methods}>
-            <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField name="full_name" label={t('profile.fullName')} required />
-                <div className="space-y-1.5 opacity-50 cursor-not-allowed">
-                  <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{t('profile.username')}</label>
-                  <input type="text" value={user.user_name} disabled className="input-field cursor-not-allowed" />
-                </div>
-                <FormField name="phone" label={t('profile.phone')} required />
+          <AppForm<ProfileForm>
+            formKey={user.id}
+            initialValues={profileInitialValues}
+            validate={zodValidator(profileSchema)}
+            onSubmit={onSubmit}
+            className="space-y-4"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField name="full_name" label={t('profile.fullName')} required />
+              <div className="space-y-1.5 opacity-50 cursor-not-allowed">
+                <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{t('profile.username')}</label>
+                <input type="text" value={user.user_name} disabled className="input-field cursor-not-allowed" />
               </div>
-              <div className="flex justify-end pt-4">
-                <button type="submit" disabled={isUpdating} className="gradient-btn px-6 py-2.5 text-sm disabled:opacity-50">
-                  {isUpdating ? t('profile.saving') : t('profile.saveChanges')}
-                </button>
-              </div>
-            </form>
-          </FormProvider>
+              <FormField name="phone" label={t('profile.phone')} required />
+            </div>
+            <div className="flex justify-end pt-4">
+              <button type="submit" disabled={isUpdating} className="gradient-btn px-6 py-2.5 text-sm disabled:opacity-50">
+                {isUpdating ? t('profile.saving') : t('profile.saveChanges')}
+              </button>
+            </div>
+          </AppForm>
         </div>
 
         <div className="space-y-6">
