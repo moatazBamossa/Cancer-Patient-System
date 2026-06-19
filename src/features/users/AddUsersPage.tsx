@@ -1,581 +1,638 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Field } from 'react-final-form';
 import { useTranslation } from 'react-i18next';
-import { Eye, EyeOff, CheckCircle2, XCircle, UserPlus, X } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { Plus, Eye, Edit2, Trash2, Search, X } from 'lucide-react';
+import { AppForm } from '../../components/ui/AppForm';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { FormField } from '../../components/ui/FormField';
+import { Modal } from '../../components/ui/Modal';
+import { StatusBadge } from '../../components/ui/StatusBadge';
+import { DataTable, type Column } from '../../components/ui/DataTable';
+import { z } from 'zod';
+import { zodValidator } from '../../lib/zodValidator';
+import { useRolesQuery } from '../../modules/roles/hooks/role.hooks';
+import {
+  useCreateUserProfileMutation,
+  useDeleteUserProfileMutation,
+  useUpdateUserProfileMutation,
+  useUserProfilesQuery,
+} from '../../hooks/useUserProfiles';
+import type { UserProfile } from '../../utils/user-profile-normalizers';
+import type { CreateUserProfileParams, UpdateUserProfileParams } from '../../types/user-profile';
 
-// Mock roles (from roles table)
-const MOCK_ROLES = [
-  { role_id: 1, role_name: 'Admin' },
-  { role_id: 2, role_name: 'Doctor' },
-  { role_id: 3, role_name: 'Nurse' },
-  { role_id: 4, role_name: 'Lab Technician' },
-  { role_id: 5, role_name: 'Radiologist' }
-];
+const phoneSchema = z
+  .union([
+    z
+      .string()
+      .regex(/^[\d\s\-\+\(\)]+$/, 'Invalid phone number')
+      .refine((value) => !value || value.replace(/\D/g, '').length >= 9, 'Invalid phone number'),
+    z.literal(''),
+    z.undefined(),
+  ])
+  .optional();
 
-// Mock existing users (to show in list and check uniqueness)
-const MOCK_EXISTING_USERS = [
-  {
-    id: '550e8400-e29b-41d4-a716-446655440001',
-    full_name: 'Ahmed Al-Rashidi',
-    user_name: 'ahmed_rashidi',
-    role_id: 1,
-    role_name: 'Admin',
-    specialty: null,
-    phone: '0501234567',
-    is_active: true,
-    created_at: '2024-01-15T10:30:00Z'
-  },
-  {
-    id: '550e8400-e29b-41d4-a716-446655440002',
-    full_name: 'Dr. Mohammed Saleh',
-    user_name: 'dr_mohammed',
-    role_id: 2,
-    role_name: 'Doctor',
-    specialty: 'Oncology',
-    phone: '0502345678',
-    is_active: true,
-    created_at: '2024-01-20T14:15:00Z'
-  },
-  {
-    id: '550e8400-e29b-41d4-a716-446655440003',
-    full_name: 'Sara Hassan',
-    user_name: 'sara_hassan',
-    role_id: 3,
-    role_name: 'Nurse',
-    specialty: null,
-    phone: '0503456789',
-    is_active: true,
-    created_at: '2024-02-05T09:00:00Z'
-  }
-];
+const createUserSchema = z
+  .object({
+    full_name: z.string().min(3, 'Full name must be at least 3 characters').max(100),
+    user_name: z.string().min(4, 'Username must be at least 4 characters').max(50).regex(/^[a-zA-Z0-9_]+$/, 'Username may only contain letters, numbers and underscores'),
+    password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .regex(/[A-Z]/, 'Password must contain an uppercase letter')
+      .regex(/[0-9]/, 'Password must contain a number')
+      .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, 'Password must contain a special character'),
+    confirm_password: z.string(),
+    phone: phoneSchema,
+    role_id: z.number().nullable().optional(),
+    specialty: z.string().optional(),
+    is_active: z.boolean().default(true),
+  })
+  .refine((data) => data.password === data.confirm_password, {
+    message: 'Passwords do not match',
+    path: ['confirm_password'],
+  });
 
-// Validations
-const validateFullName = (name: string) => {
-  if (!name || name.trim().length < 3) return 'addUsers.validation.nameMin';
-  if (name.length > 100) return 'addUsers.validation.nameMax';
-  return null;
-};
+const editUserSchema = z
+  .object({
+    full_name: z.string().min(3, 'Full name must be at least 3 characters').max(100),
+    user_name: z.string().min(4, 'Username must be at least 4 characters').max(50).regex(/^[a-zA-Z0-9_]+$/, 'Username may only contain letters, numbers and underscores'),
+    password: z.string().optional(),
+    confirm_password: z.string().optional(),
+    phone: phoneSchema,
+    role_id: z.number().nullable().optional(),
+    specialty: z.string().optional(),
+    is_active: z.boolean().default(true),
+  })
+  .superRefine((data, ctx) => {
+    const password = data.password?.trim();
+    const confirmPassword = data.confirm_password?.trim();
 
-const validateUsername = (username: string) => {
-  if (!username || username.length < 4) return 'addUsers.validation.usernameMin';
-  if (username.length > 50) return 'addUsers.validation.usernameMax';
-  if (!/^[a-zA-Z0-9_]+$/.test(username)) return 'addUsers.validation.usernameFormat';
-  const exists = MOCK_EXISTING_USERS.some(u => u.user_name.toLowerCase() === username.toLowerCase());
-  if (exists) return 'addUsers.validation.usernameTaken';
-  return null;
-};
+    if (password || confirmPassword) {
+      if (!password) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Password is required', path: ['password'] });
+      }
+      if (!confirmPassword) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Please confirm the password', path: ['confirm_password'] });
+      }
+      if (password && password.length < 8) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Password must be at least 8 characters', path: ['password'] });
+      }
+      if (password && !/[A-Z]/.test(password)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Password must contain an uppercase letter', path: ['password'] });
+      }
+      if (password && !/[0-9]/.test(password)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Password must contain a number', path: ['password'] });
+      }
+      if (password && !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Password must contain a special character', path: ['password'] });
+      }
+      if (password && confirmPassword && password !== confirmPassword) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Passwords do not match', path: ['confirm_password'] });
+      }
+    }
+  });
 
-const validatePassword = (password: string) => {
-  if (!password || password.length < 8) return 'addUsers.validation.passwordMin';
-  if (!/[A-Z]/.test(password)) return 'addUsers.validation.passwordUpper';
-  if (!/[0-9]/.test(password)) return 'addUsers.validation.passwordNumber';
-  if (!/[!@#$%^&*()_+\-\=\[\]{};':"\\|,.<>\/?]/.test(password))
-    return 'addUsers.validation.passwordSpecial';
-  return null;
-};
+type CreateUserFormValues = z.infer<typeof createUserSchema>;
+type EditUserFormValues = z.infer<typeof editUserSchema>;
 
-const validatePasswordMatch = (password: string, confirmPassword: string) => {
-  if (password !== confirmPassword) return 'addUsers.validation.passwordMatch';
-  return null;
-};
-
-const validateEmail = (email: string) => {
-  if (!email) return null;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) return 'addUsers.validation.emailFormat';
-  return null;
-};
-
-const validatePhone = (phone: string) => {
-  if (!phone) return null;
-  const phoneRegex = /^[\d\s\-\+\(\)]+$/;
-  if (!phoneRegex.test(phone) || phone.replace(/\D/g, '').length < 9)
-    return 'addUsers.validation.phoneFormat';
-  return null;
-};
-
-const getPasswordStrength = (password: string) => {
-  let strength = 0;
-  if (!password) return { level: 0, labelKey: 'addUsers.passwordStrength.noPassword', color: 'bg-gray-200', text: 'text-gray-500' };
-
-  if (password.length >= 8) strength++;
-  if (/[a-z]/.test(password)) strength++;
-  if (/[A-Z]/.test(password)) strength++;
-  if (/[0-9]/.test(password)) strength++;
-  if (/[!@#$%^&*()_+\-\=\[\]{};':"\\|,.<>\/?]/.test(password)) strength++;
-
-  const levels = [
-    { level: 0, labelKey: 'addUsers.passwordStrength.noPassword', color: 'bg-gray-200', text: 'text-gray-500' },
-    { level: 1, labelKey: 'addUsers.passwordStrength.weak', color: 'bg-red-500', text: 'text-red-500' },
-    { level: 2, labelKey: 'addUsers.passwordStrength.fair', color: 'bg-orange-500', text: 'text-orange-500' },
-    { level: 3, labelKey: 'addUsers.passwordStrength.good', color: 'bg-yellow-500', text: 'text-yellow-600' },
-    { level: 4, labelKey: 'addUsers.passwordStrength.strong', color: 'bg-green-500', text: 'text-green-500' },
-    { level: 5, labelKey: 'addUsers.passwordStrength.veryStrong', color: 'bg-green-600', text: 'text-green-600' }
-  ];
-  return levels[strength];
-};
+type StatusFilter = 'all' | 'active' | 'inactive';
 
 export default function AddUsersPage() {
   const { t } = useTranslation();
+  const { data: roles = [], isLoading: rolesLoading } = useRolesQuery();
+  const {
+    data: profiles = [],
+    isLoading: usersLoading,
+    error: usersError,
+  } = useUserProfilesQuery();
 
-  const [formData, setFormData] = useState({
+  const createMutation = useCreateUserProfileMutation();
+  const updateMutation = useUpdateUserProfileMutation();
+  const deleteMutation = useDeleteUserProfileMutation();
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState<number | null>(null);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [sortKey, setSortKey] = useState<string>('full_name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [detailsUser, setDetailsUser] = useState<UserProfile | null>(null);
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [generalError, setGeneralError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(searchQuery.trim()), 300);
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, roleFilter, statusFilter]);
+
+  const rolesMap = useMemo(() => new Map(roles.map((role) => [role.role_id, role.role_name])), [roles]);
+  const roleOptions = useMemo(
+    () => roles.map((role) => ({ value: String(role.role_id), label: role.role_name })),
+    [roles],
+  );
+
+  const filteredProfiles = useMemo(() => {
+    return profiles
+      .filter((profile) => {
+        const matchesSearch = [profile.full_name, profile.user_name, profile.phone ?? '']
+          .join(' ')
+          .toLowerCase()
+          .includes(debouncedSearch.toLowerCase());
+
+        const matchesRole = roleFilter == null || profile.role_id === roleFilter;
+        const matchesStatus =
+          statusFilter === 'all' ||
+          (statusFilter === 'active' ? profile.is_active === true : profile.is_active === false);
+
+        return matchesSearch && matchesRole && matchesStatus;
+      })
+      .sort((a, b) => {
+        const aValue = (a as any)[sortKey];
+        const bValue = (b as any)[sortKey];
+
+        if (aValue == null && bValue == null) return 0;
+        if (aValue == null) return 1;
+        if (bValue == null) return -1;
+
+        const compareValue = sortKey === 'created_at' ? new Date(aValue).getTime() - new Date(bValue).getTime() : String(aValue).localeCompare(String(bValue), undefined, { numeric: true });
+        return sortOrder === 'asc' ? compareValue : -compareValue;
+      });
+  }, [profiles, debouncedSearch, roleFilter, statusFilter, sortKey, sortOrder]);
+
+  const totalItems = filteredProfiles.length;
+  const pageCount = Math.max(1, Math.ceil(totalItems / pageSize));
+
+  useEffect(() => {
+    if (page > pageCount) {
+      setPage(pageCount);
+    }
+  }, [pageCount, page]);
+
+  const currentPageData = useMemo(
+    () => filteredProfiles.slice((page - 1) * pageSize, page * pageSize),
+    [filteredProfiles, page, pageSize],
+  );
+
+  const getRoleName = (roleId: number | null) => {
+    if (roleId == null) return 'Unassigned';
+    return rolesMap.get(roleId) ?? 'Unassigned';
+  };
+
+  const createUserValidationSchema = useMemo(() => {
+    const existingUserNames = new Set(profiles.map((profile) => profile.user_name.toLowerCase()));
+    return createUserSchema.refine((data) => !existingUserNames.has(data.user_name.toLowerCase()), {
+      message: 'Username is already taken',
+      path: ['user_name'],
+    });
+  }, [profiles]);
+
+  const editUserSchemaMemo = useMemo(() => {
+    return editUserSchema.superRefine((data, ctx) => {
+      const existingUserNames = profiles
+        .filter((profile) => profile.id !== editingUser?.id)
+        .map((profile) => profile.user_name.toLowerCase());
+
+      if (existingUserNames.includes(data.user_name.toLowerCase())) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Username is already taken', path: ['user_name'] });
+      }
+    });
+  }, [editingUser?.id, profiles]);
+
+  const initialCreateValues: CreateUserFormValues = {
     full_name: '',
     user_name: '',
     password: '',
     confirm_password: '',
-    email: '',
     phone: '',
-    role_id: 2,
+    role_id: undefined,
     specialty: '',
-    is_active: true
-  });
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [generalError, setGeneralError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [usersCreated, setUsersCreated] = useState<any[]>(MOCK_EXISTING_USERS.slice(0, 5));
-  const [successMessage, setSuccessMessage] = useState('');
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+    is_active: true,
   };
 
-  const handleUsernameBlur = () => {
-    const error = validateUsername(formData.user_name);
-    if (error) {
-      setErrors(prev => ({ ...prev, user_name: error }));
-    }
+  const editInitialValues: EditUserFormValues = {
+    full_name: editingUser?.full_name ?? '',
+    user_name: editingUser?.user_name ?? '',
+    password: '',
+    confirm_password: '',
+    phone: editingUser?.phone ?? '',
+    role_id: editingUser?.role_id ?? undefined,
+    specialty: editingUser?.specialty ?? '',
+    is_active: editingUser?.is_active ?? true,
   };
 
-  const handleReset = () => {
-    setFormData({
-      full_name: '',
-      user_name: '',
-      password: '',
-      confirm_password: '',
-      email: '',
-      phone: '',
-      role_id: 2,
-      specialty: '',
-      is_active: true
-    });
-    setErrors({});
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const clearMessages = () => {
     setGeneralError('');
     setSuccessMessage('');
+  };
 
-    const newErrors: Record<string, string | null> = {};
-    newErrors.full_name = validateFullName(formData.full_name);
-    newErrors.user_name = validateUsername(formData.user_name);
-    newErrors.password = validatePassword(formData.password);
-    newErrors.confirm_password = validatePasswordMatch(formData.password, formData.confirm_password);
-    newErrors.email = validateEmail(formData.email);
-    newErrors.phone = validatePhone(formData.phone);
-
-    if ([2, 5].includes(Number(formData.role_id)) && !formData.specialty.trim()) {
-      newErrors.specialty = 'addUsers.validation.specialtyRequired';
-    }
-
-    Object.keys(newErrors).forEach(key => newErrors[key] === null && delete newErrors[key]);
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors as Record<string, string>);
-      return;
-    }
-
-    setLoading(true);
+  const handleCreateSubmit = async (data: CreateUserFormValues, form: any) => {
+    clearMessages();
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      const newUser = {
-        id: 'uuid-' + Math.random().toString(36).substr(2, 9),
-        full_name: formData.full_name,
-        user_name: formData.user_name,
-        role_id: Number(formData.role_id),
-        role_name: MOCK_ROLES.find(r => r.role_id === Number(formData.role_id))?.role_name,
-        specialty: formData.specialty || null,
-        phone: formData.phone || null,
-        is_active: formData.is_active,
-        created_at: new Date().toISOString()
-      };
-
-      setUsersCreated(prev => [newUser, ...prev]);
-      setSuccessMessage(t('addUsers.successMessage', { name: formData.full_name }));
-
-      // Clear timer for success message
-      setTimeout(() => setSuccessMessage(''), 5000);
-      handleReset();
+      const id = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `user-${Date.now()}`;
+      await createMutation.mutateAsync({
+        id,
+        full_name: data.full_name,
+        user_name: data.user_name,
+        password: data.password,
+        role_id: data.role_id ?? null,
+        specialty: data.specialty?.trim() ? data.specialty.trim() : null,
+        phone: data.phone?.trim() ? data.phone.trim() : null,
+        is_active: data.is_active,
+      });
+      setSuccessMessage('User created successfully');
+      setCreateModalOpen(false);
+      form.restart();
     } catch (err) {
-      setGeneralError(t('addUsers.errorMessage'));
-    } finally {
-      setLoading(false);
+      setGeneralError(err instanceof Error ? err.message : 'Unable to create user');
     }
   };
 
-  const passwordStrength = getPasswordStrength(formData.password);
+  const handleUpdateSubmit = async (data: EditUserFormValues, form: any) => {
+    if (!editingUser) return;
+    clearMessages();
+
+    try {
+      const payload: UpdateUserProfileParams = { id: editingUser.id };
+      if (data.full_name !== editingUser.full_name) payload.full_name = data.full_name;
+      if (data.user_name !== editingUser.user_name) payload.user_name = data.user_name;
+      const normalizedRoleId = data.role_id ?? null;
+      if (normalizedRoleId !== editingUser.role_id) payload.role_id = normalizedRoleId;
+      const specialty = data.specialty?.trim() ? data.specialty.trim() : null;
+      if (specialty !== editingUser.specialty) payload.specialty = specialty;
+      const phone = data.phone?.trim() ? data.phone.trim() : null;
+      if (phone !== editingUser.phone) payload.phone = phone;
+      if (data.password?.trim()) payload.password = data.password.trim();
+      if (data.is_active !== editingUser.is_active) payload.is_active = data.is_active;
+
+      if (Object.keys(payload).length === 1) {
+        setSuccessMessage('No changes detected');
+        setEditingUser(null);
+        return;
+      }
+
+      await updateMutation.mutateAsync(payload);
+      setSuccessMessage('User updated successfully');
+      setEditingUser(null);
+      form.restart();
+    } catch (err) {
+      setGeneralError(err instanceof Error ? err.message : 'Unable to update user');
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteUserId) return;
+    clearMessages();
+
+    try {
+      await deleteMutation.mutateAsync({ id: deleteUserId });
+      setSuccessMessage('User deleted successfully');
+      setDeleteUserId(null);
+      setDeleteConfirmOpen(false);
+    } catch (err) {
+      setGeneralError(err instanceof Error ? err.message : 'Unable to delete user');
+    }
+  };
+
+  const columns: Column<UserProfile>[] = [
+    { key: 'full_name', header: 'Full Name', sortable: true },
+    { key: 'user_name', header: 'Username', sortable: true },
+    { key: 'phone', header: 'Phone', sortable: true },
+    {
+      key: 'role_id',
+      header: 'Role',
+      sortable: true,
+      render: (_value, row) => getRoleName(row.role_id),
+    },
+    { key: 'specialty', header: 'Specialty', sortable: true },
+    {
+      key: 'is_active',
+      header: 'Status',
+      render: (_value, row) => <StatusBadge status={row.is_active ? 'active' : 'inactive'} />,
+    },
+    {
+      key: 'created_at',
+      header: 'Created',
+      sortable: true,
+      render: (value) => new Date(String(value)).toLocaleDateString(),
+    },
+  ];
+
+  const actions = (row: UserProfile) => (
+    <div className="flex flex-wrap gap-2">
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          setDetailsUser(row);
+        }}
+        className="text-xs px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-100"
+      >
+        <Eye size={14} /> View
+      </button>
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          setEditingUser(row);
+        }}
+        className="text-xs px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-100"
+      >
+        <Edit2 size={14} /> Edit
+      </button>
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          setDeleteUserId(row.id);
+          setDeleteConfirmOpen(true);
+        }}
+        className="text-xs px-2 py-1 rounded-lg bg-red-500 text-white hover:bg-red-600"
+      >
+        <Trash2 size={14} /> Delete
+      </button>
+    </div>
+  );
 
   return (
-    <div className="space-y-6 max-w-[1200px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <header className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg"
-             style={{ background: 'var(--accent-gradient)' }}>
-          <UserPlus size={24} />
-        </div>
+    <div className="space-y-6 max-w-[1280px] mx-auto animate-in fade-in duration-500">
+      <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-            {t('addUsers.title')}
-          </h1>
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            {t('addUsers.subtitle')}
-          </p>
+          <h1 className="text-2xl font-bold">User Management</h1>
+          <p className="text-sm text-slate-500">Create, update, and manage application users with role and status controls.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setCreateModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+          >
+            <Plus size={16} /> Create User
+          </button>
         </div>
       </header>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Left Side: Form */}
-        <div className="flex-1 w-full lg:w-[60%]">
-          <div className="rounded-xl border shadow-sm p-6" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
-            
-            {successMessage && (
-              <div className="mb-6 p-4 rounded-lg bg-green-500/10 border border-green-500/20 flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="text-green-500 w-5 h-5 flex-shrink-0" />
-                  <p className="text-green-600 dark:text-green-400 font-medium text-sm">{successMessage}</p>
-                </div>
-                <button onClick={() => setSuccessMessage('')} className="text-green-500/70 hover:text-green-500">
-                  <X size={16} />
-                </button>
-              </div>
-            )}
+      {(generalError || successMessage || usersError) && (
+        <div className="space-y-3">
+          {successMessage && (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">
+              {successMessage}
+            </div>
+          )}
+          {generalError && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">
+              {generalError}
+            </div>
+          )}
+          {usersError && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900">
+              {usersError.message || 'Unable to load users.'}
+            </div>
+          )}
+        </div>
+      )}
 
-            {generalError && (
-              <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20 flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <XCircle className="text-red-500 w-5 h-5 flex-shrink-0" />
-                  <p className="text-red-600 dark:text-red-400 font-medium text-sm">{generalError}</p>
-                </div>
-                <button onClick={() => setGeneralError('')} className="text-red-500/70 hover:text-red-500">
-                  <X size={16} />
-                </button>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-5">
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-1.5 flex flex-col">
-                  <label htmlFor="full_name" className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                    {t('addUsers.fullName')} <span className="text-red-500">*</span>
-                  </label>
+      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="space-y-4">
+          <div className="rounded-xl border p-4 bg-white shadow-sm">
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="col-span-1 sm:col-span-2">
+                <label className="block text-sm font-medium text-slate-700">Search</label>
+                <div className="relative mt-1">
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
-                    id="full_name"
-                    type="text"
-                    name="full_name"
-                    value={formData.full_name}
-                    onChange={handleInputChange}
-                    placeholder={t('addUsers.placeholders.fullName')}
-                    className={cn(
-                      "w-full px-3 py-2 rounded-lg border bg-transparent outline-none transition-all focus:ring-2",
-                      errors.full_name ? "border-red-500 focus:ring-red-500/20" : "border-[var(--border-color)] focus:border-indigo-500 focus:ring-indigo-500/20"
-                    )}
-                    style={{ color: 'var(--text-primary)' }}
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Search full name, username or phone"
+                    className="input-field pl-10 w-full"
                   />
-                  {errors.full_name && <span className="text-xs text-red-500 mt-1">{t(errors.full_name)}</span>}
-                </div>
-
-                <div className="space-y-1.5 flex flex-col">
-                  <label htmlFor="user_name" className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                    {t('addUsers.username')} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="user_name"
-                    type="text"
-                    name="user_name"
-                    value={formData.user_name}
-                    onChange={handleInputChange}
-                    onBlur={handleUsernameBlur}
-                    placeholder={t('addUsers.placeholders.username')}
-                    className={cn(
-                      "w-full px-3 py-2 rounded-lg border bg-transparent outline-none transition-all focus:ring-2",
-                      errors.user_name ? "border-red-500 focus:ring-red-500/20" : "border-[var(--border-color)] focus:border-indigo-500 focus:ring-indigo-500/20"
-                    )}
-                    style={{ color: 'var(--text-primary)' }}
-                  />
-                  {errors.user_name && <span className="text-xs text-red-500 mt-1">{t(errors.user_name)}</span>}
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-1.5 flex flex-col">
-                  <label htmlFor="password" className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                    {t('addUsers.password')} <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      placeholder={t('addUsers.placeholders.password')}
-                      className={cn(
-                        "w-full px-3 py-2 pr-10 rounded-lg border bg-transparent outline-none transition-all focus:ring-2",
-                        errors.password ? "border-red-500 focus:ring-red-500/20" : "border-[var(--border-color)] focus:border-indigo-500 focus:ring-indigo-500/20"
-                      )}
-                      style={{ color: 'var(--text-primary)' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                  {errors.password && <span className="text-xs text-red-500 mt-1">{t(errors.password)}</span>}
-                  
-                  {formData.password && (
-                    <div className="mt-2 space-y-1">
-                      <div className="flex h-1.5 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-                        <div 
-                          className={cn("h-full transition-all duration-300", passwordStrength.color)} 
-                          style={{ width: `${(passwordStrength.level / 5) * 100}%` }}
-                        />
-                      </div>
-                      <span className={cn("text-xs font-medium", passwordStrength.text)}>
-                        {t(passwordStrength.labelKey)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-1.5 flex flex-col">
-                  <label htmlFor="confirm_password" className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                    {t('addUsers.confirmPassword')} <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="confirm_password"
-                      type={showPassword ? 'text' : 'password'}
-                      name="confirm_password"
-                      value={formData.confirm_password}
-                      onChange={handleInputChange}
-                      placeholder={t('addUsers.placeholders.confirmPassword')}
-                      className={cn(
-                        "w-full px-3 py-2 pr-10 rounded-lg border bg-transparent outline-none transition-all focus:ring-2",
-                        errors.confirm_password ? "border-red-500 focus:ring-red-500/20" : "border-[var(--border-color)] focus:border-indigo-500 focus:ring-indigo-500/20"
-                      )}
-                      style={{ color: 'var(--text-primary)' }}
-                    />
-                  </div>
-                  {errors.confirm_password && <span className="text-xs text-red-500 mt-1">{t(errors.confirm_password)}</span>}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-1.5 flex flex-col">
-                  <label htmlFor="email" className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                    {t('addUsers.email')}
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder={t('addUsers.placeholders.email')}
-                    className={cn(
-                      "w-full px-3 py-2 rounded-lg border bg-transparent outline-none transition-all focus:ring-2",
-                      errors.email ? "border-red-500 focus:ring-red-500/20" : "border-[var(--border-color)] focus:border-indigo-500 focus:ring-indigo-500/20"
-                    )}
-                    style={{ color: 'var(--text-primary)' }}
-                  />
-                  {errors.email && <span className="text-xs text-red-500 mt-1">{t(errors.email)}</span>}
-                </div>
-
-                <div className="space-y-1.5 flex flex-col">
-                  <label htmlFor="phone" className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                    {t('addUsers.phone')}
-                  </label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    placeholder={t('addUsers.placeholders.phone')}
-                    className={cn(
-                      "w-full px-3 py-2 rounded-lg border bg-transparent outline-none transition-all focus:ring-2",
-                      errors.phone ? "border-red-500 focus:ring-red-500/20" : "border-[var(--border-color)] focus:border-indigo-500 focus:ring-indigo-500/20"
-                    )}
-                    style={{ color: 'var(--text-primary)' }}
-                  />
-                  {errors.phone && <span className="text-xs text-red-500 mt-1">{t(errors.phone)}</span>}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-1.5 flex flex-col">
-                  <label htmlFor="role_id" className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                    {t('addUsers.role')} <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="role_id"
-                    name="role_id"
-                    value={formData.role_id}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-lg border bg-transparent outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 border-[var(--border-color)]"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
-                    {MOCK_ROLES.map(role => (
-                      <option key={role.role_id} value={role.role_id} className="bg-white dark:bg-slate-900 text-black dark:text-white">
-                        {/* Optionally localize role names if they are static keys, else use raw */}
-                        {t(`common.${role.role_name.toLowerCase()}`, { defaultValue: role.role_name }) as string}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Conditional Specialty */}
-                <div className={cn("space-y-1.5 flex flex-col transition-opacity", [2, 5].includes(Number(formData.role_id)) ? "opacity-100" : "opacity-0 pointer-events-none")}>
-                  {[2, 5].includes(Number(formData.role_id)) && (
-                    <>
-                      <label htmlFor="specialty" className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                        {t('addUsers.specialty')} <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        id="specialty"
-                        type="text"
-                        name="specialty"
-                        value={formData.specialty}
-                        onChange={handleInputChange}
-                        placeholder={t('addUsers.placeholders.specialty')}
-                        className={cn(
-                          "w-full px-3 py-2 rounded-lg border bg-transparent outline-none transition-all focus:ring-2",
-                          errors.specialty ? "border-red-500 focus:ring-red-500/20" : "border-[var(--border-color)] focus:border-indigo-500 focus:ring-indigo-500/20"
-                        )}
-                        style={{ color: 'var(--text-primary)' }}
-                      />
-                      {errors.specialty && <span className="text-xs text-red-500 mt-1">{t(errors.specialty)}</span>}
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Active Checkbox */}
-              <div className="flex items-center gap-2 pt-2">
-                <input
-                  id="is_active"
-                  type="checkbox"
-                  name="is_active"
-                  checked={formData.is_active}
-                  onChange={handleInputChange}
-                  className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 transition-all dark:border-gray-600"
-                />
-                <label htmlFor="is_active" className="text-sm font-medium cursor-pointer" style={{ color: 'var(--text-primary)' }}>
-                  {t('addUsers.activeAccount')}
-                </label>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center justify-end gap-3 pt-4 mt-6 border-t" style={{ borderColor: 'var(--border-color)' }}>
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="px-4 py-2 rounded-lg font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
-                  style={{ color: 'var(--text-primary)' }}
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Role</label>
+                <select
+                  value={roleFilter ?? ''}
+                  onChange={(event) => setRoleFilter(event.target.value ? Number(event.target.value) : null)}
+                  className="input-field w-full mt-1"
                 >
-                  {t('addUsers.reset')}
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-5 py-2 rounded-lg font-medium text-white transition-all shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]"
-                  style={{ background: 'var(--accent-gradient)' }}
-                >
-                  {loading ? (
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ) : (
-                    t('addUsers.createUser')
-                  )}
-                </button>
+                  <option value="">All roles</option>
+                  {roles.map((role) => (
+                    <option key={role.role_id} value={role.role_id}>
+                      {role.role_name}
+                    </option>
+                  ))}
+                </select>
               </div>
-            </form>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Status</label>
+                <select
+                  value={statusFilter}
+                  onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
+                  className="input-field w-full mt-1"
+                >
+                  <option value="all">All statuses</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border bg-white p-4 shadow-sm">
+            <DataTable<UserProfile>
+              columns={columns}
+              data={currentPageData}
+              totalItems={totalItems}
+              page={page}
+              pageSize={pageSize}
+              onPageChange={(nextPage) => setPage(nextPage)}
+              onSearch={(value) => setSearchQuery(value)}
+              onSort={(key, order) => {
+                setSortKey(key);
+                setSortOrder(order);
+              }}
+              searchPlaceholder="Search users..."
+              isLoading={usersLoading}
+              emptyMessage="No users found. Adjust filters or create a user."
+              actions={actions}
+            />
           </div>
         </div>
 
-        {/* Right Side: Recent Users */}
-        <div className="flex-1 w-full lg:w-[40%]">
-          <div className="rounded-xl border shadow-sm flex flex-col h-full bg-slate-50/50 dark:bg-slate-900/50" style={{ borderColor: 'var(--border-color)' }}>
-            <div className="p-5 border-b" style={{ borderColor: 'var(--border-color)' }}>
-              <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
-                {t('addUsers.recentUsers')} ({usersCreated.length})
-              </h2>
-            </div>
-            
-            <div className="p-0 overflow-x-auto flex-1 h-full">
-              {usersCreated.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-10 text-center h-full text-slate-400">
-                  <UserPlus className="w-12 h-12 mb-3 opacity-20" />
-                  <p>{t('addUsers.noUsers')}</p>
-                </div>
-              ) : (
-                <table className="w-full text-sm text-left">
-                  <thead className="text-xs uppercase bg-slate-100 dark:bg-slate-800/50" style={{ color: 'var(--text-muted)' }}>
-                    <tr>
-                      <th className="px-4 py-3 font-medium rounded-tl-lg">{t('addUsers.fullName')}</th>
-                      <th className="px-4 py-3 font-medium">{t('addUsers.role')}</th>
-                      <th className="px-4 py-3 font-medium">{t('addUsers.status')}</th>
-                      <th className="px-4 py-3 font-medium rounded-tr-lg hidden sm:table-cell">{t('addUsers.created')}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y" style={{ borderColor: 'var(--border-color)' }}>
-                    {usersCreated.map(user => (
-                      <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
-                        <td className="px-4 py-3 font-medium" style={{ color: 'var(--text-primary)' }}>
-                          {user.full_name}
-                          <div className="text-xs sm:hidden font-normal" style={{ color: 'var(--text-muted)' }}>
-                            {new Date(user.created_at).toLocaleDateString()}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3" style={{ color: 'var(--text-muted)' }}>
-                          {t(`common.${String(user.role_name || '').toLowerCase()}`, { defaultValue: user.role_name || 'User' }) as string}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={cn(
-                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border",
-                            user.is_active 
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20" 
-                              : "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
-                          )}>
-                            {user.is_active ? t('addUsers.active') : t('addUsers.inactive')}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 hidden sm:table-cell whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>
-                          {new Date(user.created_at).toLocaleDateString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
+        <aside className="space-y-4">
+          <div className="rounded-xl border bg-white p-4 shadow-sm">
+            <h2 className="text-lg font-semibold">Summary</h2>
+            <div className="mt-4 space-y-3 text-sm text-slate-600">
+              <p>
+                <span className="font-semibold">Total users:</span> {profiles.length}
+              </p>
+              <p>
+                <span className="font-semibold">Visible results:</span> {totalItems}
+              </p>
+              <p>
+                <span className="font-semibold">Selected role:</span> {roleFilter ? getRoleName(roleFilter) : 'All roles'}
+              </p>
+              <p>
+                <span className="font-semibold">Status filter:</span> {statusFilter === 'all' ? 'All' : statusFilter === 'active' ? 'Active' : 'Inactive'}
+              </p>
             </div>
           </div>
-        </div>
+
+          <div className="rounded-xl border bg-white p-4 shadow-sm">
+            <h2 className="text-lg font-semibold">Tips</h2>
+            <p className="mt-3 text-sm text-slate-600">Use the filters and search input to narrow down users. View user details for audit fields and edit access controls.</p>
+          </div>
+        </aside>
       </div>
+
+      <Modal isOpen={createModalOpen} onClose={() => setCreateModalOpen(false)} title="Create User" size="lg">
+        <AppForm<CreateUserFormValues>
+          initialValues={initialCreateValues}
+          validate={zodValidator(createUserValidationSchema)}
+          onSubmit={handleCreateSubmit}
+          className="space-y-5"
+        >
+          <div className="grid gap-4 lg:grid-cols-2">
+            <FormField name="full_name" label="Full Name" placeholder="Enter full name" required />
+            <FormField name="user_name" label="Username" placeholder="username" required />
+          </div>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <FormField name="password" type="password" label="Password" placeholder="Enter password" required />
+            <FormField name="confirm_password" type="password" label="Confirm Password" placeholder="Confirm password" required />
+          </div>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <FormField name="phone" label="Phone" placeholder="Phone number" />
+            <FormField name="role_id" type="select" label="Role" options={roleOptions} disabled={rolesLoading} placeholder="Select a role" />
+          </div>
+          <FormField name="specialty" label="Specialty" placeholder="Specialty or department" />
+          <Field name="is_active" type="checkbox">
+            {({ input }) => (
+              <div className="flex items-center gap-2">
+                <input {...input} id="create_is_active" type="checkbox" className="w-4 h-4 rounded border-slate-300 text-indigo-600" />
+                <label htmlFor="create_is_active" className="text-sm text-slate-700">Active account</label>
+              </div>
+            )}
+          </Field>
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+            <button type="button" onClick={() => setCreateModalOpen(false)} className="px-4 py-2 rounded-lg border text-slate-700">Cancel</button>
+            <button type="submit" disabled={createMutation.isPending} className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-70">
+              {createMutation.isPending ? 'Creating...' : 'Create User'}
+            </button>
+          </div>
+        </AppForm>
+      </Modal>
+
+      <Modal isOpen={!!editingUser} onClose={() => setEditingUser(null)} title="Edit User" size="lg">
+        {editingUser && (
+          <AppForm<EditUserFormValues>
+            key={editingUser.id}
+            initialValues={editInitialValues}
+            validate={zodValidator(editUserSchemaMemo)}
+            onSubmit={handleUpdateSubmit}
+            className="space-y-5"
+          >
+            <div className="grid gap-4 lg:grid-cols-2">
+              <FormField name="full_name" label="Full Name" placeholder="Enter full name" required />
+              <FormField name="user_name" label="Username" placeholder="username" required />
+            </div>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <FormField name="phone" label="Phone" placeholder="Phone number" />
+              <FormField name="role_id" type="select" label="Role" options={roleOptions} disabled={rolesLoading} placeholder="Select a role" />
+            </div>
+            <FormField name="specialty" label="Specialty" placeholder="Specialty or department" />
+            <div className="grid gap-4 lg:grid-cols-2">
+              <FormField name="password" type="password" label="New Password" placeholder="Leave blank to keep current password" />
+              <FormField name="confirm_password" type="password" label="Confirm New Password" placeholder="Confirm new password" />
+            </div>
+            <Field name="is_active" type="checkbox">
+              {({ input }) => (
+                <div className="flex items-center gap-2">
+                  <input {...input} id="edit_is_active" type="checkbox" className="w-4 h-4 rounded border-slate-300 text-indigo-600" />
+                  <label htmlFor="edit_is_active" className="text-sm text-slate-700">Active account</label>
+                </div>
+              )}
+            </Field>
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+              <button type="button" onClick={() => setEditingUser(null)} className="px-4 py-2 rounded-lg border text-slate-700">Cancel</button>
+              <button type="submit" disabled={updateMutation.isPending} className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-70">
+                {updateMutation.isPending ? 'Saving...' : 'Save changes'}
+              </button>
+            </div>
+          </AppForm>
+        )}
+      </Modal>
+
+      {detailsUser && (
+        <div className="fixed inset-0 z-50 flex items-stretch justify-end bg-black/40" onClick={() => setDetailsUser(null)}>
+          <div className="relative w-full max-w-md bg-white p-6 overflow-y-auto" onClick={(event) => event.stopPropagation()}>
+            <button type="button" onClick={() => setDetailsUser(null)} className="absolute top-4 right-4 text-slate-500 hover:text-slate-700">
+              <X size={20} />
+            </button>
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-xl font-semibold">User Details</h2>
+                <p className="text-sm text-slate-500">Read-only profile details for the selected user.</p>
+              </div>
+              <div className="grid gap-3">
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">Full name</p>
+                  <p className="text-base font-medium">{detailsUser.full_name}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">Username</p>
+                  <p className="text-base font-medium">{detailsUser.user_name}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">Role</p>
+                  <p className="text-base font-medium">{getRoleName(detailsUser.role_id)}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">Phone</p>
+                  <p className="text-base font-medium">{detailsUser.phone || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">Specialty</p>
+                  <p className="text-base font-medium">{detailsUser.specialty || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">Status</p>
+                  <StatusBadge status={detailsUser.is_active ? 'active' : 'inactive'} />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">Created</p>
+                  <p className="text-base font-medium">{new Date(detailsUser.created_at).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">Updated</p>
+                  <p className="text-base font-medium">{new Date(detailsUser.updated_at).toLocaleString()}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ConfirmDialog
+        isOpen={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete user"
+        message="Are you sure you want to delete this user? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 }

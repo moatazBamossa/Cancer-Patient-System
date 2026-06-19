@@ -152,7 +152,7 @@ export function DataTable<T>({
                   )}
                 </tr>
               ))
-            ) : sortedData.length === 0 ? (
+            ) : sortedData?.length === 0 ? (
               <tr>
                 <td colSpan={columns.length + (actions ? 1 : 0)}>
                   <div className="py-12 text-center" style={{ color: 'var(--text-muted)' }}>
@@ -162,7 +162,7 @@ export function DataTable<T>({
                 </td>
               </tr>
             ) : (
-              sortedData.map((row, index) => (
+              sortedData?.map((row, index) => (
                 <motion.tr
                   key={String((row as any)['id'] ?? index)}
                   initial={{ opacity: 0, y: 5 }}

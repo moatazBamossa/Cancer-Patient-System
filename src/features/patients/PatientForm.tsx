@@ -1,11 +1,11 @@
 import React from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { AppForm } from '../../components/ui/AppForm';
 import { FormField } from '../../components/ui/FormField';
+import { zodValidator } from '../../lib/zodValidator';
 import { patientService } from '../../services/patient.service';
 import type { Patient } from '../../types';
 
@@ -36,38 +36,35 @@ export function PatientForm({ patient, onSuccess }: PatientFormProps) {
 
   type PatientFormData = z.infer<typeof patientSchema>;
 
-  const methods = useForm<PatientFormData>({
-    resolver: zodResolver(patientSchema),
-    defaultValues: patient
-      ? {
-          national_id: patient.national_id,
-          full_name: patient.full_name,
-          birth_date: patient.birth_date,
-          gender: patient.gender,
-          blood_type: patient.blood_type,
-          phone: patient.phone,
-          mobile_number: patient.mobile_number || '',
-          email: patient.email,
-          address: patient.address,
-          nationality: patient.nationality || '',
-          status: patient.status,
-          notes: patient.notes || '',
-        }
-      : {
-          national_id: '',
-          full_name: '',
-          birth_date: '',
-          gender: 'male' as const,
-          blood_type: 'O+' as const,
-          phone: '',
-          mobile_number: '',
-          email: '',
-          address: '',
-          nationality: '',
-          status: 'active' as const,
-          notes: '',
-        },
-  });
+  const initialValues: PatientFormData = patient
+    ? {
+        national_id: patient.national_id,
+        full_name: patient.full_name,
+        birth_date: patient.birth_date,
+        gender: patient.gender,
+        blood_type: patient.blood_type,
+        phone: patient.phone,
+        mobile_number: patient.mobile_number || '',
+        email: patient.email,
+        address: patient.address,
+        nationality: patient.nationality || '',
+        status: patient.status,
+        notes: patient.notes || '',
+      }
+    : {
+        national_id: '',
+        full_name: '',
+        birth_date: '',
+        gender: 'male',
+        blood_type: 'O+',
+        phone: '',
+        mobile_number: '',
+        email: '',
+        address: '',
+        nationality: '',
+        status: 'active',
+        notes: '',
+      };
 
   const createMutation = useMutation({
     mutationFn: (data: PatientFormData) => patientService.create(data),
@@ -98,8 +95,13 @@ export function PatientForm({ patient, onSuccess }: PatientFormProps) {
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
+    <AppForm<PatientFormData>
+      formKey={patient?.patient_id ?? 'new'}
+      initialValues={initialValues}
+      validate={zodValidator(patientSchema)}
+      onSubmit={onSubmit}
+      className="space-y-4"
+    >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField name="full_name" label={t('patients.fullName')} required placeholder="محمد علي" />
           <FormField name="national_id" label={t('patients.nationalId')} required placeholder="NID-XXXXX" />
@@ -155,7 +157,6 @@ export function PatientForm({ patient, onSuccess }: PatientFormProps) {
             {!isSubmitting && (patient ? t('patients.updatePatient') : t('patients.createPatient'))}
           </button>
         </div>
-      </form>
-    </FormProvider>
+    </AppForm>
   );
 }

@@ -2,34 +2,44 @@ import React, { useState, useCallback, memo, Suspense } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard, Users, UserCog, Stethoscope, Activity,
+  LayoutDashboard, Home, Users, UserCog, Stethoscope, Activity,
   Pill, FlaskConical, ImageIcon, Building2, Calendar,
   ShieldCheck, UserCircle, LogOut, ChevronLeft, ChevronRight, UserPlus,
   Moon, Sun, Bell, Menu, X, Heart, Microscope, FileBarChart,
 } from 'lucide-react';
-import { useAuthStore } from '../../stores/authStore';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { logout } from '../../store/slices/authSlice';
 import { useThemeStore } from '../../stores/themeStore';
 import { cn, getInitials } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 import { PageSkeleton } from '../ui/Skeleton';
-import { getUpcomingVisits } from '../../lib/visit-notifications';
+import { useClinicVisitsUpcoming } from '../../hooks/useClinicVisits';
+import { canAccessModule } from '../../modules/roles/permissions';
+import type { RolePermissionModule } from '../../modules/roles/rolePermissions';
 
-const navigation = [
-  { name: 'dashboard', path: '/dashboard', icon: LayoutDashboard },
-  { name: 'patients', path: '/patients', icon: Users },
-  { name: 'diagnoses', path: '/diagnoses', icon: Stethoscope },
-  { name: 'cancerTypes', path: '/cancer-types', icon: Microscope },
-  { name: 'treatmentPlans', path: '/treatment-plans', icon: FileBarChart },
-  { name: 'vitals', path: '/vitals', icon: Activity },
-  { name: 'medications', path: '/medications', icon: Pill },
-  { name: 'labTests', path: '/lab-tests', icon: FlaskConical },
-  { name: 'imaging', path: '/imaging', icon: ImageIcon },
-  { name: 'doctors', path: '/doctors', icon: Heart },
-  { name: 'clinics', path: '/clinics', icon: Building2 },
-  { name: 'visits', path: '/visits', icon: Calendar },
-  { name: 'roles', path: '/roles', icon: ShieldCheck },
-  { name: 'addUsers', path: '/users/add', icon: UserPlus },
+const navigation: Array<{
+  name: string;
+  path: string;
+  icon: React.ComponentType<any>;
+  module?: RolePermissionModule;
+}> = [
+  { name: 'welcome', path: '/welcome', icon: Home },
+  { name: 'dashboard', path: '/dashboard', icon: LayoutDashboard ,module: 'dashboard'},
+  { name: 'patients', path: '/patients', icon: Users, module: 'patient' },
+  { name: 'patientVisits', path: '/patient-visits', icon: Calendar, module: 'patient_visits' },
+  { name: 'diagnoses', path: '/diagnoses', icon: Stethoscope, module: 'diagnoses' },
+  { name: 'cancerTypes', path: '/cancer-types', icon: Microscope, module: 'cancer_types' },
+  { name: 'treatmentPlans', path: '/treatment-plans', icon: FileBarChart, module: 'treatment_plans' },
+  { name: 'vitals', path: '/vitals', icon: Activity, module: 'clinic_visits_and_vitals' },
+  { name: 'medications', path: '/medications', icon: Pill, module: 'medications' },
+  { name: 'labTests', path: '/lab-tests', icon: FlaskConical, module: 'laboratory_tests' },
+  { name: 'imaging', path: '/imaging', icon: ImageIcon, module: 'imaging_reports' },
+  { name: 'doctors', path: '/doctors', icon: Heart, module: 'doctor' },
+  { name: 'clinics', path: '/clinics', icon: Building2, module: 'clinics' },
+  { name: 'visits', path: '/visits', icon: Calendar, module: 'visits' },
+  { name: 'roles', path: '/roles', icon: ShieldCheck, module: 'roles' },
+  { name: 'addUsers', path: '/users', icon: UserPlus, module: 'user_management' },
 ];
 
 interface SidebarContentProps {
@@ -41,7 +51,9 @@ interface SidebarContentProps {
   handleLogout: () => void;
 }
 
-const SidebarContent = memo(({ collapsed, setMobileOpen, t, user, role, handleLogout }: SidebarContentProps) => (
+const SidebarContent = memo(({ collapsed, setMobileOpen, t, user, role, handleLogout }: SidebarContentProps) => {
+
+  return (
   <div className="flex flex-col h-full">
     {/* Logo */}
     <div className="flex items-center gap-3 px-5 py-6 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
@@ -70,7 +82,9 @@ const SidebarContent = memo(({ collapsed, setMobileOpen, t, user, role, handleLo
 
     {/* Navigation */}
     <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-      {navigation.map((item) => (
+      {navigation
+        .filter((item) => !item.module || canAccessModule(role?.permissions || role, item.module))
+        .map((item) => (
         <NavLink
           key={item.path}
           to={item.path}
@@ -120,23 +134,28 @@ const SidebarContent = memo(({ collapsed, setMobileOpen, t, user, role, handleLo
       </button>
     </div>
   </div>
-));
+)
+});
 
 export function AppLayout() {
   const { t, i18n } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, role, logout } = useAuthStore();
+  const { user, role } = useAppSelector(state => state.auth);
+
+
+  const dispatch = useAppDispatch();
   const { isDark, toggle: toggleTheme } = useThemeStore();
   const navigate = useNavigate();
 
   const isRtl = i18n.language === 'ar';
-  const upcomingCount = getUpcomingVisits().length;
+  const { data: _upcoming = [] } = useClinicVisitsUpcoming();
+  const upcomingCount = _upcoming?.length ?? 0;
 
   const handleLogout = useCallback(() => {
-    logout();
+    dispatch(logout());
     navigate('/login');
-  }, [logout, navigate]);
+  }, [dispatch, navigate]);
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
@@ -147,13 +166,13 @@ export function AppLayout() {
         className="hidden lg:flex flex-col flex-shrink-0 border-r relative"
         style={{ background: 'var(--sidebar-bg)', borderColor: 'rgba(255,255,255,0.06)' }}
       >
-        <SidebarContent 
-          collapsed={collapsed} 
-          setMobileOpen={setMobileOpen} 
-          t={t} 
-          user={user} 
-          role={role} 
-          handleLogout={handleLogout} 
+        <SidebarContent
+          collapsed={collapsed}
+          setMobileOpen={setMobileOpen}
+          t={t}
+          user={user}
+          role={role}
+          handleLogout={handleLogout}
         />
         <button
           onClick={() => setCollapsed(!collapsed)}
@@ -186,13 +205,13 @@ export function AppLayout() {
               className={cn("fixed inset-y-0 w-[260px] z-50 lg:hidden", isRtl ? "right-0" : "left-0")}
               style={{ background: 'var(--sidebar-bg)' }}
             >
-              <SidebarContent 
-                collapsed={collapsed} 
-                setMobileOpen={setMobileOpen} 
-                t={t} 
-                user={user} 
-                role={role} 
-                handleLogout={handleLogout} 
+              <SidebarContent
+                collapsed={collapsed}
+                setMobileOpen={setMobileOpen}
+                t={t}
+                user={user}
+                role={role}
+                handleLogout={handleLogout}
               />
             </motion.aside>
           </>

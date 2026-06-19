@@ -13,6 +13,9 @@ import { PatientForm } from './PatientForm';
 import { formatDate, exportToCSV, debounce } from '../../lib/utils';
 import type { Patient } from '../../types';
 import { useTranslation } from 'react-i18next';
+import { useModulePermissions } from '../../modules/roles/permissions';
+import { NoListPermission } from '../../components/guards';
+
 
 export default function PatientsPage() {
   const { t } = useTranslation();
@@ -20,7 +23,7 @@ export default function PatientsPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('active');
   const [sortBy, setSortBy] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [showForm, setShowForm] = useState(false);
@@ -28,6 +31,8 @@ export default function PatientsPage() {
   const [deleteTarget, setDeleteTarget] = useState<Patient | null>(null);
 
   const pageSize = 10;
+
+  const { canList, canCreate, canUpdate, canDelete } = useModulePermissions('patient');
 
   const { data, isLoading } = useQuery({
     queryKey: ['patients', page, search, statusFilter, sortBy, sortOrder],
@@ -40,6 +45,7 @@ export default function PatientsPage() {
         sortOrder,
         status: statusFilter || undefined,
       }),
+    enabled: canList,
   });
 
   const deleteMutation = useMutation({
@@ -122,56 +128,66 @@ export default function PatientsPage() {
         </div>
       </div>
 
-      <DataTable<Patient>
-        columns={columns}
-        data={data?.data || []}
-        totalItems={data?.total}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={setPage}
-        onSearch={debouncedSearch}
-        onSort={(key, order) => { setSortBy(key); setSortOrder(order); }}
-        searchPlaceholder={t('patients.searchPlaceholder')}
-        isLoading={isLoading}
-        emptyMessage={t('patients.notFound')}
-        onRowClick={(row) => navigate(`/patients/${(row as unknown as Patient).patient_id}`)}
-        headerActions={
-          <div className="flex gap-2">
-            <select
-              value={statusFilter}
-              onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-              className="input-field w-40 text-sm"
-            >
-              <option value="">{t('patients.allStatus')}</option>
-              <option value="active">{t('patients.status.active')}</option>
-              <option value="deceased">{t('patients.status.deceased')}</option>
-              <option value="transferred">{t('patients.status.transferred')}</option>
-            </select>
-            <button onClick={handleExport} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
-              <Download size={16} /> CSV
-            </button>
-            <button onClick={() => { setEditPatient(null); setShowForm(true); }} className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5">
-              <Plus size={16} /> {t('common.add')} {t('common.patient')}
-            </button>
-          </div>
-        }
-        actions={(row) => {
-          const patient = row as unknown as Patient;
-          return (
-            <div className="flex items-center gap-1">
-              <button onClick={(e) => { e.stopPropagation(); navigate(`/patients/${patient.patient_id}`); }} className="p-1.5 rounded-lg transition-colors hover:bg-blue-500/10" style={{ color: 'var(--text-muted)' }}>
-                <Eye size={16} />
+      {!canList ? (
+        <NoListPermission module={t('common.patients')} />
+      ) : (
+        <DataTable<Patient>
+          columns={columns}
+          data={data?.data || []}
+          totalItems={data?.total}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onSearch={debouncedSearch}
+          onSort={(key, order) => { setSortBy(key); setSortOrder(order); }}
+          searchPlaceholder={t('patients.searchPlaceholder')}
+          isLoading={isLoading}
+          emptyMessage={t('patients.notFound')}
+          onRowClick={(row) => navigate(`/patients/${(row as unknown as Patient).patient_id}`)}
+          headerActions={
+            <div className="flex gap-2">
+              <select
+                value={statusFilter}
+                onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+                className="input-field w-40 text-sm"
+              >
+                <option value="active">{t('patients.status.active')}</option>
+                <option value="deceased">{t('patients.status.deceased')}</option>
+                <option value="transferred">{t('patients.status.transferred')}</option>
+                <option value="">{t('patients.allStatus')}</option>
+              </select>
+              <button onClick={handleExport} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
+                <Download size={16} /> CSV
               </button>
-              <button onClick={(e) => { e.stopPropagation(); setEditPatient(patient); setShowForm(true); }} className="p-1.5 rounded-lg transition-colors hover:bg-amber-500/10" style={{ color: 'var(--text-muted)' }}>
-                <Edit2 size={16} />
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); setDeleteTarget(patient); }} className="p-1.5 rounded-lg transition-colors hover:bg-red-500/10" style={{ color: 'var(--text-muted)' }}>
-                <Trash2 size={16} />
-              </button>
+              {canCreate && (
+                <button onClick={() => { setEditPatient(null); setShowForm(true); }} className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5">
+                  <Plus size={16} /> {t('common.add')} {t('common.patient')}
+                </button>
+              )}
             </div>
-          );
-        }}
-      />
+          }
+          actions={(row) => {
+            const patient = row as unknown as Patient;
+            return (
+              <div className="flex items-center gap-1">
+                <button onClick={(e) => { e.stopPropagation(); navigate(`/patients/${patient.patient_id}`); }} className="p-1.5 rounded-lg transition-colors hover:bg-blue-500/10" style={{ color: 'var(--text-muted)' }}>
+                  <Eye size={16} />
+                </button>
+                {canUpdate && (
+                  <button onClick={(e) => { e.stopPropagation(); setEditPatient(patient); setShowForm(true); }} className="p-1.5 rounded-lg transition-colors hover:bg-amber-500/10" style={{ color: 'var(--text-muted)' }}>
+                    <Edit2 size={16} />
+                  </button>
+                )}
+                {canDelete && (
+                  <button onClick={(e) => { e.stopPropagation(); setDeleteTarget(patient); }} className="p-1.5 rounded-lg transition-colors hover:bg-red-500/10" style={{ color: 'var(--text-muted)' }}>
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
+            );
+          }}
+        />
+      )}
 
       {/* Add/Edit Modal */}
       <Modal
