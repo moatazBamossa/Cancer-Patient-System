@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { userProfileService } from '../services/user-profile.service';
 import { userProfileQueryKeys } from '../queries/user-profile.query-key';
+import i18n from '../i18n/config';
 import {
   normalizeUserProfile,
   normalizeUserProfiles,
@@ -58,15 +59,15 @@ export function useCreateUserProfileMutation() {
   return useMutation<UserProfile, Error, CreateUserProfileParams>({
     mutationFn: async (payload) => {
       const response = await userProfileService.user_profiles_create(payload);
-      if (!response.profile) throw new Error(response.message || 'Create failed');
+      if (!response.profile) throw new Error(response.message || i18n.t('addUsers.createFailed'));
       return normalizeUserProfile(response.profile);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userProfileQueryKeys.all });
-      toast.success('User created successfully');
+      toast.success(i18n.t('addUsers.userCreated'));
     },
     onError: (error) => {
-      toast.error(error.message || 'Unable to create user');
+      toast.error(error.message || i18n.t('addUsers.unableCreateUser'));
     },
   });
 }
@@ -76,16 +77,16 @@ export function useUpdateUserProfileMutation() {
   return useMutation<UserProfile, Error, UpdateUserProfileParams>({
     mutationFn: async (payload) => {
       const response = await userProfileService.user_profiles_update(payload);
-      if (!response.profile) throw new Error(response.message || 'Update failed');
+      if (!response.profile) throw new Error(response.message || i18n.t('addUsers.updateFailed'));
       return normalizeUserProfile(response.profile);
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: userProfileQueryKeys.all });
       queryClient.invalidateQueries({ queryKey: userProfileQueryKeys.detail(variables.id) });
-      toast.success('User updated successfully');
+      toast.success(i18n.t('addUsers.userUpdated'));
     },
     onError: (error) => {
-      toast.error(error.message || 'Unable to update user');
+      toast.error(error.message || i18n.t('addUsers.unableUpdateUser'));
     },
   });
 }
@@ -99,10 +100,10 @@ export function useDeleteUserProfileMutation() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: userProfileQueryKeys.all });
       queryClient.invalidateQueries({ queryKey: userProfileQueryKeys.detail(variables.id) });
-      toast.success('User deleted successfully');
+      toast.success(i18n.t('addUsers.userDeleted'));
     },
     onError: (error) => {
-      toast.error(error.message || 'Unable to delete user');
+      toast.error(error.message || i18n.t('addUsers.unableDeleteUser'));
     },
   });
 }

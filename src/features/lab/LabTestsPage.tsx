@@ -183,7 +183,7 @@ export default function LabTestsPage() {
   }
 
   const handleDelete = async (lab_test_patient_id: string) => {
-    if (!window.confirm("Delete this lab result?")) {
+    if (!window.confirm(t("lab.deleteResultConfirm"))) {
       return
     }
     await deleteMutation.mutateAsync(lab_test_patient_id)
@@ -237,7 +237,7 @@ export default function LabTestsPage() {
     },
     {
       key: "actions",
-      header: t("common.actions") || "Actions",
+      header: t("common.actions"),
       render: (_, row) => (
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -246,7 +246,7 @@ export default function LabTestsPage() {
             onClick={() => openEditForm(row)}
           >
             <Edit3 size={14} className="inline-block mr-1" />
-            {t("common.edit") || "Edit"}
+            {t("common.edit")}
           </button>
           <button
             type="button"
@@ -254,7 +254,7 @@ export default function LabTestsPage() {
             onClick={() => handleDelete(String(row.lab_test_patient_id))}
           >
             <Trash2 size={14} className="inline-block mr-1" />
-            {t("common.delete") || "Delete"}
+            {t("common.delete")}
           </button>
         </div>
       ),
@@ -285,7 +285,7 @@ export default function LabTestsPage() {
             onClick={() => navigate("/lab-tests/manage")}
             className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
-            {t("lab.manageTests") || "Manage tests"}
+            {t("lab.manageTests")}
           </button>
           <button
             type="button"
@@ -348,8 +348,8 @@ export default function LabTestsPage() {
         onClose={closeForm}
         title={
           editingResult
-            ? t("lab.editResultTitle") || "Edit lab result"
-            : t("lab.addResultTitle") || "Add lab result"
+            ? t("lab.editResultTitle")
+            : t("lab.addResultTitle")
         }
         size="lg"
       >
@@ -364,7 +364,7 @@ export default function LabTestsPage() {
                 className="input-field w-full"
               >
                 <option value="">
-                  {t("lab.selectPatient") || "Select patient"}
+                  {t("lab.selectPatient")}
                 </option>
                 {patientOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -381,7 +381,7 @@ export default function LabTestsPage() {
                 {...register("lab_test_id")}
                 className="input-field w-full"
               >
-                <option value="">{t("lab.selectTest") || "Select test"}</option>
+                <option value="">{t("lab.selectTest")}</option>
                 {labTestOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -408,7 +408,7 @@ export default function LabTestsPage() {
                 className="input-field w-full"
               >
                 <option value="">
-                  {t("lab.selectDoctor") || "Select doctor"}
+                  {t("lab.selectDoctor")}
                 </option>
                 {doctorOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -427,7 +427,7 @@ export default function LabTestsPage() {
               <input
                 {...register("result_value")}
                 className="input-field w-full"
-                placeholder={t("lab.resultValuePlaceholder") || "e.g. 5.8"}
+                placeholder={t("lab.resultValuePlaceholder")}
               />
             </FormField>
 
@@ -438,7 +438,7 @@ export default function LabTestsPage() {
                   type="checkbox"
                   className="rounded border-slate-300"
                 />
-                {t("lab.isAbnormal") || "Is Abnormal"}
+                {t("lab.isAbnormal")}
               </label>
             </div>
           </div>
@@ -464,8 +464,8 @@ export default function LabTestsPage() {
               }
             >
               {editingResult
-                ? t("lab.updateResult") || "Update result"
-                : t("lab.saveResult") || "Save result"}
+                ? t("lab.updateResult")
+                : t("lab.saveResult")}
             </button>
           </div>
         </form>

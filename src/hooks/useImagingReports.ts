@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { imagingService } from '../services/imaging.service';
+import i18n from '../i18n/config';
 import type {
   ImagingReport,
   ImagingReportCreateInput,
@@ -24,10 +25,10 @@ export function useCreateImagingReportMutation() {
     mutationFn: async (payload) => imagingService.create(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['imaging-reports'] });
-      toast.success('Imaging report uploaded successfully');
+      toast.success(i18n.t('imaging.uploadSuccess'));
     },
     onError: (error) => {
-      toast.error(error.message || 'Unable to upload imaging report');
+      toast.error(error.message || i18n.t('imaging.unableUpload'));
     },
   });
 }
@@ -39,10 +40,10 @@ export function useUpdateImagingReportMutation() {
     mutationFn: async (payload) => imagingService.update(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['imaging-reports'] });
-      toast.success('Imaging report updated successfully');
+      toast.success(i18n.t('imaging.updateSuccess'));
     },
     onError: (error) => {
-      toast.error(error.message || 'Unable to update imaging report');
+      toast.error(error.message || i18n.t('imaging.unableUpdate'));
     },
   });
 }
@@ -54,10 +55,10 @@ export function useDeleteImagingReportMutation() {
     mutationFn: async (imageId) => imagingService.delete(imageId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['imaging-reports'] });
-      toast.success('Imaging report deleted successfully');
+      toast.success(i18n.t('imaging.deleteSuccess'));
     },
     onError: (error) => {
-      toast.error(error.message || 'Unable to delete imaging report');
+      toast.error(error.message || i18n.t('imaging.unableDelete'));
     },
   });
 }

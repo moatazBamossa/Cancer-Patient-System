@@ -60,11 +60,11 @@ export default function DashboardPage() {
 
   const translateVisitType = (type: string) => {
     const mapping: Record<string, string> = {
-      'Follow-up': t('visits.type.followUp', { defaultValue: 'Follow-up' }),
-      'consultation': t('visits.type.consultation', { defaultValue: 'Consultation' }),
-      'treatment_session': t('visits.type.treatmentSession', { defaultValue: 'Treatment Session' }),
-      'Routine': t('visits.type.routine', { defaultValue: 'Routine' }),
-      'Emergency': t('visits.type.emergency', { defaultValue: 'Emergency' }),
+      'Follow-up': t('visits.visitTypeLabels.followUp', { defaultValue: 'Follow-up' }),
+      'consultation': t('visits.visitTypeLabels.consultation', { defaultValue: 'Consultation' }),
+      'treatment_session': t('visits.visitTypeLabels.treatmentSession', { defaultValue: 'Treatment Session' }),
+      'Routine': t('visits.visitTypeLabels.routine', { defaultValue: 'Routine' }),
+      'Emergency': t('visits.visitTypeLabels.emergency', { defaultValue: 'Emergency' }),
     };
     return mapping[type] || type;
   };

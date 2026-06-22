@@ -10,18 +10,11 @@ import { doctorService } from '../services/doctor.service';
 import { diagnosisService } from '../services/diagnosis.service';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import type { Doctor, Diagnosis } from '../types';
+import { useTranslation } from 'react-i18next';
 
 interface PatientVisitsPageProps {
   patientId: number;
 }
-
-const VISIT_TYPE_LABELS: Record<string, string> = {
-  new_visit: 'New visit',
-  follow_up: 'Follow-up',
-  emergency: 'Emergency',
-  treatment_session: 'Treatment session',
-  consultation: 'Consultation',
-};
 
 function formatDate(value?: string) {
   return value ? format(new Date(value), 'PPP') : '—';
@@ -32,6 +25,7 @@ function formatDateTime(value?: string) {
 }
 
 export function PatientVisitsPage({ patientId }: PatientVisitsPageProps) {
+  const { t } = useTranslation();
   const { data: visits = [], isLoading: visitsLoading, error: visitsError } = useClinicVisits(patientId);
   const { data: doctors = [] } = useQuery<Doctor[]>({
     queryKey: ['doctors'],
@@ -82,18 +76,25 @@ export function PatientVisitsPage({ patientId }: PatientVisitsPageProps) {
 
   const selectedDoctorName = selectedVisit?.doctor_name || (selectedVisit ? doctorMap.get(selectedVisit.doctor_id) : undefined);
   const selectedDiagnosis = selectedVisit?.diagnosis_id ? diagnosisMap.get(selectedVisit.diagnosis_id) : undefined;
+  const visitTypeLabels: Record<string, string> = {
+    new_visit: t('visits.newVisit'),
+    follow_up: t('visits.visitTypeLabels.followUp'),
+    emergency: t('visits.visitTypeLabels.emergency'),
+    treatment_session: t('visits.treatmentSession'),
+    consultation: t('visits.visitTypeLabels.consultation'),
+  };
 
   const handleDeleteVisit = async () => {
     if (!confirmDeleteVisit) return;
     try {
       await deleteVisit.mutateAsync(confirmDeleteVisit);
-      toast.success('Clinic visit deleted successfully');
+      toast.success(t('visits.clinicVisitDeleted'));
       setConfirmDeleteVisit(null);
       if (selectedVisitId === confirmDeleteVisit) {
         setSelectedVisitId(visits.filter((visit) => visit.visit_id !== confirmDeleteVisit)[0]?.visit_id ?? null);
       }
     } catch (error) {
-      toast.error((error as Error).message || 'Unable to delete clinic visit');
+      toast.error((error as Error).message || t('visits.unableDeleteClinicVisit'));
     }
   };
 
@@ -102,22 +103,22 @@ export function PatientVisitsPage({ patientId }: PatientVisitsPageProps) {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-            Clinic visits
+            {t('visits.clinicVisits')}
           </h1>
-          <p className="text-sm text-slate-500">Manage patient visits and recorded vital signs for the selected patient.</p>
+          <p className="text-sm text-slate-500">{t('visits.managePatientVisits')}</p>
         </div>
         <button
           type="button"
           onClick={() => setIsAddVisitOpen(true)}
           className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
         >
-          Add new visit
+          {t('visits.addNewVisit')}
         </button>
       </div>
 
       {visitsError ? (
         <div className="rounded-2xl border p-4" style={{ borderColor: 'var(--border-color)', background: 'var(--bg-secondary)' }}>
-          <p className="text-sm font-semibold text-red-600">Unable to load visits.</p>
+          <p className="text-sm font-semibold text-red-600">{t('visits.unableLoadVisits')}</p>
           <p className="text-sm text-slate-500">{visitsError.message}</p>
         </div>
       ) : null}
@@ -127,10 +128,10 @@ export function PatientVisitsPage({ patientId }: PatientVisitsPageProps) {
           <div className="rounded-3xl border p-5 shadow-sm" style={{ borderColor: 'var(--border-color)', background: 'var(--bg-secondary)' }}>
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Visits</p>
+                <p className="text-sm uppercase tracking-[0.2em] text-slate-500">{t('common.visits')}</p>
                 <p className="mt-1 text-2xl font-semibold" style={{ color: 'var(--text-primary)' }}>{visits.length}</p>
               </div>
-              <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">Patient ID {patientId}</span>
+              <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">{t('visits.patientId', { id: patientId })}</span>
             </div>
           </div>
 
@@ -143,8 +144,8 @@ export function PatientVisitsPage({ patientId }: PatientVisitsPageProps) {
               </div>
             ) : visits.length === 0 ? (
               <div className="rounded-3xl border border-dashed border-slate-300 p-8 text-center">
-                <p className="text-sm font-semibold text-slate-700">No visits yet.</p>
-                <p className="mt-2 text-sm text-slate-500">Use the button above to schedule the first clinic visit.</p>
+                <p className="text-sm font-semibold text-slate-700">{t('visits.noVisitsYet')}</p>
+                <p className="mt-2 text-sm text-slate-500">{t('visits.scheduleFirstVisit')}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -157,13 +158,13 @@ export function PatientVisitsPage({ patientId }: PatientVisitsPageProps) {
                     style={{ borderColor: selectedVisitId === visit.visit_id ? 'rgb(59 130 246)' : undefined }}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{VISIT_TYPE_LABELS[visit.visit_type ?? ''] ?? 'Clinical visit'}</p>
+                      <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{visitTypeLabels[visit.visit_type ?? ''] ?? t('visits.clinicVisit')}</p>
                       <p className="text-xs uppercase tracking-[0.2em] text-slate-400">{formatDate(visit.visit_date)}</p>
                     </div>
                     <p className="mt-2 line-clamp-2 text-sm text-slate-600">{visit.reason_for_visit}</p>
                     <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
-                      <span>{visit.doctor_name ?? doctorMap.get(visit.doctor_id) ?? 'Doctor'}</span>
-                      <span>{visit.next_visit_date ? formatDate(visit.next_visit_date) : 'No next visit'}</span>
+                      <span>{visit.doctor_name ?? doctorMap.get(visit.doctor_id) ?? t('common.doctor')}</span>
+                      <span>{visit.next_visit_date ? formatDate(visit.next_visit_date) : t('visits.noNextVisit')}</span>
                     </div>
                   </button>
                 ))}
@@ -178,9 +179,9 @@ export function PatientVisitsPage({ patientId }: PatientVisitsPageProps) {
               <>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Visit details</p>
+                    <p className="text-sm uppercase tracking-[0.2em] text-slate-500">{t('visits.visitDetails')}</p>
                     <h2 className="mt-2 text-2xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-                      {VISIT_TYPE_LABELS[selectedVisit.visit_type ?? ''] ?? 'Clinic visit'}
+                      {visitTypeLabels[selectedVisit.visit_type ?? ''] ?? t('visits.clinicVisit')}
                     </h2>
                   </div>
                   <button
@@ -188,56 +189,56 @@ export function PatientVisitsPage({ patientId }: PatientVisitsPageProps) {
                     onClick={() => setConfirmDeleteVisit(selectedVisit.visit_id)}
                     className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600"
                   >
-                    Delete visit
+                    {t('visits.deleteVisit')}
                   </button>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="rounded-3xl border p-4" style={{ borderColor: 'var(--border-color)' }}>
-                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Visit date</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('visits.visitDate')}</p>
                     <p className="mt-2 font-semibold" style={{ color: 'var(--text-primary)' }}>
                       {formatDateTime(selectedVisit.visit_date)}
                     </p>
                   </div>
                   <div className="rounded-3xl border p-4" style={{ borderColor: 'var(--border-color)' }}>
-                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Next visit</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('visits.nextVisit')}</p>
                     <p className="mt-2 font-semibold" style={{ color: 'var(--text-primary)' }}>
-                      {selectedVisit.next_visit_date ? formatDate(selectedVisit.next_visit_date) : 'None'}
+                      {selectedVisit.next_visit_date ? formatDate(selectedVisit.next_visit_date) : t('common.none')}
                     </p>
                   </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="rounded-3xl border p-4" style={{ borderColor: 'var(--border-color)' }}>
-                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Doctor</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('common.doctor')}</p>
                     <p className="mt-2 font-semibold" style={{ color: 'var(--text-primary)' }}>
-                      {selectedDoctorName ?? 'Unknown'}
+                      {selectedDoctorName ?? t('common.unknown')}
                     </p>
                   </div>
                   <div className="rounded-3xl border p-4" style={{ borderColor: 'var(--border-color)' }}>
-                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Diagnosis</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('diagnoses.diagnosis')}</p>
                     <p className="mt-2 font-semibold" style={{ color: 'var(--text-primary)' }}>
-                      {selectedDiagnosis?.cancer_name ?? selectedDiagnosis?.notes ?? 'Unknown'}
+                      {selectedDiagnosis?.cancer_name ?? selectedDiagnosis?.notes ?? t('common.unknown')}
                     </p>
                   </div>
                 </div>
 
                 <div className="grid gap-4">
                   <div className="rounded-3xl border p-4" style={{ borderColor: 'var(--border-color)' }}>
-                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Reason for visit</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('visits.reasonForVisit')}</p>
                     <p className="mt-2 text-sm leading-relaxed text-slate-700">{selectedVisit.reason_for_visit}</p>
                   </div>
 
                   {selectedVisit.clinical_notes ? (
                     <div className="rounded-3xl border p-4" style={{ borderColor: 'var(--border-color)' }}>
-                      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Clinical notes</p>
+                      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('visits.consultationNotes')}</p>
                       <p className="mt-2 text-sm leading-relaxed text-slate-700">{selectedVisit.clinical_notes}</p>
                     </div>
                   ) : null}
 
                   {selectedVisit.recommendations ? (
                     <div className="rounded-3xl border p-4" style={{ borderColor: 'var(--border-color)' }}>
-                      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Recommendations</p>
+                      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('visits.recommendations')}</p>
                       <p className="mt-2 text-sm leading-relaxed text-slate-700">{selectedVisit.recommendations}</p>
                     </div>
                   ) : null}
@@ -245,7 +246,7 @@ export function PatientVisitsPage({ patientId }: PatientVisitsPageProps) {
               </>
             ) : (
               <div className="rounded-3xl border p-6 text-center" style={{ borderColor: 'var(--border-color)', background: 'var(--bg-secondary)' }}>
-                <p className="text-sm font-medium text-slate-700">Select a visit to review details and vitals.</p>
+                <p className="text-sm font-medium text-slate-700">{t('visits.selectVisitToReview')}</p>
               </div>
             )}
           </div>
@@ -272,8 +273,8 @@ export function PatientVisitsPage({ patientId }: PatientVisitsPageProps) {
 
       <ConfirmDialog
         isOpen={!!confirmDeleteVisit}
-        title="Delete clinic visit"
-        message="Are you sure you want to delete this visit? This action cannot be undone."
+        title={t('visits.deleteClinicVisitTitle')}
+        message={t('visits.deleteClinicVisitMessage')}
         onClose={() => setConfirmDeleteVisit(null)}
         onConfirm={handleDeleteVisit}
         variant="danger"

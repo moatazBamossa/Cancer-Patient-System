@@ -13,12 +13,14 @@ import { useQuery } from "@tanstack/react-query"
 import { doctorService } from "../../services/doctor.service"
 import { Doctor } from "../../types"
 import { formatDate, formatDateTime } from "../../lib/utils"
+import { useTranslation } from "react-i18next"
 
 interface Props {
   diagnosisId: number
 }
 
 export default function DiagnosisDoctorHistoryPanel({ diagnosisId }: Props) {
+  const { t } = useTranslation()
   const { data: histories = [], isLoading } =
     useDiagnosisDoctorHistoryQuery(diagnosisId)
   const doctorQuery = useQuery<Doctor[], Error>({
@@ -56,36 +58,36 @@ export default function DiagnosisDoctorHistoryPanel({ diagnosisId }: Props) {
     <div className="space-y-4">
       <div className="p-4 bg-white rounded shadow">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Current Doctor Assignment</h3>
+          <h3 className="text-lg font-semibold">{t("diagnosisDoctorHistory.currentAssignment")}</h3>
           <div>
             <button
               className="gradient-btn px-4 py-2 text-sm rounded-lg"
               onClick={() => setShowAssignModal(true)}
             >
-              Assign / Reassign
+              {t("diagnosisDoctorHistory.assignReassign")}
             </button>
           </div>
         </div>
         <div className="mt-3">
           {isLoading ? (
-            <div>Loading...</div>
+            <div>{t("common.loading")}</div>
           ) : activeAssignment ? (
             <div>
               <div className="font-medium">{activeAssignment.doctor_name}</div>
               <div className="text-sm text-slate-500">
-                Assigned: {formatDate(activeAssignment.start_date)}
+                {t("diagnosisDoctorHistory.assigned")}: {formatDate(activeAssignment.start_date)}
               </div>
               <div className="text-sm text-slate-500">
-                Created: {formatDateTime(activeAssignment.assigned_date)}
+                {t("addUsers.created")}: {formatDateTime(activeAssignment.assigned_date)}
               </div>
               {activeAssignment.changed_by_name && (
                 <div className="text-sm text-slate-500">
-                  Changed by: {activeAssignment.changed_by_name}
+                  {t("diagnosisDoctorHistory.changedBy")}: {activeAssignment.changed_by_name}
                 </div>
               )}
               {activeAssignment.notes && (
                 <div className="text-sm text-slate-500">
-                  Notes: {activeAssignment.notes}
+                  {t("common.notes")}: {activeAssignment.notes}
                 </div>
               )}
               <div className="mt-2 grid gap-2 sm:flex sm:justify-start">
@@ -93,29 +95,29 @@ export default function DiagnosisDoctorHistoryPanel({ diagnosisId }: Props) {
                   className="gradient-btn px-4 py-2 text-sm rounded-lg"
                   onClick={() => setEditing(activeAssignment)}
                 >
-                  Edit
+                  {t("common.edit")}
                 </button>
                 <button
                   className="px-4 py-2 text-sm rounded-lg border border-red-200 text-red-700 hover:bg-red-50"
                   onClick={() => setConfirmDelete(activeAssignment)}
                 >
-                  Delete
+                  {t("common.delete")}
                 </button>
               </div>
             </div>
           ) : (
             <div className="text-sm text-slate-500">
-              No active doctor assigned.
+              {t("diagnosisDoctorHistory.noActiveDoctor")}
             </div>
           )}
         </div>
       </div>
 
       <div className="p-4 bg-white rounded shadow">
-        <h4 className="text-md font-semibold">Assignment History</h4>
+        <h4 className="text-md font-semibold">{t("diagnosisDoctorHistory.assignmentHistory")}</h4>
         <div className="mt-3 space-y-2">
           {histories.length === 0 ? (
-            <div className="text-sm text-slate-500">No history available.</div>
+            <div className="text-sm text-slate-500">{t("diagnosisDoctorHistory.noHistory")}</div>
           ) : (
             histories.map((h) => (
               <div
@@ -129,14 +131,14 @@ export default function DiagnosisDoctorHistoryPanel({ diagnosisId }: Props) {
                     </div>
                     <div className="text-sm text-slate-500">
                       {formatDate(h.start_date)} —{" "}
-                      {h.end_date ? formatDate(h.end_date) : "Present"}
+                      {h.end_date ? formatDate(h.end_date) : t("diagnosisDoctorHistory.present")}
                     </div>
                     <div className="text-sm text-slate-500">
-                      Assigned: {formatDateTime(h.assigned_date)}
+                      {t("diagnosisDoctorHistory.assigned")}: {formatDateTime(h.assigned_date)}
                     </div>
                     {h.changed_by_name && (
                       <div className="text-sm text-slate-500">
-                        Changed by: {h.changed_by_name}
+                        {t("diagnosisDoctorHistory.changedBy")}: {h.changed_by_name}
                       </div>
                     )}
                   </div>
@@ -145,24 +147,24 @@ export default function DiagnosisDoctorHistoryPanel({ diagnosisId }: Props) {
                       className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 text-sm"
                       onClick={() => setEditing(h)}
                     >
-                      Edit
+                      {t("common.edit")}
                     </button>
                     <button
                       className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm hover:bg-red-700"
                       onClick={() => setConfirmDelete(h)}
                     >
-                      Delete
+                      {t("common.delete")}
                     </button>
                   </div>
                 </div>
                 {h.reason_for_change && (
                   <div className="text-sm mt-3 text-slate-700">
-                    Reason: {h.reason_for_change}
+                    {t("diagnosisDoctorHistory.reason")}: {h.reason_for_change}
                   </div>
                 )}
                 {h.notes && (
                   <div className="text-sm mt-2 text-slate-700">
-                    Notes: {h.notes}
+                    {t("common.notes")}: {h.notes}
                   </div>
                 )}
               </div>
@@ -174,7 +176,7 @@ export default function DiagnosisDoctorHistoryPanel({ diagnosisId }: Props) {
       <Modal
         isOpen={showAssignModal}
         onClose={() => setShowAssignModal(false)}
-        title="Assign Doctor"
+        title={t("diagnosisDoctorHistory.assignDoctor")}
       >
         <AppForm
           onSubmit={async (values) => {
@@ -201,35 +203,35 @@ export default function DiagnosisDoctorHistoryPanel({ diagnosisId }: Props) {
         >
           <FormField
             name="doctor_id"
-            label="Doctor ID"
+            label={t("diagnosisDoctorHistory.doctorId")}
             component="select"
             options={doctorOptions}
           />
           <FormField
             name="start_date"
-            label="Start Date"
+            label={t("treatment.startDate")}
             component="input"
             type="date"
           />
           <FormField
             name="reason_for_change"
-            label="Reason"
+            label={t("diagnosisDoctorHistory.reason")}
             component="textarea"
           />
-          <FormField name="notes" label="Notes" component="textarea" />
+          <FormField name="notes" label={t("common.notes")} component="textarea" />
           <div className="mt-3 flex justify-end gap-2">
             <button
               type="button"
               className="px-4 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100"
               onClick={() => setShowAssignModal(false)}
             >
-              Cancel
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
               className="gradient-btn px-5 py-2.5 text-sm rounded-lg"
             >
-              Assign
+              {t("diagnosisDoctorHistory.assign")}
             </button>
           </div>
         </AppForm>
@@ -238,7 +240,7 @@ export default function DiagnosisDoctorHistoryPanel({ diagnosisId }: Props) {
       <Modal
         isOpen={!!editing}
         onClose={() => setEditing(null)}
-        title="Edit Assignment"
+        title={t("diagnosisDoctorHistory.editAssignment")}
       >
         {editing && (
           <AppForm
@@ -264,23 +266,23 @@ export default function DiagnosisDoctorHistoryPanel({ diagnosisId }: Props) {
           >
             <FormField
               name="start_date"
-              label="Start Date"
+              label={t("treatment.startDate")}
               component="input"
               type="date"
             />
             <FormField
               name="end_date"
-              label="End Date"
+              label={t("treatment.expectedEndDate")}
               component="input"
               type="date"
             />
 
             <FormField
               name="reason_for_change"
-              label="Reason"
+              label={t("diagnosisDoctorHistory.reason")}
               component="textarea"
             />
-            <FormField name="notes" label="Notes" component="textarea" />
+            <FormField name="notes" label={t("common.notes")} component="textarea" />
 
             <div className="mt-3 flex justify-end gap-2">
               <button
@@ -288,13 +290,13 @@ export default function DiagnosisDoctorHistoryPanel({ diagnosisId }: Props) {
                 className="px-4 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100"
                 onClick={() => setEditing(null)}
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 type="submit"
                 className="gradient-btn px-5 py-2.5 text-sm rounded-lg"
               >
-                Save
+                {t("common.save")}
               </button>
             </div>
           </AppForm>
@@ -304,20 +306,19 @@ export default function DiagnosisDoctorHistoryPanel({ diagnosisId }: Props) {
       <Modal
         isOpen={!!confirmDelete}
         onClose={() => setConfirmDelete(null)}
-        title="Delete Assignment"
+        title={t("diagnosisDoctorHistory.deleteAssignment")}
       >
         {confirmDelete && (
           <div>
             <p>
-              Are you sure you want to delete the assignment for{" "}
-              <strong>{confirmDelete.doctor_name}</strong>?
+              {t("diagnosisDoctorHistory.deleteAssignmentConfirm", { name: confirmDelete.doctor_name })}
             </p>
             <div className="mt-3 flex justify-end gap-2">
               <button
                 className="px-4 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100"
                 onClick={() => setConfirmDelete(null)}
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
@@ -330,7 +331,7 @@ export default function DiagnosisDoctorHistoryPanel({ diagnosisId }: Props) {
                   }
                 }}
               >
-                Delete
+                {t("common.delete")}
               </button>
             </div>
           </div>

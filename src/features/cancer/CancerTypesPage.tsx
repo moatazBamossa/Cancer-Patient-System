@@ -45,7 +45,7 @@ export default function CancerTypesPage() {
 
   type CTForm = z.infer<typeof ctSchema>;
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isPending } = useQuery({
     queryKey: ['cancer-types', searchQuery],
     queryFn: () =>
       searchQuery
@@ -130,7 +130,7 @@ export default function CancerTypesPage() {
       <DataTable<CancerType>
         columns={columns}
         data={data || []}
-        isLoading={isLoading}
+        isLoading={isLoading||isPending}
         headerActions={
           <button onClick={openAdd} className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5 rounded-lg">
             <Plus size={16} /> {t('cancer.addType')}
