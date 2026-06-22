@@ -53,25 +53,25 @@ export default function UpcomingVisitsAlert({ onViewPatient }: UpcomingVisitsAle
   );
 
   const doctorOptions = useMemo(
-    () => doctors.map((doctor) => ({ value: String(doctor.doctor_id), label: doctor.full_name || `Doctor ${doctor.doctor_id}` })),
-    [doctors],
+    () => doctors.map((doctor) => ({ value: String(doctor.doctor_id), label: doctor.full_name || t('upcomingVisits.doctorFallback', { id: doctor.doctor_id }) })),
+    [doctors, t],
   );
 
   const patientOptions = useMemo(
     () =>
       [...patients]
         .sort((a, b) => (a.full_name || '').localeCompare(b.full_name || ''))
-        .map((patient) => ({ value: String(patient.patient_id), label: patient.full_name || `Patient ${patient.patient_id}` })),
-    [patients],
+        .map((patient) => ({ value: String(patient.patient_id), label: patient.full_name || t('upcomingVisits.patientFallback', { id: patient.patient_id }) })),
+    [patients, t],
   );
 
   const diagnosisOptions = useMemo(
     () =>
       diagnoses.map((diagnosis) => ({
         value: String(diagnosis.diagnosis_id),
-        label: diagnosis.cancer_name ?? diagnosis.notes ?? `Diagnosis ${diagnosis.diagnosis_id}`,
+        label: diagnosis.cancer_name ?? diagnosis.notes ?? t('upcomingVisits.diagnosisFallback', { id: diagnosis.diagnosis_id }),
       })),
-    [diagnoses],
+    [diagnoses, t],
   );
 
   const handleApplyFilters = (values: ClinicVisitsUpcomingFilters) => {
@@ -147,7 +147,7 @@ export default function UpcomingVisitsAlert({ onViewPatient }: UpcomingVisitsAle
             <button
               onClick={() => setDismissed(true)}
               className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Dismiss"
+              aria-label={t('common.dismiss')}
               style={{ color: 'var(--text-muted)' }}
             >
               <X size={18} />
@@ -160,7 +160,7 @@ export default function UpcomingVisitsAlert({ onViewPatient }: UpcomingVisitsAle
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 text-sm text-slate-500">
               <Filter size={16} />
-              <span className="font-medium">Refine upcoming visits</span>
+              <span className="font-medium">{t('upcomingVisits.refineUpcomingVisits')}</span>
             </div>
             <div className="flex flex-wrap gap-2">
               <button
@@ -169,10 +169,12 @@ export default function UpcomingVisitsAlert({ onViewPatient }: UpcomingVisitsAle
                 className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
               >
                 <RefreshCcw size={16} />
-                Reset filters
+                {t('upcomingVisits.resetFilters')}
               </button>
               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-                {activeFilterCount === 0 ? 'All visits' : `${activeFilterCount} active filter${activeFilterCount > 1 ? 's' : ''}`}
+                {activeFilterCount === 0
+                  ? t('upcomingVisits.allVisits')
+                  : t('upcomingVisits.activeFilters', { count: activeFilterCount })}
               </span>
             </div>
           </div>
@@ -187,30 +189,30 @@ export default function UpcomingVisitsAlert({ onViewPatient }: UpcomingVisitsAle
               <div className="grid gap-4 sm:grid-cols-2">
                 <FormField
                   name="p_from_visit_date"
-                  label="Visit date from"
+                  label={t('upcomingVisits.visitDateFrom')}
                   type="date"
-                  placeholder="Start date"
+                  placeholder={t('common.startDate')}
                 />
                 <FormField
                   name="p_to_visit_date"
-                  label="Visit date to"
+                  label={t('upcomingVisits.visitDateTo')}
                   type="date"
-                  placeholder="End date"
+                  placeholder={t('common.endDate')}
                 />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <FormField
                   name="p_from_next_date"
-                  label="Next visit from"
+                  label={t('upcomingVisits.nextVisitFrom')}
                   type="date"
-                  placeholder="Start date"
+                  placeholder={t('common.startDate')}
                 />
                 <FormField
                   name="p_to_next_date"
-                  label="Next visit to"
+                  label={t('upcomingVisits.nextVisitTo')}
                   type="date"
-                  placeholder="End date"
+                  placeholder={t('common.endDate')}
                 />
               </div>
             </div>
@@ -218,24 +220,24 @@ export default function UpcomingVisitsAlert({ onViewPatient }: UpcomingVisitsAle
             <div className="mt-4 grid gap-4 lg:grid-cols-3">
               <FormField
                 name="p_doctor_id"
-                label="Doctor"
+                label={t('common.doctor')}
                 type="select"
                 options={doctorOptions}
-                placeholder="All doctors"
+                placeholder={t('upcomingVisits.allDoctors')}
               />
               <FormField
                 name="p_diagnosis_id"
-                label="Diagnosis"
+                label={t('diagnoses.diagnosis')}
                 type="select"
                 options={diagnosisOptions}
-                placeholder="All diagnoses"
+                placeholder={t('upcomingVisits.allDiagnoses')}
               />
               <FormField
                 name="p_patient_id"
-                label="Patient"
+                label={t('common.patient')}
                 type="select"
                 options={patientOptions}
-                placeholder="All patients"
+                placeholder={t('upcomingVisits.allPatients')}
               />
             </div>
 
@@ -244,7 +246,7 @@ export default function UpcomingVisitsAlert({ onViewPatient }: UpcomingVisitsAle
                 type="submit"
                 className="inline-flex items-center justify-center rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-600"
               >
-                Apply filters
+                {t('upcomingVisits.applyFilters')}
               </button>
             </div>
           </AppForm>
@@ -253,12 +255,12 @@ export default function UpcomingVisitsAlert({ onViewPatient }: UpcomingVisitsAle
         {/* Visit List */}
         <div className="max-h-[350px] overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800 custom-scrollbar">
           {upcomingLoading ? (
-            <div className="p-6 text-center text-sm text-slate-500">Loading upcoming visits...</div>
+            <div className="p-6 text-center text-sm text-slate-500">{t('upcomingVisits.loading')}</div>
           ) : upcomingVisits.length === 0 ? (
             <div className="p-6 text-center text-sm text-slate-500">
               {activeFilterCount > 0
-                ? 'No visits match your filter selection. Adjust the filters or reset to show all upcoming visits.'
-                : 'No upcoming visits are available at the moment.'}
+                ? t('upcomingVisits.noFilterMatches')
+                : t('upcomingVisits.noneAvailable')}
             </div>
           ) : (
             upcomingVisits.map((visit: any) => {

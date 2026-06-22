@@ -214,11 +214,11 @@ console.log("localPermissions", localPermissions);
             name="role_name"
             label={t("roles.roleName")}
             required
-            placeholder="e.g. administrator"
+            placeholder={t("roles.roleNamePlaceholder")}
           />
 
           <div>
-            <h3 className="text-sm font-semibold mb-2">Permissions</h3>
+            <h3 className="text-sm font-semibold mb-2">{t("roles.permissions")}</h3>
             <div className="flex items-center gap-2 mb-2">
               <button
                 type="button"
@@ -227,7 +227,7 @@ console.log("localPermissions", localPermissions);
                 }}
                 className="px-2 py-1 rounded border"
               >
-                Clear All
+                {t("roles.clearAll")}
               </button>
               <button
                 type="button"
@@ -240,7 +240,7 @@ console.log("localPermissions", localPermissions);
                 }}
                 className="px-2 py-1 rounded border"
               >
-                Grant Full Access
+                {t("roles.grantFullAccess")}
               </button>
               <button
                 type="button"
@@ -253,7 +253,7 @@ console.log("localPermissions", localPermissions);
                 }}
                 className="px-2 py-1 rounded border"
               >
-                Read Only
+                {t("roles.readOnly")}
               </button>
             </div>
 
@@ -268,17 +268,17 @@ console.log("localPermissions", localPermissions);
                   }))
                 }
               />
-              <span className="text-sm">Dashboard Access</span>
+              <span className="text-sm">{t("roles.dashboardAccess")}</span>
             </switch>
 
             <div className="overflow-auto max-h-60 border rounded">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-slate-50">
-                    <th className="p-2 text-left">Module</th>
+                    <th className="p-2 text-left">{t("roles.module")}</th>
                     {ROLE_PERMISSION_ACTIONS.map((a) => (
                       <th key={a} className="p-2 text-center">
-                        {a}
+                        {t(`roles.actions.${a}`)}
                       </th>
                     ))}
                   </tr>
@@ -288,7 +288,7 @@ console.log("localPermissions", localPermissions);
                     if(m === 'dashboard') return null
                     return (
                     <tr key={m} className="border-t">
-                      <td className="p-2">{m.replace("_", " ")}</td>
+                      <td className="p-2">{t(`roles.modules.${m}`)}</td>
                       {ROLE_PERMISSION_ACTIONS.map((a) => (
                         <td key={a} className="p-2 text-center">
                           <input

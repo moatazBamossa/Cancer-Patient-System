@@ -988,7 +988,7 @@ export default function TreatmentPlansPage() {
             label={t('medications.title')}
             type="select"
             required
-            
+
             options={medications.map((m) => ({
               value: String(m.medication_id),
               label: m.name,
@@ -1011,13 +1011,13 @@ export default function TreatmentPlansPage() {
 						name="route"
 						label={t('treatment.route')}
 						required
-						placeholder="IV, PO..."
+						placeholder={t('treatment.routePlaceholder')}
 					/>
 					<FormField
 						name="frequency"
 						label={t('treatment.frequency')}
 						required
-						placeholder="Once daily..."
+						placeholder={t('treatment.frequencyPlaceholder')}
 					/>
 					<FormField name="note" label={t('common.notes')} type="textarea" />
 					<div className="flex justify-end pt-4">

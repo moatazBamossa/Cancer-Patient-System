@@ -36,7 +36,7 @@ export default function PatientVisitsLanding() {
   if (error) {
     return (
       <div className="rounded-3xl border p-6" style={{ borderColor: 'var(--border-color)', background: 'var(--bg-secondary)' }}>
-        <p className="text-sm font-semibold text-red-600">Unable to load patients.</p>
+        <p className="text-sm font-semibold text-red-600">{t('patients.unableLoadPatients')}</p>
         <p className="text-sm text-slate-500">{error.message}</p>
       </div>
     );
@@ -49,7 +49,7 @@ export default function PatientVisitsLanding() {
           <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
             {t('common.patientVisits')}
           </h1>
-          <p className="text-sm text-slate-500">Select a patient to manage visits and vital signs.</p>
+          <p className="text-sm text-slate-500">{t('visits.selectPatientToManage')}</p>
         </div>
 
         <button
@@ -58,19 +58,19 @@ export default function PatientVisitsLanding() {
           disabled={!selectedPatientId}
           className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {selectedPatientId ? 'Open visits' : 'Select a patient'}
+          {selectedPatientId ? t('visits.openVisits') : t('visits.selectPatient')}
         </button>
       </div>
 
       <div className="rounded-3xl border p-6" style={{ borderColor: 'var(--border-color)', background: 'var(--bg-secondary)' }}>
         <label className="block text-sm font-medium text-slate-700">
-          Choose patient
+          {t('visits.choosePatient')}
           <select
             value={selectedPatientId ?? ''}
             onChange={(event) => setSelectedPatientId(event.target.value || null)}
             className="input-field mt-2 w-full"
           >
-            <option value="">Select patient</option>
+            <option value="">{t('visits.selectPatient')}</option>
             {patients.map((patient) => (
               <option key={patient.patient_id} value={patient.patient_id}>
                 {patient.full_name} ({patient.patient_id})
@@ -81,7 +81,7 @@ export default function PatientVisitsLanding() {
 
         {patients.length === 0 && (
           <div className="mt-6 rounded-3xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
-            No patients available to show visits.
+            {t('visits.noPatientsForVisits')}
           </div>
         )}
       </div>

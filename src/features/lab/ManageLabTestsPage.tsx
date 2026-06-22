@@ -11,15 +11,15 @@ import { Modal } from '../../components/ui/Modal';
 import { useLabTests, useCreateLabTest, useUpdateLabTest, useDeleteLabTest } from '../../hooks/useLabTests';
 import type { LabTest } from '../../types';
 
-const labTestSchema = z.object({
-  test_name: z.string().min(1, 'Test name is required'),
-  category: z.string().min(1, 'Category is required'),
-  units: z.string().min(1, 'Units are required'),
-  normal_range: z.string().min(1, 'Normal range is required'),
+const labTestSchema = (t: ReturnType<typeof useTranslation>['t']) => z.object({
+  test_name: z.string().min(1, t('lab.testNameRequired')),
+  category: z.string().min(1, t('lab.categoryRequired')),
+  units: z.string().min(1, t('lab.unitsRequired')),
+  normal_range: z.string().min(1, t('lab.normalRangeRequired')),
   description: z.string().optional(),
 });
 
-type LabTestForm = z.infer<typeof labTestSchema>;
+type LabTestForm = z.infer<ReturnType<typeof labTestSchema>>;
 
 type FieldProps = {
   label: string;
@@ -59,7 +59,7 @@ export default function ManageLabTestsPage() {
   const deleteMutation = useDeleteLabTest();
 
   const { register, handleSubmit, reset, formState } = useForm<LabTestForm>({
-    resolver: zodResolver(labTestSchema),
+    resolver: zodResolver(labTestSchema(t)),
     defaultValues,
   });
 
@@ -109,25 +109,25 @@ export default function ManageLabTestsPage() {
   };
 
   const handleDelete = async (test: LabTest) => {
-    if (!window.confirm('Are you sure you want to delete this lab test?')) {
+    if (!window.confirm(t('lab.deleteTestConfirm'))) {
       return;
     }
     await deleteMutation.mutateAsync(test.lab_test_id);
   };
 
   const columns: Column<LabTest>[] = [
-    { key: 'test_name', header: t('lab.testName') || 'Test name' },
-    { key: 'category', header: t('common.category') || 'Category' },
-    { key: 'units', header: t('lab.units') || 'Units' },
-    { key: 'normal_range', header: t('lab.normalRange') || 'Normal range' },
+    { key: 'test_name', header: t('lab.testName') },
+    { key: 'category', header: t('common.category') },
+    { key: 'units', header: t('lab.units') },
+    { key: 'normal_range', header: t('lab.normalRange') },
     {
       key: 'description',
-      header: t('common.description') || 'Description',
+      header: t('common.description'),
       render: (value) => <span className="truncate block max-w-xl">{String(value)}</span>,
     },
     {
       key: 'actions',
-      header: t('common.actions') || 'Actions',
+      header: t('common.actions'),
       render: (_, row) => (
         <div className="flex gap-2">
           <button
@@ -136,7 +136,7 @@ export default function ManageLabTestsPage() {
             onClick={() => openEditForm(row)}
           >
             <Edit3 size={14} className="inline-block mr-1" />
-            {t('common.edit') || 'Edit'}
+            {t('common.edit')}
           </button>
           <button
             type="button"
@@ -144,7 +144,7 @@ export default function ManageLabTestsPage() {
             onClick={() => handleDelete(row)}
           >
             <Trash2 size={14} className="inline-block mr-1" />
-            {t('common.delete') || 'Delete'}
+            {t('common.delete')}
           </button>
         </div>
       ),
@@ -156,10 +156,10 @@ export default function ManageLabTestsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-            {t('lab.manageTests') || 'Manage Lab Tests'}
+            {t('lab.manageTests')}
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            {t('lab.manageTestsDescription') || 'Create and update lab test definitions.'}
+            {t('lab.manageTestsDescription')}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -168,14 +168,14 @@ export default function ManageLabTestsPage() {
             onClick={() => navigate(-1)}
             className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
-            {t('common.back') || 'Back'}
+            {t('common.back')}
           </button>
           <button
             type="button"
             onClick={openCreateForm}
             className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5"
           >
-            <Plus size={16} /> {t('lab.addTest') || 'Add test'}
+            <Plus size={16} /> {t('lab.addTest')}
           </button>
         </div>
       </div>
@@ -184,48 +184,48 @@ export default function ManageLabTestsPage() {
         columns={columns}
         data={labTestsQuery.data ?? []}
         isLoading={labTestsQuery.isLoading}
-        searchPlaceholder={t('lab.searchPlaceholder') || 'Search tests'}
-        emptyMessage={t('lab.noTests') || 'No lab tests found'}
+        searchPlaceholder={t('lab.searchPlaceholder')}
+        emptyMessage={t('lab.noTests')}
       />
 
-      <Modal isOpen={isOpen} onClose={closeForm} title={selectedTest ? t('lab.editTest') || 'Edit lab test' : t('lab.addTest') || 'Add lab test'} size="lg">
+      <Modal isOpen={isOpen} onClose={closeForm} title={selectedTest ? t('lab.editTest') : t('lab.addTest')} size="lg">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <FormField label={t('lab.testName') || 'Test name'} error={formState.errors.test_name?.message?.toString()}>
+            <FormField label={t('lab.testName')} error={formState.errors.test_name?.message?.toString()}>
               <input
                 {...register('test_name')}
                 className="input-field w-full"
-                placeholder={t('lab.testNamePlaceholder') || 'e.g. Complete Blood Count'}
+                placeholder={t('lab.testNamePlaceholder')}
               />
             </FormField>
-            <FormField label={t('common.category') || 'Category'} error={formState.errors.category?.message?.toString()}>
+            <FormField label={t('common.category')} error={formState.errors.category?.message?.toString()}>
               <input
                 {...register('category')}
                 className="input-field w-full"
-                placeholder={t('lab.categoryPlaceholder') || 'e.g. Hematology'}
+                placeholder={t('lab.categoryPlaceholder')}
               />
             </FormField>
-            <FormField label={t('lab.units') || 'Units'} error={formState.errors.units?.message?.toString()}>
+            <FormField label={t('lab.units')} error={formState.errors.units?.message?.toString()}>
               <input
                 {...register('units')}
                 className="input-field w-full"
-                placeholder={t('lab.unitsPlaceholder') || 'e.g. cells/mcL'}
+                placeholder={t('lab.unitsPlaceholder')}
               />
             </FormField>
-            <FormField label={t('lab.normalRange') || 'Normal range'} error={formState.errors.normal_range?.message?.toString()}>
+            <FormField label={t('lab.normalRange')} error={formState.errors.normal_range?.message?.toString()}>
               <input
                 {...register('normal_range')}
                 className="input-field w-full"
-                placeholder={t('lab.normalRangePlaceholder') || 'e.g. 4.5 - 11.0'}
+                placeholder={t('lab.normalRangePlaceholder')}
               />
             </FormField>
           </div>
 
-          <FormField label={t('common.description') || 'Description'} error={formState.errors.description?.message?.toString()}>
+          <FormField label={t('common.description')} error={formState.errors.description?.message?.toString()}>
             <textarea
               {...register('description')}
               className="input-field w-full min-h-[120px]"
-              placeholder={t('lab.descriptionPlaceholder') || 'Optional description'}
+              placeholder={t('lab.descriptionPlaceholder')}
             />
           </FormField>
 
@@ -237,7 +237,7 @@ export default function ManageLabTestsPage() {
                 onClick={() => selectedTest && handleDelete(selectedTest)}
                 disabled={deleteMutation.isPending}
               >
-                {t('common.delete') || 'Delete'}
+                {t('common.delete')}
               </button>
             )}
             <button
@@ -245,7 +245,7 @@ export default function ManageLabTestsPage() {
               className="gradient-btn px-6 py-2.5 text-sm"
               disabled={formState.isSubmitting || createMutation.isPending || updateMutation.isPending}
             >
-              {selectedTest ? t('common.update') || 'Update test' : t('common.save') || 'Save test'}
+              {selectedTest ? t('common.update') : t('common.save')}
             </button>
           </div>
         </form>

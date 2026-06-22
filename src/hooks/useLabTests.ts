@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { labService, LabTestPatientDto } from '../services/lab.service';
 import type { LabTest, LabTestResult } from '../types';
+import i18n from '../i18n/config';
 
 export function useLabTests() {
   return useQuery<LabTest[], Error>({
@@ -18,10 +19,10 @@ export function useCreateLabTest() {
     mutationFn: labService.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lab-tests'] });
-      toast.success('Lab test created successfully');
+      toast.success(i18n.t('lab.testCreated'));
     },
     onError: (error) => {
-      toast.error(error.message || 'Unable to create lab test');
+      toast.error(error.message || i18n.t('lab.unableCreateTest'));
     },
   });
 }
@@ -32,10 +33,10 @@ export function useUpdateLabTest() {
     mutationFn: ({ id, data }) => labService.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lab-tests'] });
-      toast.success('Lab test updated successfully');
+      toast.success(i18n.t('lab.testUpdated'));
     },
     onError: (error) => {
-      toast.error(error.message || 'Unable to update lab test');
+      toast.error(error.message || i18n.t('lab.unableUpdateTest'));
     },
   });
 }
@@ -46,10 +47,10 @@ export function useDeleteLabTest() {
     mutationFn: labService.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lab-tests'] });
-      toast.success('Lab test deleted successfully');
+      toast.success(i18n.t('lab.testDeleted'));
     },
     onError: (error) => {
-      toast.error(error.message || 'Unable to delete lab test');
+      toast.error(error.message || i18n.t('lab.unableDeleteTest'));
     },
   });
 }
@@ -69,10 +70,10 @@ export function useCreateLabTestPatient() {
     mutationFn: labService.createPatient,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lab-test-patients'] });
-      toast.success('Lab test result created successfully');
+      toast.success(i18n.t('lab.resultCreated'));
     },
     onError: (error) => {
-      toast.error(error.message || 'Unable to create lab test result');
+      toast.error(error.message || i18n.t('lab.unableCreateResult'));
     },
   });
 }
@@ -83,10 +84,10 @@ export function useUpdateLabTestPatient() {
     mutationFn: labService.updatePatient,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lab-test-patients'] });
-      toast.success('Lab test result updated successfully');
+      toast.success(i18n.t('lab.resultUpdated'));
     },
     onError: (error) => {
-      toast.error(error.message || 'Unable to update lab test result');
+      toast.error(error.message || i18n.t('lab.unableUpdateResult'));
     },
   });
 }
@@ -97,10 +98,10 @@ export function useDeleteLabTestPatient() {
     mutationFn: labService.deletePatient,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lab-test-patients'] });
-      toast.success('Lab test result deleted successfully');
+      toast.success(i18n.t('lab.resultDeleted'));
     },
     onError: (error) => {
-      toast.error(error.message || 'Unable to delete lab test result');
+      toast.error(error.message || i18n.t('lab.unableDeleteResult'));
     },
   });
 }

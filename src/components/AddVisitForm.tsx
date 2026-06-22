@@ -6,6 +6,7 @@ import { Modal } from './ui/Modal';
 import { clinicVisitSchema, type ClinicVisitFormValues } from '../schemas/clinicVisit';
 import { useCreateVisit } from '../hooks/useClinicVisits';
 import type { Diagnosis, Doctor } from '../types';
+import { useTranslation } from 'react-i18next';
 
 interface AddVisitFormProps {
   patientId: number;
@@ -17,6 +18,7 @@ interface AddVisitFormProps {
 }
 
 export function AddVisitForm({ patientId, doctors, diagnoses, isOpen, onClose, onSuccess }: AddVisitFormProps) {
+  const { t } = useTranslation();
   const createVisit = useCreateVisit(patientId);
 
   const { register, handleSubmit, formState, reset } = useForm<ClinicVisitFormValues>({
@@ -48,12 +50,12 @@ export function AddVisitForm({ patientId, doctors, diagnoses, isOpen, onClose, o
       };
 
       await createVisit.mutateAsync(payload);
-      toast.success('Clinic visit added successfully');
+      toast.success(t('visits.clinicVisitAdded'));
       reset();
       onSuccess();
       onClose();
     } catch (error) {
-      toast.error((error as Error).message || 'Unable to create clinic visit');
+      toast.error((error as Error).message || t('visits.unableCreateClinicVisit'));
     }
   };
 
@@ -72,11 +74,11 @@ export function AddVisitForm({ patientId, doctors, diagnoses, isOpen, onClose, o
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add Clinic Visit" size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('visits.addClinicVisit')} size="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <label className="block text-sm text-slate-700">
-            Visit date and time
+            {t('visits.visitDateTime')}
             <input
               type="datetime-local"
               {...register('p_visit_date')}
@@ -88,14 +90,14 @@ export function AddVisitForm({ patientId, doctors, diagnoses, isOpen, onClose, o
           </label>
 
           <label className="block text-sm text-slate-700">
-            Visit type
+            {t('visits.visitType')}
             <select {...register('p_visit_type')} className="input-field mt-2 w-full">
-              <option value="">Select type</option>
-              <option value="new_visit">New visit</option>
-              <option value="follow_up">Follow-up</option>
-              <option value="emergency">Emergency</option>
-              <option value="treatment_session">Treatment session</option>
-              <option value="consultation">Consultation</option>
+              <option value="">{t('visits.selectType')}</option>
+              <option value="new_visit">{t('visits.newVisit')}</option>
+              <option value="follow_up">{t('visits.visitTypeLabels.followUp')}</option>
+              <option value="emergency">{t('visits.visitTypeLabels.emergency')}</option>
+              <option value="treatment_session">{t('visits.treatmentSession')}</option>
+              <option value="consultation">{t('visits.visitTypeLabels.consultation')}</option>
             </select>
             {formState.errors.p_visit_type && (
               <span className="text-xs text-red-500">{formState.errors.p_visit_type.message}</span>
@@ -105,9 +107,9 @@ export function AddVisitForm({ patientId, doctors, diagnoses, isOpen, onClose, o
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <label className="block text-sm text-slate-700">
-            Doctor
+            {t('common.doctor')}
             <select {...register('p_doctor_id')} className="input-field mt-2 w-full">
-              <option value="0">Select doctor</option>
+              <option value="0">{t('visits.selectDoctor')}</option>
               {sortedDoctorOptions.map((doctor) => (
                 <option key={doctor.doctor_id} value={doctor.doctor_id}>
                   {doctor.full_name}
@@ -120,9 +122,9 @@ export function AddVisitForm({ patientId, doctors, diagnoses, isOpen, onClose, o
           </label>
 
           <label className="block text-sm text-slate-700">
-            Diagnosis
+            {t('diagnoses.diagnosis')}
             <select {...register('p_diagnosis_id')} className="input-field mt-2 w-full">
-              <option value="0">Select diagnosis</option>
+              <option value="0">{t('visits.selectDiagnosis')}</option>
               {sortedDiagnosisOptions.map((diagnosis) => (
                 <option key={diagnosis.diagnosis_id} value={diagnosis.diagnosis_id}>
                   {diagnosis.cancer_name ?? diagnosis.notes ?? diagnosis.diagnosis_id}
@@ -136,12 +138,12 @@ export function AddVisitForm({ patientId, doctors, diagnoses, isOpen, onClose, o
         </div>
 
         <label className="block text-sm text-slate-700">
-          Reason for visit
+          {t('visits.reasonForVisit')}
           <textarea
             {...register('p_reason_for_visit')}
             rows={3}
             className="input-field mt-2 w-full resize-none"
-            placeholder="Describe the reason for visit"
+            placeholder={t('visits.describeReason')}
           />
           {formState.errors.p_reason_for_visit && (
             <span className="text-xs text-red-500">{formState.errors.p_reason_for_visit.message}</span>
@@ -150,28 +152,28 @@ export function AddVisitForm({ patientId, doctors, diagnoses, isOpen, onClose, o
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <label className="block text-sm text-slate-700">
-            Clinical notes
+            {t('visits.consultationNotes')}
             <textarea
               {...register('p_clinical_notes')}
               rows={3}
               className="input-field mt-2 w-full resize-none"
-              placeholder="Optional clinical notes"
+              placeholder={t('visits.optionalClinicalNotes')}
             />
           </label>
 
           <label className="block text-sm text-slate-700">
-            Recommendations
+            {t('visits.recommendations')}
             <textarea
               {...register('p_recommendations')}
               rows={3}
               className="input-field mt-2 w-full resize-none"
-              placeholder="Optional recommendations"
+              placeholder={t('visits.optionalRecommendations')}
             />
           </label>
         </div>
 
         <label className="block text-sm text-slate-700">
-          Next visit date
+          {t('visits.nextVisitDate')}
           <input
             type="date"
             {...register('p_next_visit_date')}
@@ -185,14 +187,14 @@ export function AddVisitForm({ patientId, doctors, diagnoses, isOpen, onClose, o
             onClick={onClose}
             className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-100"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
             disabled={createVisit.isPending}
             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
           >
-            {createVisit.isPending ? 'Saving...' : 'Save visit'}
+            {createVisit.isPending ? t('common.saving') : t('visits.saveVisit')}
           </button>
         </div>
       </form>

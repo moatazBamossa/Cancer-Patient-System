@@ -112,6 +112,7 @@ interface MedCardProps {
 }
 
 function MedicationCard({ med, index, onEdit, onDelete }: MedCardProps) {
+  const { t } = useTranslation()
   const tk = getToken(med.category)
 
   return (
@@ -173,7 +174,7 @@ function MedicationCard({ med, index, onEdit, onDelete }: MedCardProps) {
               onClick={() => onEdit(med)}
               className="p-1.5 rounded-lg transition-colors"
               style={{ color: '#94a3b8', background: tk.chip }}
-              title="Edit"
+              title={t('common.edit')}
             >
               <Edit2 size={13} />
             </button>
@@ -181,7 +182,7 @@ function MedicationCard({ med, index, onEdit, onDelete }: MedCardProps) {
               onClick={() => onDelete(med)}
               className="p-1.5 rounded-lg transition-colors"
               style={{ color: '#94a3b8', background: 'rgba(239,68,68,0.12)' }}
-              title="Delete"
+              title={t('common.delete')}
             >
               <Trash2 size={13} />
             </button>
@@ -196,15 +197,15 @@ function MedicationCard({ med, index, onEdit, onDelete }: MedCardProps) {
           {med.unit && (
             <InfoChip
               icon={<Beaker size={10} />}
-              label="Unit"
+              label={t('medications.unit')}
               value={med.unit}
               chipBg={tk.chip}
             />
           )}
           <InfoChip
             icon={med.is_active ? <ToggleRight size={10} /> : <ToggleLeft size={10} />}
-            label="Status"
-            value={med.is_active ? 'Active' : 'Inactive'}
+            label={t('common.status.label')}
+            value={med.is_active ? t('common.status.active') : t('common.status.inactive')}
             chipBg={med.is_active ? 'rgba(16,185,129,0.12)' : 'rgba(100,116,139,0.15)'}
           />
         </div>
@@ -445,7 +446,7 @@ export default function MedicationsPage() {
           </div>
           <input
             type="text"
-            placeholder="Search medications by name…"
+            placeholder={t('medications.searchByName')}
             value={searchInput}
             onChange={(e) => {
               setSearchInput(e.target.value)
@@ -488,7 +489,7 @@ export default function MedicationsPage() {
             <button
               onClick={(e) => { e.stopPropagation(); openEdit(row) }}
               className="p-1.5 rounded-lg"
-              title="Edit"
+              title={t('common.edit')}
               style={{ color: 'var(--text-muted)' }}
             >
               <Edit2 size={14} />
@@ -496,7 +497,7 @@ export default function MedicationsPage() {
             <button
               onClick={(e) => { e.stopPropagation(); setDeleteTarget(row) }}
               className="p-1.5 rounded-lg"
-              title="Delete"
+              title={t('common.delete')}
               style={{ color: 'var(--text-muted)' }}
             >
               <Trash2 size={14} />
@@ -523,9 +524,9 @@ export default function MedicationsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               name="p_name"
-              label="Medication Name"
+              label={t('medications.medicationName')}
               required
-              placeholder="e.g. Cisplatin"
+              placeholder={t('medications.namePlaceholder')}
             />
             <FormField
               name="p_category"
@@ -539,16 +540,16 @@ export default function MedicationsPage() {
           {/* Row 2 — Unit */}
           <FormField
             name="p_unit"
-            label="Unit"
-            placeholder="e.g. mg/m², mg/kg, mg"
+            label={t('medications.unit')}
+            placeholder={t('medications.unitPlaceholder')}
           />
 
           {/* Description */}
           <FormField
             name="p_description"
-            label="Description"
+            label={t('common.description')}
             type="textarea"
-            placeholder="Clinical description, indications, or notes…"
+            placeholder={t('medications.descriptionPlaceholder')}
           />
 
           {/* Active toggle */}

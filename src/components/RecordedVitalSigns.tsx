@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { useVisitVitals, useDeleteVital } from '../hooks/useClinicVisits';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import type { VitalSignRpcItem } from '../types/visitRpc';
+import { useTranslation } from 'react-i18next';
 
 interface RecordedVitalSignsProps {
   visitId: number | null;
@@ -11,6 +12,7 @@ interface RecordedVitalSignsProps {
 }
 
 export function RecordedVitalSigns({ visitId, onAddVital }: RecordedVitalSignsProps) {
+  const { t } = useTranslation();
   const { data: vitals = [], isLoading, error } = useVisitVitals(visitId);
   const deleteVital = useDeleteVital(visitId ?? 0);
   const [confirmVitalId, setConfirmVitalId] = React.useState<number | null>(null);
@@ -28,10 +30,10 @@ export function RecordedVitalSigns({ visitId, onAddVital }: RecordedVitalSignsPr
     if (!confirmVitalId) return;
     try {
       await deleteVital.mutateAsync(confirmVitalId);
-      toast.success('Vital sign record deleted');
+      toast.success(t('vitals.vitalSignRecordDeleted'));
       setConfirmVitalId(null);
     } catch (err) {
-      toast.error((err as Error).message || 'Unable to delete vital sign');
+      toast.error((err as Error).message || t('vitals.unableDeleteVitalSign'));
     }
   };
 
@@ -40,9 +42,9 @@ export function RecordedVitalSigns({ visitId, onAddVital }: RecordedVitalSignsPr
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Recorded vital signs
+            {t('vitals.recordedVitalSigns')}
           </h2>
-          <p className="text-sm text-slate-500">View readings captured for the selected visit.</p>
+          <p className="text-sm text-slate-500">{t('vitals.viewReadingsForSelectedVisit')}</p>
         </div>
         <button
           type="button"
@@ -50,7 +52,7 @@ export function RecordedVitalSigns({ visitId, onAddVital }: RecordedVitalSignsPr
           className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
           disabled={!visitId}
         >
-          Add vital signs
+          {t('vitals.addVitalSigns')}
         </button>
       </div>
 
@@ -68,13 +70,13 @@ export function RecordedVitalSigns({ visitId, onAddVital }: RecordedVitalSignsPr
         </div>
       ) : error ? (
         <div className="rounded-2xl border p-6" style={{ borderColor: 'var(--border-color)', background: 'var(--bg-secondary)' }}>
-          <p className="text-sm font-medium text-red-600">Unable to load vital signs.</p>
+          <p className="text-sm font-medium text-red-600">{t('vitals.unableLoadVitalSigns')}</p>
           <p className="text-sm text-slate-500">{error.message}</p>
         </div>
       ) : vitals.length === 0 ? (
         <div className="rounded-2xl border p-6 text-center" style={{ borderColor: 'var(--border-color)', background: 'var(--bg-secondary)' }}>
-          <p className="text-sm font-medium text-slate-700">No vital signs recorded for this visit.</p>
-          <p className="text-sm text-slate-500">Add a new reading to keep tracking the patient’s vitals.</p>
+          <p className="text-sm font-medium text-slate-700">{t('vitals.noVitalSignsRecordedForVisit')}</p>
+          <p className="text-sm text-slate-500">{t('vitals.addNewReadingToTrackVitals')}</p>
         </div>
       ) : (
         <div className="grid gap-4">
@@ -87,40 +89,40 @@ export function RecordedVitalSigns({ visitId, onAddVital }: RecordedVitalSignsPr
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                    {vital.recorded_at ? format(new Date(vital.recorded_at), 'PPpp') : 'Recorded reading'}
+                    {vital.recorded_at ? format(new Date(vital.recorded_at), 'PPpp') : t('vitals.recordedReading')}
                   </p>
-                  <p className="text-xs text-slate-500">Vital sign snapshot</p>
+                  <p className="text-xs text-slate-500">{t('vitals.vitalSignSnapshot')}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setConfirmVitalId(vital.vital_id)}
                   className="rounded-lg bg-red-500 px-3 py-2 text-sm font-semibold text-white transition hover:bg-red-600"
                 >
-                  Delete
+                  {t('common.delete')}
                 </button>
               </div>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-2xl border p-3" style={{ borderColor: 'var(--border-color)' }}>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Blood pressure</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('vitals.bloodPressure')}</p>
                   <p className="mt-2 font-semibold" style={{ color: 'var(--text-primary)' }}>
                     {vital.blood_pressure_sys ?? '-'} / {vital.blood_pressure_dia ?? '-'} mmHg
                   </p>
                 </div>
                 <div className="rounded-2xl border p-3" style={{ borderColor: 'var(--border-color)' }}>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Heart rate</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('vitals.heartRateLabel')}</p>
                   <p className="mt-2 font-semibold" style={{ color: 'var(--text-primary)' }}>
                     {vital.heart_rate ?? '-'} bpm
                   </p>
                 </div>
                 <div className="rounded-2xl border p-3" style={{ borderColor: 'var(--border-color)' }}>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Temperature</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('vitals.temperatureLabel')}</p>
                   <p className="mt-2 font-semibold" style={{ color: 'var(--text-primary)' }}>
                     {vital.temperature ?? '-'} °C
                   </p>
                 </div>
                 <div className="rounded-2xl border p-3" style={{ borderColor: 'var(--border-color)' }}>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">SpO2</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('vitals.spo2')}</p>
                   <p className="mt-2 font-semibold" style={{ color: 'var(--text-primary)' }}>
                     {vital.spo2 ?? '-'} %
                   </p>
@@ -129,19 +131,19 @@ export function RecordedVitalSigns({ visitId, onAddVital }: RecordedVitalSignsPr
 
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 <div className="rounded-2xl border p-3" style={{ borderColor: 'var(--border-color)' }}>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Respiratory rate</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('vitals.respiratoryRateLabel')}</p>
                   <p className="mt-2 font-semibold" style={{ color: 'var(--text-primary)' }}>
                     {vital.respiratory_rate ?? '-'} /min
                   </p>
                 </div>
                 <div className="rounded-2xl border p-3" style={{ borderColor: 'var(--border-color)' }}>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Weight</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('vitals.weightLabel')}</p>
                   <p className="mt-2 font-semibold" style={{ color: 'var(--text-primary)' }}>
                     {vital.weight_kg ?? '-'} kg
                   </p>
                 </div>
                 <div className="rounded-2xl border p-3" style={{ borderColor: 'var(--border-color)' }}>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Height / BMI</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('vitals.heightBmi')}</p>
                   <p className="mt-2 font-semibold" style={{ color: 'var(--text-primary)' }}>
                     {vital.height_cm ?? '-'} cm / {vital.bmi ?? '-'}
                   </p>
@@ -150,7 +152,7 @@ export function RecordedVitalSigns({ visitId, onAddVital }: RecordedVitalSignsPr
 
               {vital.notes && (
                 <div className="mt-4 rounded-2xl border p-3" style={{ borderColor: 'var(--border-color)' }}>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Notes</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('common.notes')}</p>
                   <p className="mt-2 text-sm text-slate-700">{vital.notes}</p>
                 </div>
               )}
@@ -161,8 +163,8 @@ export function RecordedVitalSigns({ visitId, onAddVital }: RecordedVitalSignsPr
 
       <ConfirmDialog
         isOpen={!!confirmVitalId}
-        title="Delete vital sign"
-        message="Are you sure you want to delete this vital sign record? This action cannot be undone."
+        title={t('vitals.deleteVitalSignTitle')}
+        message={t('vitals.deleteVitalSignMessage')}
         onClose={() => setConfirmVitalId(null)}
         onConfirm={handleDelete}
         variant="danger"

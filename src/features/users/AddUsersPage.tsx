@@ -20,45 +20,45 @@ import {
 import type { UserProfile } from '../../utils/user-profile-normalizers';
 import type { CreateUserProfileParams, UpdateUserProfileParams } from '../../types/user-profile';
 
-const phoneSchema = z
+const phoneSchema = (t: ReturnType<typeof useTranslation>['t']) => z
   .union([
     z
       .string()
-      .regex(/^[\d\s\-\+\(\)]+$/, 'Invalid phone number')
-      .refine((value) => !value || value.replace(/\D/g, '').length >= 9, 'Invalid phone number'),
+      .regex(/^[\d\s\-\+\(\)]+$/, t('addUsers.invalidPhone'))
+      .refine((value) => !value || value.replace(/\D/g, '').length >= 9, t('addUsers.invalidPhone')),
     z.literal(''),
     z.undefined(),
   ])
   .optional();
 
-const createUserSchema = z
+const createUserSchema = (t: ReturnType<typeof useTranslation>['t']) => z
   .object({
-    full_name: z.string().min(3, 'Full name must be at least 3 characters').max(100),
-    user_name: z.string().min(4, 'Username must be at least 4 characters').max(50).regex(/^[a-zA-Z0-9_]+$/, 'Username may only contain letters, numbers and underscores'),
+    full_name: z.string().min(3, t('addUsers.fullNameMin')).max(100),
+    user_name: z.string().min(4, t('addUsers.usernameMin')).max(50).regex(/^[a-zA-Z0-9_]+$/, t('addUsers.usernamePattern')),
     password: z
       .string()
-      .min(8, 'Password must be at least 8 characters')
-      .regex(/[A-Z]/, 'Password must contain an uppercase letter')
-      .regex(/[0-9]/, 'Password must contain a number')
-      .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, 'Password must contain a special character'),
+      .min(8, t('addUsers.passwordMin'))
+      .regex(/[A-Z]/, t('addUsers.passwordUppercase'))
+      .regex(/[0-9]/, t('addUsers.passwordNumber'))
+      .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, t('addUsers.passwordSpecial')),
     confirm_password: z.string(),
-    phone: phoneSchema,
+    phone: phoneSchema(t),
     role_id: z.number().nullable().optional(),
     specialty: z.string().optional(),
     is_active: z.boolean().default(true),
   })
   .refine((data) => data.password === data.confirm_password, {
-    message: 'Passwords do not match',
+    message: t('addUsers.passwordsDoNotMatch'),
     path: ['confirm_password'],
   });
 
-const editUserSchema = z
+const editUserSchema = (t: ReturnType<typeof useTranslation>['t']) => z
   .object({
-    full_name: z.string().min(3, 'Full name must be at least 3 characters').max(100),
-    user_name: z.string().min(4, 'Username must be at least 4 characters').max(50).regex(/^[a-zA-Z0-9_]+$/, 'Username may only contain letters, numbers and underscores'),
+    full_name: z.string().min(3, t('addUsers.fullNameMin')).max(100),
+    user_name: z.string().min(4, t('addUsers.usernameMin')).max(50).regex(/^[a-zA-Z0-9_]+$/, t('addUsers.usernamePattern')),
     password: z.string().optional(),
     confirm_password: z.string().optional(),
-    phone: phoneSchema,
+    phone: phoneSchema(t),
     role_id: z.number().nullable().optional(),
     specialty: z.string().optional(),
     is_active: z.boolean().default(true),
@@ -69,31 +69,31 @@ const editUserSchema = z
 
     if (password || confirmPassword) {
       if (!password) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Password is required', path: ['password'] });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('auth.passwordRequired'), path: ['password'] });
       }
       if (!confirmPassword) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Please confirm the password', path: ['confirm_password'] });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('addUsers.confirmPasswordRequired'), path: ['confirm_password'] });
       }
       if (password && password.length < 8) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Password must be at least 8 characters', path: ['password'] });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('addUsers.passwordMin'), path: ['password'] });
       }
       if (password && !/[A-Z]/.test(password)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Password must contain an uppercase letter', path: ['password'] });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('addUsers.passwordUppercase'), path: ['password'] });
       }
       if (password && !/[0-9]/.test(password)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Password must contain a number', path: ['password'] });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('addUsers.passwordNumber'), path: ['password'] });
       }
       if (password && !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Password must contain a special character', path: ['password'] });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('addUsers.passwordSpecial'), path: ['password'] });
       }
       if (password && confirmPassword && password !== confirmPassword) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Passwords do not match', path: ['confirm_password'] });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('addUsers.passwordsDoNotMatch'), path: ['confirm_password'] });
       }
     }
   });
 
-type CreateUserFormValues = z.infer<typeof createUserSchema>;
-type EditUserFormValues = z.infer<typeof editUserSchema>;
+type CreateUserFormValues = z.infer<ReturnType<typeof createUserSchema>>;
+type EditUserFormValues = z.infer<ReturnType<typeof editUserSchema>>;
 
 type StatusFilter = 'all' | 'active' | 'inactive';
 
@@ -185,29 +185,29 @@ export default function AddUsersPage() {
   );
 
   const getRoleName = (roleId: number | null) => {
-    if (roleId == null) return 'Unassigned';
-    return rolesMap.get(roleId) ?? 'Unassigned';
+    if (roleId == null) return t('addUsers.unassigned');
+    return rolesMap.get(roleId) ?? t('addUsers.unassigned');
   };
 
   const createUserValidationSchema = useMemo(() => {
     const existingUserNames = new Set(profiles.map((profile) => profile.user_name.toLowerCase()));
-    return createUserSchema.refine((data) => !existingUserNames.has(data.user_name.toLowerCase()), {
-      message: 'Username is already taken',
+    return createUserSchema(t).refine((data) => !existingUserNames.has(data.user_name.toLowerCase()), {
+      message: t('addUsers.usernameTaken'),
       path: ['user_name'],
     });
-  }, [profiles]);
+  }, [profiles, t]);
 
   const editUserSchemaMemo = useMemo(() => {
-    return editUserSchema.superRefine((data, ctx) => {
+    return editUserSchema(t).superRefine((data, ctx) => {
       const existingUserNames = profiles
         .filter((profile) => profile.id !== editingUser?.id)
         .map((profile) => profile.user_name.toLowerCase());
 
       if (existingUserNames.includes(data.user_name.toLowerCase())) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Username is already taken', path: ['user_name'] });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('addUsers.usernameTaken'), path: ['user_name'] });
       }
     });
-  }, [editingUser?.id, profiles]);
+  }, [editingUser?.id, profiles, t]);
 
   const initialCreateValues: CreateUserFormValues = {
     full_name: '',
@@ -251,11 +251,11 @@ export default function AddUsersPage() {
         phone: data.phone?.trim() ? data.phone.trim() : null,
         is_active: data.is_active,
       });
-      setSuccessMessage('User created successfully');
+      setSuccessMessage(t('addUsers.userCreated'));
       setCreateModalOpen(false);
       form.restart();
     } catch (err) {
-      setGeneralError(err instanceof Error ? err.message : 'Unable to create user');
+      setGeneralError(err instanceof Error ? err.message : t('addUsers.unableCreateUser'));
     }
   };
 
@@ -277,17 +277,17 @@ export default function AddUsersPage() {
       if (data.is_active !== editingUser.is_active) payload.is_active = data.is_active;
 
       if (Object.keys(payload).length === 1) {
-        setSuccessMessage('No changes detected');
+        setSuccessMessage(t('addUsers.noChangesDetected'));
         setEditingUser(null);
         return;
       }
 
       await updateMutation.mutateAsync(payload);
-      setSuccessMessage('User updated successfully');
+      setSuccessMessage(t('addUsers.userUpdated'));
       setEditingUser(null);
       form.restart();
     } catch (err) {
-      setGeneralError(err instanceof Error ? err.message : 'Unable to update user');
+      setGeneralError(err instanceof Error ? err.message : t('addUsers.unableUpdateUser'));
     }
   };
 
@@ -297,33 +297,33 @@ export default function AddUsersPage() {
 
     try {
       await deleteMutation.mutateAsync({ id: deleteUserId });
-      setSuccessMessage('User deleted successfully');
+      setSuccessMessage(t('addUsers.userDeleted'));
       setDeleteUserId(null);
       setDeleteConfirmOpen(false);
     } catch (err) {
-      setGeneralError(err instanceof Error ? err.message : 'Unable to delete user');
+      setGeneralError(err instanceof Error ? err.message : t('addUsers.unableDeleteUser'));
     }
   };
 
   const columns: Column<UserProfile>[] = [
-    { key: 'full_name', header: 'Full Name', sortable: true },
-    { key: 'user_name', header: 'Username', sortable: true },
-    { key: 'phone', header: 'Phone', sortable: true },
+    { key: 'full_name', header: t('profile.fullName'), sortable: true },
+    { key: 'user_name', header: t('profile.username'), sortable: true },
+    { key: 'phone', header: t('common.phone'), sortable: true },
     {
       key: 'role_id',
-      header: 'Role',
+      header: t('common.role'),
       sortable: true,
       render: (_value, row) => getRoleName(row.role_id),
     },
-    { key: 'specialty', header: 'Specialty', sortable: true },
+    { key: 'specialty', header: t('doctors.specialty'), sortable: true },
     {
       key: 'is_active',
-      header: 'Status',
+      header: t('common.status.label'),
       render: (_value, row) => <StatusBadge status={row.is_active ? 'active' : 'inactive'} />,
     },
     {
       key: 'created_at',
-      header: 'Created',
+      header: t('addUsers.created'),
       sortable: true,
       render: (value) => new Date(String(value)).toLocaleDateString(),
     },
@@ -337,9 +337,9 @@ export default function AddUsersPage() {
           event.stopPropagation();
           setDetailsUser(row);
         }}
-        className="text-xs px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-100"
+      className="text-xs px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-100"
       >
-        <Eye size={14} /> View
+        <Eye size={14} /> {t('common.view')}
       </button>
       <button
         type="button"
@@ -349,7 +349,7 @@ export default function AddUsersPage() {
         }}
         className="text-xs px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-100"
       >
-        <Edit2 size={14} /> Edit
+        <Edit2 size={14} /> {t('common.edit')}
       </button>
       <button
         type="button"
@@ -360,7 +360,7 @@ export default function AddUsersPage() {
         }}
         className="text-xs px-2 py-1 rounded-lg bg-red-500 text-white hover:bg-red-600"
       >
-        <Trash2 size={14} /> Delete
+        <Trash2 size={14} /> {t('common.delete')}
       </button>
     </div>
   );
@@ -369,8 +369,8 @@ export default function AddUsersPage() {
     <div className="space-y-6 max-w-[1280px] mx-auto animate-in fade-in duration-500">
       <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">User Management</h1>
-          <p className="text-sm text-slate-500">Create, update, and manage application users with role and status controls.</p>
+          <h1 className="text-2xl font-bold">{t('addUsers.userManagement')}</h1>
+          <p className="text-sm text-slate-500">{t('addUsers.userManagementSubtitle')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <button
@@ -378,7 +378,7 @@ export default function AddUsersPage() {
             onClick={() => setCreateModalOpen(true)}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
           >
-            <Plus size={16} /> Create User
+            <Plus size={16} /> {t('addUsers.createUser')}
           </button>
         </div>
       </header>
@@ -397,7 +397,7 @@ export default function AddUsersPage() {
           )}
           {usersError && (
             <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900">
-              {usersError.message || 'Unable to load users.'}
+              {usersError.message || t('addUsers.unableLoadUsers')}
             </div>
           )}
         </div>
@@ -408,25 +408,25 @@ export default function AddUsersPage() {
           <div className="rounded-xl border p-4 bg-white shadow-sm">
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="col-span-1 sm:col-span-2">
-                <label className="block text-sm font-medium text-slate-700">Search</label>
+                <label className="block text-sm font-medium text-slate-700">{t('common.searchAction')}</label>
                 <div className="relative mt-1">
                   <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
-                    placeholder="Search full name, username or phone"
+                    placeholder={t('addUsers.searchPlaceholder')}
                     className="input-field pl-10 w-full"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700">Role</label>
+                <label className="block text-sm font-medium text-slate-700">{t('common.role')}</label>
                 <select
                   value={roleFilter ?? ''}
                   onChange={(event) => setRoleFilter(event.target.value ? Number(event.target.value) : null)}
                   className="input-field w-full mt-1"
                 >
-                  <option value="">All roles</option>
+                  <option value="">{t('addUsers.allRoles')}</option>
                   {roles.map((role) => (
                     <option key={role.role_id} value={role.role_id}>
                       {role.role_name}
@@ -435,15 +435,15 @@ export default function AddUsersPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700">Status</label>
+                <label className="block text-sm font-medium text-slate-700">{t('common.status.label')}</label>
                 <select
                   value={statusFilter}
                   onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
                   className="input-field w-full mt-1"
                 >
-                  <option value="all">All statuses</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
+                  <option value="all">{t('addUsers.allStatuses')}</option>
+                  <option value="active">{t('common.status.active')}</option>
+                  <option value="inactive">{t('common.status.inactive')}</option>
                 </select>
               </div>
             </div>
@@ -462,9 +462,9 @@ export default function AddUsersPage() {
                 setSortKey(key);
                 setSortOrder(order);
               }}
-              searchPlaceholder="Search users..."
+              searchPlaceholder={t('addUsers.searchUsers')}
               isLoading={usersLoading}
-              emptyMessage="No users found. Adjust filters or create a user."
+              emptyMessage={t('addUsers.noUsersFound')}
               actions={actions}
             />
           </div>
@@ -472,31 +472,31 @@ export default function AddUsersPage() {
 
         <aside className="space-y-4">
           <div className="rounded-xl border bg-white p-4 shadow-sm">
-            <h2 className="text-lg font-semibold">Summary</h2>
+            <h2 className="text-lg font-semibold">{t('addUsers.summary')}</h2>
             <div className="mt-4 space-y-3 text-sm text-slate-600">
               <p>
-                <span className="font-semibold">Total users:</span> {profiles.length}
+                <span className="font-semibold">{t('addUsers.totalUsers')}:</span> {profiles.length}
               </p>
               <p>
-                <span className="font-semibold">Visible results:</span> {totalItems}
+                <span className="font-semibold">{t('addUsers.visibleResults')}:</span> {totalItems}
               </p>
               <p>
-                <span className="font-semibold">Selected role:</span> {roleFilter ? getRoleName(roleFilter) : 'All roles'}
+                <span className="font-semibold">{t('addUsers.selectedRole')}:</span> {roleFilter ? getRoleName(roleFilter) : t('addUsers.allRoles')}
               </p>
               <p>
-                <span className="font-semibold">Status filter:</span> {statusFilter === 'all' ? 'All' : statusFilter === 'active' ? 'Active' : 'Inactive'}
+                <span className="font-semibold">{t('addUsers.statusFilter')}:</span> {statusFilter === 'all' ? t('common.all') : statusFilter === 'active' ? t('common.status.active') : t('common.status.inactive')}
               </p>
             </div>
           </div>
 
           <div className="rounded-xl border bg-white p-4 shadow-sm">
-            <h2 className="text-lg font-semibold">Tips</h2>
-            <p className="mt-3 text-sm text-slate-600">Use the filters and search input to narrow down users. View user details for audit fields and edit access controls.</p>
+            <h2 className="text-lg font-semibold">{t('addUsers.tips')}</h2>
+            <p className="mt-3 text-sm text-slate-600">{t('addUsers.tipsText')}</p>
           </div>
         </aside>
       </div>
 
-      <Modal isOpen={createModalOpen} onClose={() => setCreateModalOpen(false)} title="Create User" size="lg">
+      <Modal isOpen={createModalOpen} onClose={() => setCreateModalOpen(false)} title={t('addUsers.createUser')} size="lg">
         <AppForm<CreateUserFormValues>
           initialValues={initialCreateValues}
           validate={zodValidator(createUserValidationSchema)}
@@ -504,36 +504,36 @@ export default function AddUsersPage() {
           className="space-y-5"
         >
           <div className="grid gap-4 lg:grid-cols-2">
-            <FormField name="full_name" label="Full Name" placeholder="Enter full name" required />
-            <FormField name="user_name" label="Username" placeholder="username" required />
+            <FormField name="full_name" label={t('profile.fullName')} placeholder={t('addUsers.enterFullName')} required />
+            <FormField name="user_name" label={t('profile.username')} placeholder={t('auth.username')} required />
           </div>
           <div className="grid gap-4 lg:grid-cols-2">
-            <FormField name="password" type="password" label="Password" placeholder="Enter password" required />
-            <FormField name="confirm_password" type="password" label="Confirm Password" placeholder="Confirm password" required />
+            <FormField name="password" type="password" label={t('auth.password')} placeholder={t('auth.enterPassword')} required />
+            <FormField name="confirm_password" type="password" label={t('addUsers.confirmPassword')} placeholder={t('addUsers.confirmPassword')} required />
           </div>
           <div className="grid gap-4 lg:grid-cols-2">
-            <FormField name="phone" label="Phone" placeholder="Phone number" />
-            <FormField name="role_id" type="select" label="Role" options={roleOptions} disabled={rolesLoading} placeholder="Select a role" />
+            <FormField name="phone" label={t('common.phone')} placeholder={t('addUsers.phoneNumber')} />
+            <FormField name="role_id" type="select" label={t('common.role')} options={roleOptions} disabled={rolesLoading} placeholder={t('addUsers.selectRole')} />
           </div>
-          <FormField name="specialty" label="Specialty" placeholder="Specialty or department" />
+          <FormField name="specialty" label={t('doctors.specialty')} placeholder={t('addUsers.specialtyDepartment')} />
           <Field name="is_active" type="checkbox">
             {({ input }) => (
               <div className="flex items-center gap-2">
                 <input {...input} id="create_is_active" type="checkbox" className="w-4 h-4 rounded border-slate-300 text-indigo-600" />
-                <label htmlFor="create_is_active" className="text-sm text-slate-700">Active account</label>
+                <label htmlFor="create_is_active" className="text-sm text-slate-700">{t('addUsers.activeAccount')}</label>
               </div>
             )}
           </Field>
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
-            <button type="button" onClick={() => setCreateModalOpen(false)} className="px-4 py-2 rounded-lg border text-slate-700">Cancel</button>
+            <button type="button" onClick={() => setCreateModalOpen(false)} className="px-4 py-2 rounded-lg border text-slate-700">{t('common.cancel')}</button>
             <button type="submit" disabled={createMutation.isPending} className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-70">
-              {createMutation.isPending ? 'Creating...' : 'Create User'}
+              {createMutation.isPending ? t('addUsers.creating') : t('addUsers.createUser')}
             </button>
           </div>
         </AppForm>
       </Modal>
 
-      <Modal isOpen={!!editingUser} onClose={() => setEditingUser(null)} title="Edit User" size="lg">
+      <Modal isOpen={!!editingUser} onClose={() => setEditingUser(null)} title={t('addUsers.editUser')} size="lg">
         {editingUser && (
           <AppForm<EditUserFormValues>
             key={editingUser.id}
@@ -543,30 +543,30 @@ export default function AddUsersPage() {
             className="space-y-5"
           >
             <div className="grid gap-4 lg:grid-cols-2">
-              <FormField name="full_name" label="Full Name" placeholder="Enter full name" required />
-              <FormField name="user_name" label="Username" placeholder="username" required />
+              <FormField name="full_name" label={t('profile.fullName')} placeholder={t('addUsers.enterFullName')} required />
+              <FormField name="user_name" label={t('profile.username')} placeholder={t('auth.username')} required />
             </div>
             <div className="grid gap-4 lg:grid-cols-2">
-              <FormField name="phone" label="Phone" placeholder="Phone number" />
-              <FormField name="role_id" type="select" label="Role" options={roleOptions} disabled={rolesLoading} placeholder="Select a role" />
+              <FormField name="phone" label={t('common.phone')} placeholder={t('addUsers.phoneNumber')} />
+              <FormField name="role_id" type="select" label={t('common.role')} options={roleOptions} disabled={rolesLoading} placeholder={t('addUsers.selectRole')} />
             </div>
-            <FormField name="specialty" label="Specialty" placeholder="Specialty or department" />
+            <FormField name="specialty" label={t('doctors.specialty')} placeholder={t('addUsers.specialtyDepartment')} />
             <div className="grid gap-4 lg:grid-cols-2">
-              <FormField name="password" type="password" label="New Password" placeholder="Leave blank to keep current password" />
-              <FormField name="confirm_password" type="password" label="Confirm New Password" placeholder="Confirm new password" />
+              <FormField name="password" type="password" label={t('addUsers.newPassword')} placeholder={t('addUsers.keepCurrentPassword')} />
+              <FormField name="confirm_password" type="password" label={t('addUsers.confirmNewPassword')} placeholder={t('addUsers.confirmNewPassword')} />
             </div>
             <Field name="is_active" type="checkbox">
               {({ input }) => (
                 <div className="flex items-center gap-2">
                   <input {...input} id="edit_is_active" type="checkbox" className="w-4 h-4 rounded border-slate-300 text-indigo-600" />
-                  <label htmlFor="edit_is_active" className="text-sm text-slate-700">Active account</label>
+                  <label htmlFor="edit_is_active" className="text-sm text-slate-700">{t('addUsers.activeAccount')}</label>
                 </div>
               )}
             </Field>
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
-              <button type="button" onClick={() => setEditingUser(null)} className="px-4 py-2 rounded-lg border text-slate-700">Cancel</button>
+              <button type="button" onClick={() => setEditingUser(null)} className="px-4 py-2 rounded-lg border text-slate-700">{t('common.cancel')}</button>
               <button type="submit" disabled={updateMutation.isPending} className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-70">
-                {updateMutation.isPending ? 'Saving...' : 'Save changes'}
+                {updateMutation.isPending ? t('common.saving') : t('profile.saveChanges')}
               </button>
             </div>
           </AppForm>
@@ -581,40 +581,40 @@ export default function AddUsersPage() {
             </button>
             <div className="space-y-4">
               <div>
-                <h2 className="text-xl font-semibold">User Details</h2>
-                <p className="text-sm text-slate-500">Read-only profile details for the selected user.</p>
+                <h2 className="text-xl font-semibold">{t('addUsers.userDetails')}</h2>
+                <p className="text-sm text-slate-500">{t('addUsers.userDetailsSubtitle')}</p>
               </div>
               <div className="grid gap-3">
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400">Full name</p>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">{t('profile.fullName')}</p>
                   <p className="text-base font-medium">{detailsUser.full_name}</p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400">Username</p>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">{t('profile.username')}</p>
                   <p className="text-base font-medium">{detailsUser.user_name}</p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400">Role</p>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">{t('common.role')}</p>
                   <p className="text-base font-medium">{getRoleName(detailsUser.role_id)}</p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400">Phone</p>
-                  <p className="text-base font-medium">{detailsUser.phone || 'N/A'}</p>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">{t('common.phone')}</p>
+                  <p className="text-base font-medium">{detailsUser.phone || t('common.notAvailable')}</p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400">Specialty</p>
-                  <p className="text-base font-medium">{detailsUser.specialty || 'N/A'}</p>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">{t('doctors.specialty')}</p>
+                  <p className="text-base font-medium">{detailsUser.specialty || t('common.notAvailable')}</p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400">Status</p>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">{t('common.status.label')}</p>
                   <StatusBadge status={detailsUser.is_active ? 'active' : 'inactive'} />
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400">Created</p>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">{t('addUsers.created')}</p>
                   <p className="text-base font-medium">{new Date(detailsUser.created_at).toLocaleString()}</p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400">Updated</p>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">{t('addUsers.updated')}</p>
                   <p className="text-base font-medium">{new Date(detailsUser.updated_at).toLocaleString()}</p>
                 </div>
               </div>
@@ -627,10 +627,10 @@ export default function AddUsersPage() {
         isOpen={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}
         onConfirm={handleDeleteConfirm}
-        title="Delete user"
-        message="Are you sure you want to delete this user? This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t('addUsers.deleteUser')}
+        message={t('addUsers.deleteUserConfirm')}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
         variant="danger"
       />
     </div>

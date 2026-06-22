@@ -61,7 +61,8 @@
       "high": "مرتفع",
       "critical": "حرج",
       "cancelled": "ملغى",
-      "chemo": "علاج كيماوي"
+      "chemo": "علاج كيماوي",
+      "transferred": "تم التحويل"
     },
     "date": "التاريخ",
     "name": "الاسم",
@@ -83,7 +84,14 @@
     "updated": "تم التحديث",
     "somethingWentWrong": "حدث خطأ ما",
     "unexpectedError": "حدث خطأ غير متوقع",
-    "tryAgain": "حاول مرة أخرى"
+    "tryAgain": "حاول مرة أخرى",
+    "back": "رجوع",
+    "category": "الفئة",
+    "copied": "تم النسخ إلى الحافظة!",
+    "deleted": "تم الحذف",
+    "deleteSuccess": "تم الحذف بنجاح",
+    "select": "اختر...",
+    "updateSuccess": "تم التحديث بنجاح"
   },
   "auth": {
     "welcome": "مرحباً بك مجدداً",
@@ -109,7 +117,34 @@
     "monthlyVisits": "زيارات العيادة الشهرية",
     "recentActivity": "النشاط الأخير",
     "viewAll": "عرض الكل",
-    "vsLastMonth": "مقارنة بالشهر الماضي"
+    "vsLastMonth": "مقارنة بالشهر الماضي",
+    "action": "إجراء",
+    "active": "نشط",
+    "activeDiagnoses": "التشخيصات النشطة",
+    "ageDemographics": "توزيع الأعمار",
+    "attendance": "الحضور",
+    "cancerByType": "حالات السرطان حسب النوع",
+    "cancerCases": "حالات السرطان",
+    "completed": "مكتملة",
+    "doctorPerformance": "أداء الطاقم الطبي",
+    "failedLoad": "تعذر تحميل ملخص لوحة القيادة",
+    "failedLoadSubtitle": "يرجى التأكد من إعداد اتصالات قاعدة البيانات والصلاحيات بشكل صحيح.",
+    "genderDemographics": "توزيع الجنس",
+    "missed": "فائتة",
+    "missedFollowUp": "متابعة الزيارات",
+    "missedFollowUpDesc": "هؤلاء المرضى فاتتهم مواعيدهم. يلزم التواصل معهم أو إعادة الجدولة.",
+    "monitored": "حالات قيد المتابعة",
+    "newPatients": "مرضى جدد",
+    "noMissedVisits": "كل شيء جيد! لا توجد زيارات فائتة.",
+    "resolved": "تم حلها",
+    "today": "اليوم",
+    "total": "الإجمالي",
+    "totalPatientsShort": "المرضى",
+    "totalVisits": "إجمالي الزيارات",
+    "viewAllUpcoming": "عرض جدول الزيارات القادمة",
+    "visitTypes": "أنواع المواعيد",
+    "visitsToday": "زيارات اليوم",
+    "visitsTrend": "اتجاه الزيارات الشهري"
   },
   "welcome": {
     "quickStart": "بداية سريعة",
@@ -149,7 +184,9 @@
     "upcomingVisits": "الزيارات القادمة",
     "activePatients": "المرضى النشطين",
     "openCases": "الحالات المفتوحة",
-    "tasks": "الإجراءات المعلقة"
+    "tasks": "الإجراءات المعلقة",
+    "diagnoses": "التشخيصات",
+    "diagnosesDescription": "راجع وأدر تشخيصات المرضى."
   },
   "sidebar": {
     "cancerCenter": "مركز السرطان",
@@ -173,7 +210,10 @@
     "cancerTypeRequired": "نوع السرطان مطلوب",
     "doctorRequired": "الطبيب مطلوب",
     "dateRequired": "التاريخ مطلوب",
-    "notesRequired": "الملاحظات مطلوبة"
+    "notesRequired": "الملاحظات مطلوبة",
+    "diagnosis": "التشخيص",
+    "diagnosisId": "رقم التشخيص",
+    "searchByPatientId": "البحث برقم المريض..."
   },
   "cancer": {
     "title": "أنواع السرطان",
@@ -184,7 +224,9 @@
     "nameRequired": "الاسم مطلوب",
     "codeRequired": "الرمز مطلوب",
     "colorRequired": "اللون مطلوب",
-    "descriptionRequired": "الوصف مطلوب"
+    "descriptionRequired": "الوصف مطلوب",
+    "deleteConfirm": "هل أنت متأكد من حذف نوع السرطان هذا؟",
+    "icd10": "ICD-10"
   },
   "treatment": {
     "title": "خطط العلاج",
@@ -290,7 +332,9 @@
     "saving": "جاري الحفظ...",
     "saveChanges": "حفظ التغييرات",
     "fullName": "الاسم الكامل",
-    "mobileNumber": "رقم الجوال"
+    "mobileNumber": "رقم الجوال",
+    "fullNameRequired": "الاسم الكامل مطلوب",
+    "nationalityRequired": "الجنسية مطلوبة"
   },
   "patientDetails": {
     "overview": "نظرة عامة",
@@ -320,7 +364,17 @@
     "impression": "الانطباع",
     "radiologist": "أخصائي الأشعة",
     "primary": "أساسي",
-    "normal": "طبيعي"
+    "normal": "طبيعي",
+    "addContact": "إضافة جهة اتصال",
+    "altPhone": "هاتف بديل",
+    "deleteContactMessage": "هل أنت متأكد من حذف جهة اتصال الطوارئ هذه؟",
+    "deleteContactTitle": "حذف جهة الاتصال",
+    "editContact": "تعديل جهة الاتصال",
+    "fullName": "الاسم الكامل",
+    "loadingContacts": "جاري تحميل جهات الاتصال...",
+    "notes": "ملاحظات",
+    "phone": "الهاتف",
+    "relationship": "صلة القرابة"
   },
   "doctors": {
     "title": "الفريق الطبي",
@@ -354,7 +408,8 @@
     "clinicRequired": "العيادة مطلوبة",
     "licenseRequired": "رقم الترخيص مطلوب",
     "phoneRequired": "رقم الهاتف مطلوب",
-    "emailRequired": "البريد الإلكتروني مطلوب"
+    "emailRequired": "البريد الإلكتروني مطلوب",
+    "specialty": "التخصص"
   },
   "clinics": {
     "title": "العيادات والأقسام",
@@ -403,7 +458,48 @@
     "recommendations": "التوصيات",
     "nextVisitDate": "تاريخ الزيارة القادمة",
     "routine": "روتينية",
-    "postTreatment": "ما بعد العلاج"
+    "postTreatment": "ما بعد العلاج",
+    "editVisit": "تعديل الزيارة",
+    "visitDeleted": "تم حذف الزيارة بنجاح",
+    "visitUpdated": "تم تحديث الزيارة بنجاح",
+    "clinicVisits": "زيارات العيادة",
+    "managePatientVisits": "إدارة زيارات المريض والعلامات الحيوية المسجلة للمريض المحدد.",
+    "addNewVisit": "إضافة زيارة جديدة",
+    "unableLoadVisits": "تعذر تحميل الزيارات.",
+    "noVisitsYet": "لا توجد زيارات بعد.",
+    "scheduleFirstVisit": "استخدم الزر أعلاه لجدولة أول زيارة للعيادة.",
+    "patientId": "رقم المريض {{id}}",
+    "visitDetails": "تفاصيل الزيارة",
+    "deleteVisit": "حذف الزيارة",
+    "visitDate": "تاريخ الزيارة",
+    "nextVisit": "الزيارة القادمة",
+    "noNextVisit": "لا توجد زيارة قادمة",
+    "selectVisitToReview": "اختر زيارة لمراجعة التفاصيل والعلامات الحيوية.",
+    "deleteClinicVisitTitle": "حذف زيارة العيادة",
+    "deleteClinicVisitMessage": "هل أنت متأكد من حذف هذه الزيارة؟ لا يمكن التراجع عن هذا الإجراء.",
+    "clinicVisitDeleted": "تم حذف زيارة العيادة بنجاح",
+    "unableDeleteClinicVisit": "تعذر حذف زيارة العيادة",
+    "addClinicVisit": "إضافة زيارة عيادة",
+    "visitDateTime": "تاريخ ووقت الزيارة",
+    "selectType": "اختر النوع",
+    "selectDoctor": "اختر الطبيب",
+    "selectDiagnosis": "اختر التشخيص",
+    "describeReason": "اكتب سبب الزيارة",
+    "optionalClinicalNotes": "ملاحظات سريرية اختيارية",
+    "optionalRecommendations": "توصيات اختيارية",
+    "saveVisit": "حفظ الزيارة",
+    "clinicVisitAdded": "تمت إضافة زيارة العيادة بنجاح",
+    "unableCreateClinicVisit": "تعذر إنشاء زيارة العيادة",
+    "clinicVisit": "زيارة عيادة",
+    "newVisit": "زيارة جديدة",
+    "treatmentSession": "جلسة علاج",
+    "visitTypeLabels": {
+      "consultation": "استشارة",
+      "emergency": "طارئة",
+      "followUp": "متابعة",
+      "routine": "روتينية",
+      "treatmentSession": "جلسة علاج"
+    }
   },
   "vitals": {
     "title": "العلامات الحيوية",
@@ -466,7 +562,20 @@
     "underweight": "نقص وزن",
     "normal": "وزن طبيعي",
     "overweight": "وزن زائد",
-    "obese": "سمنة"
+    "obese": "سمنة",
+    "respRate": "معدل التنفس",
+    "viewReadingsForSelectedVisit": "عرض القراءات المسجلة للزيارة المحددة.",
+    "addVitalSigns": "إضافة علامات حيوية",
+    "unableLoadVitalSigns": "تعذر تحميل العلامات الحيوية.",
+    "noVitalSignsRecordedForVisit": "لا توجد علامات حيوية مسجلة لهذه الزيارة.",
+    "addNewReadingToTrackVitals": "أضف قراءة جديدة لمتابعة العلامات الحيوية للمريض.",
+    "vitalSignRecordDeleted": "تم حذف سجل العلامات الحيوية",
+    "unableDeleteVitalSign": "تعذر حذف العلامة الحيوية",
+    "recordedReading": "قراءة مسجلة",
+    "vitalSignSnapshot": "لقطة للعلامات الحيوية",
+    "heightBmi": "الطول / مؤشر كتلة الجسم",
+    "deleteVitalSignTitle": "حذف علامة حيوية",
+    "deleteVitalSignMessage": "هل أنت متأكد من حذف سجل العلامات الحيوية هذا؟ لا يمكن التراجع عن هذا الإجراء."
   },
   "medications": {
     "title": "الأدوية",
@@ -483,7 +592,8 @@
     "allCategories": "جميع الفئات",
     "chemotherapy": "علاج كيميائي",
     "hormonal": "هرموني",
-    "supportive": "داعم"
+    "supportive": "داعم",
+    "noData": "لا توجد أدوية"
   },
   "lab": {
     "title": "الفحوصات المخبرية",
@@ -518,7 +628,27 @@
     "resultsRecorded": "النتائج المسجلة",
     "abnormalResults": "النتائج غير الطبيعية",
     "date": "التاريخ",
-    "resultValue": "قيمة النتيجة"
+    "resultValue": "قيمة النتيجة",
+    "addTest": "إضافة فحص",
+    "categoryPlaceholder": "مثال: أمراض الدم",
+    "descriptionPlaceholder": "وصف اختياري",
+    "editResultTitle": "تعديل نتيجة المختبر",
+    "editTest": "تعديل فحص المختبر",
+    "isAbnormal": "غير طبيعي",
+    "manageTests": "إدارة فحوصات المختبر",
+    "manageTestsDescription": "إنشاء وتحديث تعريفات فحوصات المختبر.",
+    "noTests": "لا توجد فحوصات مخبرية",
+    "normalRange": "النطاق الطبيعي",
+    "normalRangePlaceholder": "مثال: 4.5 - 11.0",
+    "resultValuePlaceholder": "مثال: 5.8",
+    "searchPlaceholder": "البحث في الفحوصات",
+    "selectDoctor": "اختر الطبيب",
+    "selectPatient": "اختر المريض",
+    "selectTest": "اختر الفحص",
+    "testNamePlaceholder": "مثال: تعداد الدم الكامل",
+    "units": "الوحدات",
+    "unitsPlaceholder": "مثال: خلية/ميكرولتر",
+    "updateResult": "تحديث النتيجة"
   },
   "imaging": {
     "title": "تقارير الأشعة",
@@ -538,7 +668,8 @@
     "findings": "النتائج",
     "scanDate": "تاريخ المسح",
     "type": "النوع (مثل: رنين مغناطيسي، أشعة مقطعية)",
-    "reportId": "رقم التقرير"
+    "reportId": "رقم التقرير",
+    "reportSummary": "ملخص التقرير"
   },
   "roles": {
     "title": "الأدوار",
@@ -554,7 +685,8 @@
     "deleteTitle": "حذف دور",
     "deleteConfirm": "حذف الدور \"{{name}}\"؟ لا يمكن التراجع عن هذا الإجراء.",
     "nameRequired": "الاسم مطلوب",
-    "descriptionRequired": "الوصف مطلوب"
+    "descriptionRequired": "الوصف مطلوب",
+    "permissions": "الصلاحيات"
   },
   "profile": {
     "title": "ملفي الشخصي",
