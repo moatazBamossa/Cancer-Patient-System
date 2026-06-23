@@ -103,10 +103,10 @@ export function PatientForm({ patient, onSuccess }: PatientFormProps) {
       className="space-y-4"
     >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField name="full_name" label={t('patients.fullName')} required placeholder="محمد علي" />
-          <FormField name="national_id" label={t('patients.nationalId')} required placeholder="NID-XXXXX" />
+          <FormField name="full_name" label={t('patients.fullName')} required placeholder={t('patients.fullName')} />
+          <FormField name="national_id" label={t('patients.nationalId')} required placeholder={t('patients.nationalIdRequired')} />
           <FormField name="birth_date" label={t('patients.dob')} type="date" required />
-          <FormField name="nationality" label={t('patients.nationality')} type="text" required placeholder="يمني" />
+          <FormField name="nationality" label={t('patients.nationality')} type="text" required placeholder={t('patients.nationalityRequired')} />
           <FormField
             name="gender"
             label={t('patients.gender')}
@@ -127,9 +127,9 @@ export function PatientForm({ patient, onSuccess }: PatientFormProps) {
               label: v,
             }))}
           />
-          <FormField name="phone" label={t('patients.phone')} type="tel" required placeholder="+967-XXXXXXXXX" />
-          <FormField name="mobile_number" label={t('patients.mobileNumber')} type="tel" placeholder="+967-XXXXXXXXX" />
-          <FormField name="email" label={t('patients.email')} type="email" placeholder="email@example.com" />
+          <FormField name="phone" label={t('patients.phone')} type="tel" required placeholder={t('patients.phoneRequired')} />
+          <FormField name="mobile_number" label={t('patients.mobileNumber')} type="tel" placeholder={t('patients.mobileNumber')} />
+          <FormField name="email" label={t('patients.email')} type="email" placeholder={t('patients.email')} />
           <FormField
             name="status"
             label={t('common.status.label')}
@@ -141,8 +141,8 @@ export function PatientForm({ patient, onSuccess }: PatientFormProps) {
             ]}
           />
         </div>
-        <FormField name="address" label={t('patients.address')} type="textarea" required placeholder="..." />
-        <FormField name="notes" label={t('common.notes')} type="textarea" placeholder="..." />
+        <FormField name="address" label={t('patients.address')} type="textarea" required placeholder={t('patients.addressRequired')} />
+        <FormField name="notes" label={t('common.notes')} type="textarea" placeholder={t('common.notes')} />
 
         <div className="flex justify-end gap-3 pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
           <button

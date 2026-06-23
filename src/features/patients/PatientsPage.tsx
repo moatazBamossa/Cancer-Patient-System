@@ -69,15 +69,15 @@ export default function PatientsPage() {
     if (data?.data) {
       exportToCSV(
         data.data.map((p) => ({
-          Name: p.full_name,
-          NationalID: p.national_id,
-          Gender: p.gender,
-          BirthDate: p.birth_date,
-          Phone: p.phone,
-          Email: p.email,
-          Status: p.status,
-          BloodType: p.blood_type,
-          Nationality: p.nationality,
+          [t('common.name')]: p.full_name,
+          [t('patients.nationalId')]: p.national_id,
+          [t('patients.gender')]: p.gender,
+          [t('patients.dob')]: p.birth_date,
+          [t('common.phone')]: p.phone,
+          [t('common.email')]: p.email,
+          [t('common.status.label')]: p.status,
+          [t('patients.bloodType')]: p.blood_type,
+          [t('patients.nationality')]: p.nationality,
         })),
         'patients_export'
       );

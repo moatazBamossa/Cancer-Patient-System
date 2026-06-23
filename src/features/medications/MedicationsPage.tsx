@@ -28,16 +28,13 @@ import { StatusBadge } from '../../components/ui/StatusBadge'
 import { DataTable, Column } from '../../components/ui/DataTable'
 import type { MedicationRpcItem } from '../../types/medicationRpc'
 
-// ─── Zod schema — field names match medication_create / medication_update exactly
-const medSchema = z.object({
-  p_name:        z.string().min(1, 'Name is required'),
-  p_category:    z.string().min(1, 'Category is required'),
-  p_unit:        z.string().optional().default(''),
-  p_description: z.string().optional().default(''),
-  p_is_active:   z.boolean().optional().default(true),
-})
-
-type MedForm = z.infer<typeof medSchema>
+type MedForm = {
+  p_name:        string;
+  p_category:    string;
+  p_unit:        string;
+  p_description: string;
+  p_is_active:   boolean;
+}
 
 const DEFAULT_VALUES: MedForm = {
   p_name:        '',
@@ -267,6 +264,15 @@ export default function MedicationsPage() {
     return () => clearTimeout(id)
   }, [searchInput])
 
+  // ── zod schema ──
+  const medSchema = z.object({
+    p_name:        z.string().min(1, t('medications.validation.nameRequired')),
+    p_category:    z.string().min(1, t('medications.validation.categoryRequired')),
+    p_unit:        z.string().optional().default(''),
+    p_description: z.string().optional().default(''),
+    p_is_active:   z.boolean().optional().default(true),
+  })
+
   // ── category options from DB ──
   const { data: dbCategories = [] } = useQuery({
     queryKey: ['medication-categories'],
@@ -280,8 +286,8 @@ export default function MedicationsPage() {
     { value: 'Chemotherapy',  label: t('medications.chemotherapy') },
     { value: 'Hormonal',      label: t('medications.hormonal') },
     { value: 'Supportive',    label: t('medications.supportive') },
-    { value: 'Targeted',      label: 'Targeted Therapy' },
-    { value: 'Immunotherapy', label: 'Immunotherapy' },
+    { value: 'Targeted',      label: t('medications.targeted') },
+    { value: 'Immunotherapy', label: t('medications.immunotherapy') },
     ...dbCategories
       .filter((c) => !STATIC_CATS.includes(c.toLowerCase()))
       .map((c) => ({ value: c, label: c })),
@@ -367,7 +373,7 @@ export default function MedicationsPage() {
     mutationFn: (id: number) => medicationService.delete(id),
     onSuccess: () => {
       invalidate()
-      toast.success('Deleted successfully')
+      toast.success(t('common.deleteSuccess'))
       setDeleteTarget(null)
     },
     onError: (err: Error) => toast.error(err.message),
@@ -377,11 +383,11 @@ export default function MedicationsPage() {
 
   // ─── table columns for DataTable ────────────────────────────────────────────
   const columns: Column<MedicationRpcItem>[] = [
-    { key: 'name', header: 'Name', sortable: true },
-    { key: 'category', header: 'Category', sortable: true, render: (_v, row) => <StatusBadge status={row.category} /> },
-    { key: 'unit', header: 'Unit', sortable: false },
-    { key: 'is_active', header: 'Status', sortable: true, render: (v: unknown) => (v ? 'Active' : 'Inactive') },
-    { key: 'description', header: 'Description', render: (v: unknown) => String(v ?? '').slice(0, 120) },
+    { key: 'name', header: t('common.name'), sortable: true },
+    { key: 'category', header: t('common.category'), sortable: true, render: (_v, row) => <StatusBadge status={row.category} /> },
+    { key: 'unit', header: t('medications.unit'), sortable: false },
+    { key: 'is_active', header: t('common.status.label'), sortable: true, render: (v: unknown) => (v ? t('common.status.active') : t('common.status.inactive')) },
+    { key: 'description', header: t('common.description'), render: (v: unknown) => String(v ?? '').slice(0, 120) },
   ]
 
   // ─── render ──────────────────────────────────────────────────────────────────
@@ -410,9 +416,9 @@ export default function MedicationsPage() {
       {/* ── Stats strip ── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {[
-          { icon: <Pill size={16} />,     label: 'Total Medications', value: totalCount },
-          { icon: <Tag size={16} />,      label: 'Categories',        value: catCount },
-          { icon: <Activity size={16} />, label: 'Active',            value: activeCount },
+          { icon: <Pill size={16} />,     label: t('medications.totalMedications'), value: totalCount },
+          { icon: <Tag size={16} />,      label: t('medications.categories'),        value: catCount },
+          { icon: <Activity size={16} />, label: t('medications.activeCount'),       value: activeCount },
         ].map((s) => (
           <div
             key={s.label}
@@ -569,7 +575,7 @@ export default function MedicationsPage() {
                   />
                 </div>
                 <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
-                  Active
+                  {t('common.status.active')}
                 </span>
               </label>
             )}
@@ -598,7 +604,7 @@ export default function MedicationsPage() {
         onClose={() => setDeleteTarget(null)}
         onConfirm={() => deleteTarget && deleteMut.mutate(deleteTarget.medication_id)}
         title={t('common.delete')}
-        message={`Delete "${deleteTarget?.name}"? This action cannot be undone.`}
+        message={t('common.deleteConfirm', { name: deleteTarget?.name })}
       />
     </motion.div>
   )

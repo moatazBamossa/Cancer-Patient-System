@@ -172,7 +172,11 @@ console.log("localPermissions", localPermissions);
             </button>
 
             <button
-              // onClick={() => { setEditItem(row); setFormInitialValues({ role_name: row.role_name }); setLocalPermissions((row as any).permissions ?? defaultRolePermissions() as any); setFormKey((k) => k + 1); setShowForm(true); }}
+              onClick={() => {
+                if(row?.role_id) {
+                  setDeleteId(`${row.role_id}`)
+                }
+              }}
               className="p-1.5 rounded-lg hover:bg-amber-500/10 text-red-600"
             >
               <Trash2 size={16} />

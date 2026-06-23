@@ -30,34 +30,27 @@ import { zodValidator } from "../../lib/zodValidator"
 import { formatDate, formatTime } from "../../lib/utils"
 import type { ClinicVisitRpcItem } from "../../types/visitRpc"
 
-// ─── Zod Schema ───────────────────────────────────────────────────────────────
-
-const combinedVisitSchema = z.object({
-  p_patient_id: z.string().min(1, "Patient is required"),
-  p_doctor_id: z.string().min(1, "Doctor is required"),
-  p_diagnosis_id: z.string().optional(),
-  p_visit_date: z.string().min(1, "Visit date is required"),
-  p_visit_type: z
-    .enum(["Routine", "Follow-up", "Emergency", "Post-treatment"])
-    .default("Routine"),
-  p_reason_for_visit: z.string().min(1, "Reason is required"),
-  p_clinical_notes: z.string().optional(),
-  p_recommendations: z.string().optional(),
-  p_next_visit_date: z.string().optional(),
-
-  include_vitals: z.boolean().default(false),
-  p_temperature: z.coerce.number().optional().or(z.literal("")),
-  p_blood_pressure_sys: z.coerce.number().optional().or(z.literal("")),
-  p_blood_pressure_dia: z.coerce.number().optional().or(z.literal("")),
-  p_heart_rate: z.coerce.number().optional().or(z.literal("")),
-  p_respiratory_rate: z.coerce.number().optional().or(z.literal("")),
-  p_spo2: z.coerce.number().optional().or(z.literal("")),
-  p_weight_kg: z.coerce.number().optional().or(z.literal("")),
-  p_height_cm: z.coerce.number().optional().or(z.literal("")),
-  p_vital_notes: z.string().optional(),
-})
-
-type CombinedVisitForm = z.infer<typeof combinedVisitSchema>
+type CombinedVisitForm = {
+  p_patient_id: string;
+  p_doctor_id: string;
+  p_diagnosis_id?: string;
+  p_visit_date: string;
+  p_visit_type: "Routine" | "Follow-up" | "Emergency" | "Post-treatment";
+  p_reason_for_visit: string;
+  p_clinical_notes?: string;
+  p_recommendations?: string;
+  p_next_visit_date?: string;
+  include_vitals: boolean;
+  p_temperature?: number | "";
+  p_blood_pressure_sys?: number | "";
+  p_blood_pressure_dia?: number | "";
+  p_heart_rate?: number | "";
+  p_respiratory_rate?: number | "";
+  p_spo2?: number | "";
+  p_weight_kg?: number | "";
+  p_height_cm?: number | "";
+  p_vital_notes?: string;
+}
 
 const DEFAULT_FORM_VALUES: CombinedVisitForm = {
   p_patient_id: "",
@@ -345,6 +338,30 @@ function FormDiagnosisSelect({ patientsData }: { patientsData: any }) {
 
 export default function VitalsPage() {
   const { t } = useTranslation()
+  const combinedVisitSchema = z.object({
+    p_patient_id: z.string().min(1, t("vitals.validation.patientRequired") ?? "Patient is required"),
+    p_doctor_id: z.string().min(1, t("visits.validation.doctorRequired") ?? "Doctor is required"),
+    p_diagnosis_id: z.string().optional(),
+    p_visit_date: z.string().min(1, t("visits.validation.visitDateTimeRequired") ?? "Visit date is required"),
+    p_visit_type: z
+      .enum(["Routine", "Follow-up", "Emergency", "Post-treatment"])
+      .default("Routine"),
+    p_reason_for_visit: z.string().min(1, t("visits.validation.reasonRequired") ?? "Reason is required"),
+    p_clinical_notes: z.string().optional(),
+    p_recommendations: z.string().optional(),
+    p_next_visit_date: z.string().optional(),
+
+    include_vitals: z.boolean().default(false),
+    p_temperature: z.coerce.number().optional().or(z.literal("")),
+    p_blood_pressure_sys: z.coerce.number().optional().or(z.literal("")),
+    p_blood_pressure_dia: z.coerce.number().optional().or(z.literal("")),
+    p_heart_rate: z.coerce.number().optional().or(z.literal("")),
+    p_respiratory_rate: z.coerce.number().optional().or(z.literal("")),
+    p_spo2: z.coerce.number().optional().or(z.literal("")),
+    p_weight_kg: z.coerce.number().optional().or(z.literal("")),
+    p_height_cm: z.coerce.number().optional().or(z.literal("")),
+    p_vital_notes: z.string().optional(),
+  })
   const qc = useQueryClient()
   const [selectedPatientId, setSelectedPatientId] = useState<number | null>(
     null,
@@ -414,7 +431,7 @@ export default function VitalsPage() {
       }
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["clinic-visits"] })
+      qc.invalidateQueries({ queryKey: ["clinic-visits",selectedPatientId] })
       toast.success(t("vitals.visitScheduledSuccess"))
       setShowForm(false)
     },

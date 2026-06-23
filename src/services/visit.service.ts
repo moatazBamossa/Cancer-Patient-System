@@ -109,7 +109,7 @@ export const visitService = {
  			p_patient_id: filters?.p_patient_id ?? null,
  		});
 
- 		const items = extractVisits(data, 'clinic_visits_upcoming_dual_date');
+ 		const items = data?.visits ?? [];
 
  		// Normalize to the shape the UI expects (compat with existing mock structure)
 		return items.map((it: any) => ({
