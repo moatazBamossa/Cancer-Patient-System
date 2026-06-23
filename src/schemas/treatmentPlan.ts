@@ -30,7 +30,7 @@ export const treatmentCycleSchema = z.object({
 
 export const cycleMedicationSchema = z.object({
   cycle_id: z.coerce.number().min(1, 'Cycle is required'),
-  medication_id: z.coerce.number().min(1, 'Medication is required'),
+  medication_id: z.string().min(1, 'Medication is required'),
   dose: z.coerce.number().positive('Dose must be positive'),
   dose_unit: z.string().min(1, 'Dose unit is required'),
   route: z.string().min(1, 'Route is required'),
