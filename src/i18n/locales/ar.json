@@ -91,7 +91,13 @@
     "deleted": "تم الحذف",
     "deleteSuccess": "تم الحذف بنجاح",
     "select": "اختر...",
-    "updateSuccess": "تم التحديث بنجاح"
+    "updateSuccess": "تم التحديث بنجاح",
+    "all": "الكل",
+    "dismiss": "إغلاق",
+    "endDate": "تاريخ الانتهاء",
+    "notAvailable": "غير متاح",
+    "startDate": "تاريخ البداية",
+    "view": "عرض"
   },
   "auth": {
     "welcome": "مرحباً بك مجدداً",
@@ -215,6 +221,23 @@
     "diagnosisId": "رقم التشخيص",
     "searchByPatientId": "البحث برقم المريض..."
   },
+  "diagnosisDoctorHistory": {
+    "assign": "تعيين",
+    "assignDoctor": "تعيين طبيب",
+    "assignReassign": "تعيين / إعادة تعيين",
+    "assigned": "تم التعيين",
+    "assignmentHistory": "سجل التعيينات",
+    "changedBy": "تم التغيير بواسطة",
+    "currentAssignment": "التعيين الحالي",
+    "deleteAssignment": "حذف التعيين",
+    "deleteAssignmentConfirm": "هل أنت متأكد من حذف تعيين {{name}}؟",
+    "doctorId": "الطبيب",
+    "editAssignment": "تعديل التعيين",
+    "noActiveDoctor": "لا يوجد طبيب نشط معين",
+    "noHistory": "لا يوجد سجل تعيينات",
+    "present": "حالياً",
+    "reason": "السبب"
+  },
   "cancer": {
     "title": "أنواع السرطان",
     "subtitle": "إدارة تصنيفات أنواع السرطان",
@@ -281,7 +304,9 @@
     "dose": "الجرعة",
     "doseUnit": "وحدة الجرعة",
     "route": "طريقة الإعطاء",
-    "frequency": "التكرار"
+    "frequency": "التكرار",
+    "frequencyPlaceholder": "مثال: كل 3 أسابيع",
+    "routePlaceholder": "مثال: فموي، وريدي"
   },
   "patients": {
     "gender": "الجنس",
@@ -334,7 +359,8 @@
     "fullName": "الاسم الكامل",
     "mobileNumber": "رقم الجوال",
     "fullNameRequired": "الاسم الكامل مطلوب",
-    "nationalityRequired": "الجنسية مطلوبة"
+    "nationalityRequired": "الجنسية مطلوبة",
+    "unableLoadPatients": "تعذر تحميل المرضى"
   },
   "patientDetails": {
     "overview": "نظرة عامة",
@@ -499,7 +525,12 @@
       "followUp": "متابعة",
       "routine": "روتينية",
       "treatmentSession": "جلسة علاج"
-    }
+    },
+    "choosePatient": "اختر مريضاً",
+    "noPatientsForVisits": "لا يوجد مرضى متاحون للزيارات",
+    "openVisits": "فتح الزيارات",
+    "selectPatient": "اختر المريض",
+    "selectPatientToManage": "اختر مريضاً لإدارة زياراته وعلاماته الحيوية"
   },
   "vitals": {
     "title": "العلامات الحيوية",
@@ -575,7 +606,19 @@
     "vitalSignSnapshot": "لقطة للعلامات الحيوية",
     "heightBmi": "الطول / مؤشر كتلة الجسم",
     "deleteVitalSignTitle": "حذف علامة حيوية",
-    "deleteVitalSignMessage": "هل أنت متأكد من حذف سجل العلامات الحيوية هذا؟ لا يمكن التراجع عن هذا الإجراء."
+    "deleteVitalSignMessage": "هل أنت متأكد من حذف سجل العلامات الحيوية هذا؟ لا يمكن التراجع عن هذا الإجراء.",
+    "bloodPressureDiastolic": "الضغط الانبساطي (mmHg)",
+    "bloodPressureSystolic": "الضغط الانقباضي (mmHg)",
+    "heartRateBpm": "معدل ضربات القلب (نبضة/دقيقة)",
+    "heightCm": "الطول (سم)",
+    "optionalReadingNotes": "ملاحظات اختيارية للقراءة",
+    "saveVitalSigns": "حفظ العلامات الحيوية",
+    "savedSuccessfully": "تم حفظ العلامات الحيوية بنجاح",
+    "selectVisitBeforeAdding": "يرجى اختيار زيارة قبل إضافة العلامات الحيوية",
+    "spo2Percent": "تشبع الأكسجين (%)",
+    "temperatureCelsius": "درجة الحرارة (°م)",
+    "unableSaveVitalSigns": "تعذر حفظ العلامات الحيوية",
+    "weightKg": "الوزن (كجم)"
   },
   "medications": {
     "title": "الأدوية",
@@ -593,7 +636,13 @@
     "chemotherapy": "علاج كيميائي",
     "hormonal": "هرموني",
     "supportive": "داعم",
-    "noData": "لا توجد أدوية"
+    "noData": "لا توجد أدوية",
+    "descriptionPlaceholder": "وصف اختياري",
+    "medicationName": "اسم الدواء",
+    "namePlaceholder": "مثال: دوكسوروبيسين",
+    "searchByName": "ابحث باسم الدواء...",
+    "unit": "الوحدة",
+    "unitPlaceholder": "مثال: ملغ، مل"
   },
   "lab": {
     "title": "الفحوصات المخبرية",
@@ -648,7 +697,25 @@
     "testNamePlaceholder": "مثال: تعداد الدم الكامل",
     "units": "الوحدات",
     "unitsPlaceholder": "مثال: خلية/ميكرولتر",
-    "updateResult": "تحديث النتيجة"
+    "updateResult": "تحديث النتيجة",
+    "categoryRequired": "الفئة مطلوبة",
+    "deleteResultConfirm": "هل أنت متأكد من حذف هذه النتيجة؟",
+    "deleteTestConfirm": "هل أنت متأكد من حذف هذا الفحص؟",
+    "normalRangeRequired": "النطاق الطبيعي مطلوب",
+    "resultCreated": "تم إنشاء النتيجة بنجاح",
+    "resultDeleted": "تم حذف النتيجة بنجاح",
+    "resultUpdated": "تم تحديث النتيجة بنجاح",
+    "testCreated": "تم إنشاء الفحص بنجاح",
+    "testDeleted": "تم حذف الفحص بنجاح",
+    "testNameRequired": "اسم الفحص مطلوب",
+    "testUpdated": "تم تحديث الفحص بنجاح",
+    "unableCreateResult": "تعذر إنشاء النتيجة",
+    "unableCreateTest": "تعذر إنشاء الفحص",
+    "unableDeleteResult": "تعذر حذف النتيجة",
+    "unableDeleteTest": "تعذر حذف الفحص",
+    "unableUpdateResult": "تعذر تحديث النتيجة",
+    "unableUpdateTest": "تعذر تحديث الفحص",
+    "unitsRequired": "الوحدات مطلوبة"
   },
   "imaging": {
     "title": "تقارير الأشعة",
@@ -669,7 +736,13 @@
     "scanDate": "تاريخ المسح",
     "type": "النوع (مثل: رنين مغناطيسي، أشعة مقطعية)",
     "reportId": "رقم التقرير",
-    "reportSummary": "ملخص التقرير"
+    "reportSummary": "ملخص التقرير",
+    "deleteSuccess": "تم حذف تقرير الأشعة بنجاح",
+    "unableDelete": "تعذر حذف تقرير الأشعة",
+    "unableUpdate": "تعذر تحديث تقرير الأشعة",
+    "unableUpload": "تعذر رفع تقرير الأشعة",
+    "updateSuccess": "تم تحديث تقرير الأشعة بنجاح",
+    "uploadSuccess": "تم رفع تقرير الأشعة بنجاح"
   },
   "roles": {
     "title": "الأدوار",
@@ -686,7 +759,13 @@
     "deleteConfirm": "حذف الدور \"{{name}}\"؟ لا يمكن التراجع عن هذا الإجراء.",
     "nameRequired": "الاسم مطلوب",
     "descriptionRequired": "الوصف مطلوب",
-    "permissions": "الصلاحيات"
+    "permissions": "الصلاحيات",
+    "clearAll": "مسح الكل",
+    "dashboardAccess": "الوصول إلى لوحة القيادة",
+    "grantFullAccess": "منح صلاحية كاملة",
+    "module": "الوحدة",
+    "readOnly": "قراءة فقط",
+    "roleNamePlaceholder": "أدخل اسم الدور"
   },
   "profile": {
     "title": "ملفي الشخصي",
@@ -768,7 +847,57 @@
       "email": "user@example.com",
       "phone": "0501234567",
       "specialty": "مثل: طب الأورام، جراحة"
-    }
+    },
+    "allRoles": "جميع الأدوار",
+    "allStatuses": "جميع الحالات",
+    "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
+    "confirmPasswordRequired": "تأكيد كلمة المرور مطلوب",
+    "createFailed": "فشل إنشاء المستخدم",
+    "creating": "جارٍ الإنشاء...",
+    "deleteUser": "حذف المستخدم",
+    "deleteUserConfirm": "هل أنت متأكد من حذف هذا المستخدم؟",
+    "editUser": "تعديل المستخدم",
+    "enterFullName": "أدخل الاسم الكامل",
+    "fullNameMin": "يجب أن يتكون الاسم الكامل من 3 أحرف على الأقل",
+    "invalidPhone": "رقم هاتف غير صالح",
+    "keepCurrentPassword": "اتركه فارغاً للاحتفاظ بكلمة المرور الحالية",
+    "newPassword": "كلمة المرور الجديدة",
+    "noChangesDetected": "لم يتم اكتشاف أي تغييرات",
+    "noUsersFound": "لم يتم العثور على مستخدمين",
+    "passwordMin": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل",
+    "passwordNumber": "يجب أن تحتوي كلمة المرور على رقم واحد على الأقل",
+    "passwordSpecial": "يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل",
+    "passwordUppercase": "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل",
+    "passwordsDoNotMatch": "كلمات المرور غير متطابقة",
+    "phoneNumber": "رقم الهاتف",
+    "searchPlaceholder": "ابحث بالاسم أو البريد الإلكتروني...",
+    "searchUsers": "ابحث عن مستخدمين...",
+    "selectRole": "اختر الدور",
+    "selectedRole": "الدور المحدد",
+    "specialtyDepartment": "مثل: طب الأورام، جراحة",
+    "statusFilter": "تصفية الحالة",
+    "summary": "الملخص",
+    "tips": "نصائح",
+    "tipsText": "استخدم البحث والفلاتر أعلاه للعثور على المستخدمين. انقر على مستخدم لعرض أو تعديل بياناته.",
+    "totalUsers": "إجمالي المستخدمين",
+    "unableCreateUser": "تعذر إنشاء المستخدم",
+    "unableDeleteUser": "تعذر حذف المستخدم",
+    "unableLoadUsers": "تعذر تحميل المستخدمين",
+    "unableUpdateUser": "تعذر تحديث المستخدم",
+    "unassigned": "غير معين",
+    "updateFailed": "فشل تحديث المستخدم",
+    "updated": "تم التحديث",
+    "userCreated": "تم إنشاء المستخدم بنجاح",
+    "userDeleted": "تم حذف المستخدم بنجاح",
+    "userDetails": "تفاصيل المستخدم",
+    "userDetailsSubtitle": "عرض وإدارة معلومات المستخدم",
+    "userManagement": "إدارة المستخدمين",
+    "userManagementSubtitle": "إنشاء وتعديل وإدارة مستخدمي النظام",
+    "userUpdated": "تم تحديث المستخدم بنجاح",
+    "usernameMin": "يجب أن يتكون اسم المستخدم من 4 أحرف على الأقل",
+    "usernamePattern": "يمكن أن يحتوي اسم المستخدم على أحرف وأرقام وشرطات سفلية فقط",
+    "usernameTaken": "اسم المستخدم مستخدم بالفعل",
+    "visibleResults": "النتائج المرئية"
   },
   "upcomingVisits": {
     "title": "الزيارات القادمة",
@@ -782,7 +911,25 @@
     "view": "عرض",
     "subtitle_full": "عرض مفصل لجميع المرضى المقرر حضورهم خلال الـ 48 ساعة القادمة.",
     "keepTrack": "ابق على اطلاع بجدولك",
-    "trackDesc": "تجمع هذه الصفحة جميع الزيارات العاجلة في العيادة لمساعدتك في الاستعداد لوصول المرضى."
+    "trackDesc": "تجمع هذه الصفحة جميع الزيارات العاجلة في العيادة لمساعدتك في الاستعداد لوصول المرضى.",
+    "activeFilters": "فلاتر نشطة ({{count}})",
+    "allDiagnoses": "جميع التشخيصات",
+    "allDoctors": "جميع الأطباء",
+    "allPatients": "جميع المرضى",
+    "allVisits": "جميع الزيارات",
+    "applyFilters": "تطبيق الفلاتر",
+    "diagnosisFallback": "تشخيص #{{id}}",
+    "doctorFallback": "طبيب #{{id}}",
+    "loading": "جارٍ تحميل الزيارات القادمة...",
+    "nextVisitFrom": "الزيارة القادمة من",
+    "nextVisitTo": "الزيارة القادمة إلى",
+    "noFilterMatches": "لا توجد زيارات تطابق الفلاتر المحددة",
+    "noneAvailable": "لا توجد زيارات قادمة في اليومين القادمين",
+    "patientFallback": "مريض #{{id}}",
+    "refineUpcomingVisits": "تصفية الزيارات القادمة",
+    "resetFilters": "إعادة تعيين الفلاتر",
+    "visitDateFrom": "تاريخ الزيارة من",
+    "visitDateTo": "تاريخ الزيارة إلى"
   },
   "permissions": {
     "accessDenied": "تم رفض الوصول",

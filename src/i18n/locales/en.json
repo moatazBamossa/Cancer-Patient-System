@@ -91,7 +91,13 @@
     "deleted": "Deleted",
     "deleteSuccess": "Deleted successfully",
     "select": "Select...",
-    "updateSuccess": "Updated successfully"
+    "updateSuccess": "Updated successfully",
+    "all": "All",
+    "dismiss": "Dismiss",
+    "endDate": "End Date",
+    "notAvailable": "N/A",
+    "startDate": "Start Date",
+    "view": "View"
   },
   "auth": {
     "welcome": "Welcome back",
@@ -215,6 +221,23 @@
     "diagnosisId": "Diagnosis ID",
     "searchByPatientId": "Search by Patient ID..."
   },
+  "diagnosisDoctorHistory": {
+    "assign": "Assign",
+    "assignDoctor": "Assign Doctor",
+    "assignReassign": "Assign / Reassign",
+    "assigned": "Assigned",
+    "assignmentHistory": "Assignment History",
+    "changedBy": "Changed by",
+    "currentAssignment": "Current Assignment",
+    "deleteAssignment": "Delete Assignment",
+    "deleteAssignmentConfirm": "Are you sure you want to delete the assignment for {{name}}?",
+    "doctorId": "Doctor",
+    "editAssignment": "Edit Assignment",
+    "noActiveDoctor": "No active doctor assigned",
+    "noHistory": "No assignment history",
+    "present": "Present",
+    "reason": "Reason"
+  },
   "cancer": {
     "title": "Cancer Types",
     "subtitle": "Manage cancer type classifications",
@@ -281,7 +304,9 @@
     "dose": "Dose",
     "doseUnit": "Dose Unit",
     "route": "Route",
-    "frequency": "Frequency"
+    "frequency": "Frequency",
+    "frequencyPlaceholder": "e.g. Every 3 weeks",
+    "routePlaceholder": "e.g. Oral, IV"
   },
   "patients": {
     "gender": "Gender",
@@ -334,7 +359,8 @@
     "fullName": "Full Name",
     "mobileNumber": "Mobile Number",
     "fullNameRequired": "Full name is required",
-    "nationalityRequired": "Nationality is required"
+    "nationalityRequired": "Nationality is required",
+    "unableLoadPatients": "Unable to load patients"
   },
   "patientDetails": {
     "overview": "Overview",
@@ -499,7 +525,12 @@
       "followUp": "Follow-up",
       "routine": "Routine",
       "treatmentSession": "Treatment Session"
-    }
+    },
+    "choosePatient": "Choose Patient",
+    "noPatientsForVisits": "No patients available for visits",
+    "openVisits": "Open Visits",
+    "selectPatient": "Select Patient",
+    "selectPatientToManage": "Select a patient to manage their visits and vitals"
   },
   "vitals": {
     "title": "Vital Signs",
@@ -575,7 +606,19 @@
     "vitalSignSnapshot": "Vital sign snapshot",
     "heightBmi": "Height / BMI",
     "deleteVitalSignTitle": "Delete vital sign",
-    "deleteVitalSignMessage": "Are you sure you want to delete this vital sign record? This action cannot be undone."
+    "deleteVitalSignMessage": "Are you sure you want to delete this vital sign record? This action cannot be undone.",
+    "bloodPressureDiastolic": "Diastolic BP (mmHg)",
+    "bloodPressureSystolic": "Systolic BP (mmHg)",
+    "heartRateBpm": "Heart Rate (bpm)",
+    "heightCm": "Height (cm)",
+    "optionalReadingNotes": "Optional reading notes",
+    "saveVitalSigns": "Save Vital Signs",
+    "savedSuccessfully": "Vital signs saved successfully",
+    "selectVisitBeforeAdding": "Please select a visit before adding vital signs",
+    "spo2Percent": "SpO₂ (%)",
+    "temperatureCelsius": "Temperature (°C)",
+    "unableSaveVitalSigns": "Unable to save vital signs",
+    "weightKg": "Weight (kg)"
   },
   "medications": {
     "title": "Medications",
@@ -593,7 +636,13 @@
     "chemotherapy": "Chemotherapy",
     "hormonal": "Hormonal",
     "supportive": "Supportive",
-    "noData": "No medications found"
+    "noData": "No medications found",
+    "descriptionPlaceholder": "Optional description",
+    "medicationName": "Medication Name",
+    "namePlaceholder": "e.g. Doxorubicin",
+    "searchByName": "Search by medication name...",
+    "unit": "Unit",
+    "unitPlaceholder": "e.g. mg, ml"
   },
   "lab": {
     "title": "Laboratory Tests",
@@ -648,7 +697,25 @@
     "testNamePlaceholder": "e.g. Complete Blood Count",
     "units": "Units",
     "unitsPlaceholder": "e.g. cells/mcL",
-    "updateResult": "Update result"
+    "updateResult": "Update result",
+    "categoryRequired": "Category is required",
+    "deleteResultConfirm": "Are you sure you want to delete this result?",
+    "deleteTestConfirm": "Are you sure you want to delete this test?",
+    "normalRangeRequired": "Normal range is required",
+    "resultCreated": "Result created successfully",
+    "resultDeleted": "Result deleted successfully",
+    "resultUpdated": "Result updated successfully",
+    "testCreated": "Test created successfully",
+    "testDeleted": "Test deleted successfully",
+    "testNameRequired": "Test name is required",
+    "testUpdated": "Test updated successfully",
+    "unableCreateResult": "Unable to create result",
+    "unableCreateTest": "Unable to create test",
+    "unableDeleteResult": "Unable to delete result",
+    "unableDeleteTest": "Unable to delete test",
+    "unableUpdateResult": "Unable to update result",
+    "unableUpdateTest": "Unable to update test",
+    "unitsRequired": "Units are required"
   },
   "imaging": {
     "title": "Imaging Reports",
@@ -669,7 +736,13 @@
     "scanDate": "Scan Date",
     "type": "Type (e.g. MRI, CT)",
     "reportId": "Report ID",
-    "reportSummary": "Report Summary"
+    "reportSummary": "Report Summary",
+    "deleteSuccess": "Imaging report deleted successfully",
+    "unableDelete": "Unable to delete imaging report",
+    "unableUpdate": "Unable to update imaging report",
+    "unableUpload": "Unable to upload imaging report",
+    "updateSuccess": "Imaging report updated successfully",
+    "uploadSuccess": "Imaging report uploaded successfully"
   },
   "roles": {
     "title": "Roles",
@@ -686,7 +759,13 @@
     "deleteConfirm": "Delete role \"{{name}}\"? This cannot be undone.",
     "nameRequired": "Name is required",
     "descriptionRequired": "Description is required",
-    "permissions": "Permissions"
+    "permissions": "Permissions",
+    "clearAll": "Clear All",
+    "dashboardAccess": "Dashboard Access",
+    "grantFullAccess": "Grant Full Access",
+    "module": "Module",
+    "readOnly": "Read Only",
+    "roleNamePlaceholder": "Enter role name"
   },
   "profile": {
     "title": "My Profile",
@@ -768,7 +847,57 @@
       "email": "user@example.com",
       "phone": "0501234567",
       "specialty": "e.g. Oncology, Surgery"
-    }
+    },
+    "allRoles": "All Roles",
+    "allStatuses": "All Statuses",
+    "confirmNewPassword": "Confirm New Password",
+    "confirmPasswordRequired": "Confirm password is required",
+    "createFailed": "Failed to create user",
+    "creating": "Creating...",
+    "deleteUser": "Delete User",
+    "deleteUserConfirm": "Are you sure you want to delete this user?",
+    "editUser": "Edit User",
+    "enterFullName": "Enter full name",
+    "fullNameMin": "Full name must be at least 3 characters",
+    "invalidPhone": "Invalid phone number",
+    "keepCurrentPassword": "Leave blank to keep current password",
+    "newPassword": "New Password",
+    "noChangesDetected": "No changes detected",
+    "noUsersFound": "No users found",
+    "passwordMin": "Password must be at least 8 characters",
+    "passwordNumber": "Password must contain at least one number",
+    "passwordSpecial": "Password must contain at least one special character",
+    "passwordUppercase": "Password must contain at least one uppercase letter",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "phoneNumber": "Phone number",
+    "searchPlaceholder": "Search by name or email...",
+    "searchUsers": "Search users...",
+    "selectRole": "Select role",
+    "selectedRole": "Selected Role",
+    "specialtyDepartment": "e.g. Oncology, Surgery",
+    "statusFilter": "Status Filter",
+    "summary": "Summary",
+    "tips": "Tips",
+    "tipsText": "Use the search and filters above to find users. Click on a user to view or edit their details.",
+    "totalUsers": "Total Users",
+    "unableCreateUser": "Unable to create user",
+    "unableDeleteUser": "Unable to delete user",
+    "unableLoadUsers": "Unable to load users",
+    "unableUpdateUser": "Unable to update user",
+    "unassigned": "Unassigned",
+    "updateFailed": "Failed to update user",
+    "updated": "Updated",
+    "userCreated": "User created successfully",
+    "userDeleted": "User deleted successfully",
+    "userDetails": "User Details",
+    "userDetailsSubtitle": "View and manage user information",
+    "userManagement": "User Management",
+    "userManagementSubtitle": "Create, edit, and manage system users",
+    "userUpdated": "User updated successfully",
+    "usernameMin": "Username must be at least 4 characters",
+    "usernamePattern": "Username can only contain letters, numbers, and underscores",
+    "usernameTaken": "Username already taken",
+    "visibleResults": "Visible Results"
   },
   "upcomingVisits": {
     "title": "Upcoming Visits",
@@ -782,7 +911,25 @@
     "view": "View",
     "subtitle_full": "Detailed view of all patients scheduled in the next 48 hours.",
     "keepTrack": "Stay Ahead of Schedule",
-    "trackDesc": "This page aggregates all urgent visits across the clinic to help you prepare for patient arrivals."
+    "trackDesc": "This page aggregates all urgent visits across the clinic to help you prepare for patient arrivals.",
+    "activeFilters": "Active filters ({{count}})",
+    "allDiagnoses": "All Diagnoses",
+    "allDoctors": "All Doctors",
+    "allPatients": "All Patients",
+    "allVisits": "All Visits",
+    "applyFilters": "Apply Filters",
+    "diagnosisFallback": "Diagnosis #{{id}}",
+    "doctorFallback": "Doctor #{{id}}",
+    "loading": "Loading upcoming visits...",
+    "nextVisitFrom": "Next Visit From",
+    "nextVisitTo": "Next Visit To",
+    "noFilterMatches": "No visits match the selected filters",
+    "noneAvailable": "No upcoming visits in the next 2 days",
+    "patientFallback": "Patient #{{id}}",
+    "refineUpcomingVisits": "Refine Upcoming Visits",
+    "resetFilters": "Reset Filters",
+    "visitDateFrom": "Visit Date From",
+    "visitDateTo": "Visit Date To"
   },
   "permissions": {
     "accessDenied": "Access Denied",
