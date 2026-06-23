@@ -1,5 +1,6 @@
 import React from 'react';
 import { Field } from 'react-final-form';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 import { getFieldError } from '../../lib/formUtils';
 
@@ -27,6 +28,7 @@ export function FormField({
   disabled,
   className,
 }: FormFieldProps) {
+  const { t } = useTranslation();
   return (
     <Field
       name={name}
@@ -75,7 +77,7 @@ export function FormField({
               />
             ) : (component === 'select' || type === 'select') ? (
               <select {...input} id={name} disabled={disabled} className={inputClasses}>
-                <option value="">{placeholder || 'Select...'}</option>
+                <option value="">{placeholder || t('common.select')}</option>
                 {options?.map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label}
@@ -122,6 +124,7 @@ export function FormSelectField({
   required,
   disabled,
 }: FormSelectFieldProps) {
+  const { t } = useTranslation();
   return (
     <Field name={name}>
       {({ input, meta }) => {
@@ -143,7 +146,7 @@ export function FormSelectField({
               disabled={disabled}
               className={cn('input-field', errorMessage && 'border-red-500')}
             >
-              <option value="">{placeholder || 'Select...'}</option>
+              <option value="">{placeholder || t('common.select')}</option>
               {options.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}

@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
 import { Modal } from './ui/Modal';
-import { clinicVisitSchema, type ClinicVisitFormValues } from '../schemas/clinicVisit';
+import { createClinicVisitSchema, type ClinicVisitFormValues } from '../schemas/clinicVisit';
 import { useCreateVisit } from '../hooks/useClinicVisits';
 import type { Diagnosis, Doctor } from '../types';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +19,7 @@ interface AddVisitFormProps {
 
 export function AddVisitForm({ patientId, doctors, diagnoses, isOpen, onClose, onSuccess }: AddVisitFormProps) {
   const { t } = useTranslation();
+  const clinicVisitSchema = createClinicVisitSchema(t);
   const createVisit = useCreateVisit(patientId);
 
   const { register, handleSubmit, formState, reset } = useForm<ClinicVisitFormValues>({

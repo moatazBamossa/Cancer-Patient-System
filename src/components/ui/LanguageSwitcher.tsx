@@ -4,7 +4,7 @@ import { Languages } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export function LanguageSwitcher({ className }: { className?: string }) {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
 
   const toggleLanguage = () => {
     const nextLng = i18n.language === 'en' ? 'ar' : 'en';
@@ -19,11 +19,11 @@ export function LanguageSwitcher({ className }: { className?: string }) {
         'bg-slate-500/10 text-slate-500 hover:bg-slate-500/20',
         className
       )}
-      title={i18n.language === 'en' ? 'Switch to Arabic' : 'تغيير للإنجليزية'}
+      title={t('common.switchLanguage')}
     >
       <Languages size={18} />
       <span className="text-xs font-bold uppercase tracking-wider">
-        {i18n.language === 'en' ? 'AR' : 'EN'}
+        {t('common.languageAbbr')}
       </span>
     </button>
   );

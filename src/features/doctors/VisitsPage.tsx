@@ -23,6 +23,17 @@ import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
 
 export default function VisitsPage() {
   const { t } = useTranslation()
+  const visitSchema = z.object({
+    patient_id: z.string().min(1, t("visits.validation.patientRequired") ?? "Patient is required"),
+    doctor_id: z.string().min(1, t("visits.validation.doctorRequired") ?? "Doctor is required"),
+    visit_date: z.string().min(1, t("visits.validation.visitDateTimeRequired") ?? "Visit date is required"),
+    visit_type: z.enum(["Follow-up", "Emergency", "Routine", "Post-treatment"]),
+    reason_for_visit: z.string().min(1, t("visits.validation.reasonRequired") ?? "Reason is required"),
+    clinical_notes: z.string().optional().default(""),
+    recommendations: z.string().optional().default(""),
+    next_visit_date: z.string().optional().default(""),
+    diagnosis_id: z.string().optional().default(""),
+  })
   const qc = useQueryClient()
   const [showForm, setShowForm] = useState(false)
   const [selectedVisit, setSelectedVisit] = useState<ClinicVisitRpcItem | null>(
@@ -44,19 +55,17 @@ export default function VisitsPage() {
   >(null)
   const [formKey, setFormKey] = useState(0)
 
-  const visitSchema = z.object({
-    patient_id: z.string().min(1),
-    doctor_id: z.string().min(1),
-    visit_date: z.string().min(1),
-    visit_type: z.enum(["Follow-up", "Emergency", "Routine", "Post-treatment"]),
-    reason_for_visit: z.string().min(1),
-    clinical_notes: z.string().optional().default(""),
-    recommendations: z.string().optional().default(""),
-    next_visit_date: z.string().optional().default(""),
-    diagnosis_id: z.string().optional().default(""),
-  })
-
-  type VisitForm = z.infer<typeof visitSchema>
+  type VisitForm = {
+    patient_id: string;
+    doctor_id: string;
+    visit_date: string;
+    visit_type: "Follow-up" | "Emergency" | "Routine" | "Post-treatment";
+    reason_for_visit: string;
+    clinical_notes: string;
+    recommendations: string;
+    next_visit_date: string;
+    diagnosis_id: string;
+  }
 
   const { data: allVisits, isLoading } = useQuery({
     queryKey: ["clinic-visits"],
@@ -191,11 +200,17 @@ export default function VisitsPage() {
           Routine: "bg-blue-500/10 text-blue-500",
           "Post-treatment": "bg-purple-500/10 text-purple-500",
         }
+        const typeLabels: Record<string, string> = {
+          "Follow-up": t("visits.visitTypeLabels.followUp"),
+          Emergency: t("visits.visitTypeLabels.emergency"),
+          Routine: t("visits.visitTypeLabels.routine"),
+          "Post-treatment": t("visits.postTreatment"),
+        }
         return (
           <span
             className={`text-[10px] items-center gap-1.5 px-2 py-0.5 rounded-full font-bold uppercase ${colors[String(v)] || colors.Routine}`}
           >
-            {String(v)}
+            {typeLabels[String(v)] || String(v)}
           </span>
         )
       },
@@ -456,9 +471,7 @@ export default function VisitsPage() {
           if (showDeleteConfirm?.id) deleteMut.mutate(showDeleteConfirm.id)
         }}
         title={t("common.delete", { defaultValue: "Delete" })}
-        message={t("cancer.deleteConfirm", {
-          defaultValue: "Are you sure you want to delete Appointment?",
-        })}
+        message={t("visits.deleteConfirm")}
         variant="danger"
       />
     </motion.div>

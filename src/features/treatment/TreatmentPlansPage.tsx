@@ -18,18 +18,20 @@ import { doctorService } from "../../services/doctor.service"
 import { treatmentService } from "../../services/treatment.service"
 import { Modal } from "../../components/ui/Modal"
 import { AppForm } from "../../components/ui/AppForm"
-import { FormField } from "../../components/ui/FormField"
+import { FormField, FormSelectField } from "../../components/ui/FormField"
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
 import { CardSkeleton, TableSkeleton } from "../../components/ui/Skeleton"
 import { zodValidator } from "../../lib/zodValidator"
 import { formatDate } from "../../lib/utils"
 import {
-  treatmentPlanSchema,
-  treatmentCycleSchema,
-  cycleMedicationSchema,
-  type TreatmentPlanFormValues,
-  type TreatmentCycleFormValues,
-  type CycleMedicationFormValues,
+  createTreatmentPlanSchema,
+  createTreatmentCycleSchema,
+  createCycleMedicationSchema,
+} from "../../schemas/treatmentPlan"
+import type {
+  TreatmentPlanFormValues,
+  TreatmentCycleFormValues,
+  CycleMedicationFormValues,
 } from "../../schemas/treatmentPlan"
 import type {
   TreatmentPlanRpcItem,
@@ -38,6 +40,7 @@ import type {
 } from "../../types/treatmentRpc"
 import { CycleStatusBadge, PlanStatusBadge } from "./treatmentBadges"
 import { medicationService } from "../../services/medication.service"
+import { Tooltip } from "../../components/ui/Tooltip"
 
 type ModalType = "plan" | "cycle" | "medication" | null
 type DeleteTarget =
@@ -48,6 +51,9 @@ type DeleteTarget =
 
 export default function TreatmentPlansPage() {
   const { t } = useTranslation()
+  const treatmentPlanSchema = createTreatmentPlanSchema(t)
+  const treatmentCycleSchema = createTreatmentCycleSchema(t)
+  const cycleMedicationSchema = createCycleMedicationSchema(t)
 
   const {
     createPlan,
@@ -222,7 +228,7 @@ export default function TreatmentPlansPage() {
       p_dose_unit: values.dose_unit,
       p_route: values.route,
       p_frequency: values.frequency,
-      p_note: values.note || undefined,
+      p_note: values.note || "",
     }
 
     if (editMed) {
@@ -347,7 +353,7 @@ export default function TreatmentPlansPage() {
         administered_by: "",
       }
 
-  const medInitialValues: CycleMedicationFormValues = editMed
+ const medInitialValues: CycleMedicationFormValues = editMed
     ? {
         cycle_id: editMed.cycle_id,
         medication_id: String(editMed.medication_id),
@@ -359,7 +365,7 @@ export default function TreatmentPlansPage() {
       }
     : {
         cycle_id: selectedCycleId ?? 0,
-        medication_id: "",
+        medication_id: '',
         dose: 1,
         dose_unit: "mg",
         route: "IV",
@@ -615,16 +621,19 @@ export default function TreatmentPlansPage() {
               <RefreshCw size={18} className="text-blue-500" />
               {t("treatment.cycles")}
             </h2>
-            <button
-              type="button"
-              disabled={(selectedPlan?.total_cycles ?? 0) <= cycles.length}
-              onClick={() => {
-                openCycleModal()
-              }}
-              className={`${(selectedPlan?.total_cycles ?? 0) <= cycles.length ? "opacity-50 cursor-not-allowed" : ""} gradient-btn px-4 py-2 text-sm flex items-center gap-1.5`}
-            >
-              <Plus size={16} /> {t("treatment.addCycle")}
-            </button>
+
+            <Tooltip position="right" text={t("treatment.cycle_limit_reached")} show={(selectedPlan?.total_cycles ?? 0) <= cycles.length}>
+              <button
+                type="button"
+                disabled={(selectedPlan?.total_cycles ?? 0) <= cycles.length}
+                onClick={() => {
+                  openCycleModal()
+                }}
+                className={`${(selectedPlan?.total_cycles ?? 0) <= cycles.length ? "opacity-50 cursor-not-allowed" : ""} gradient-btn px-4 py-2 text-sm flex items-center gap-1.5`}
+              >
+                <Plus size={16} /> {t("treatment.addCycle")}
+              </button>
+            </Tooltip>
           </div>
 
           {cyclesLoading && <TableSkeleton rows={3} cols={4} />}
@@ -755,7 +764,10 @@ export default function TreatmentPlansPage() {
 
           {!medsLoading && cycleMedications.length > 0 && (
             <div className="table-container overflow-x-auto">
-              <table className="data-table w-full">
+              <table
+                id="table-medical"
+                className="data-table text-sm text-left w-full"
+              >
                 <thead>
                   <tr>
                     <th>{t("medications.title")}</th>
@@ -781,7 +793,7 @@ export default function TreatmentPlansPage() {
                       <td>{med.frequency}</td>
                       <td>{med.note || "—"}</td>
                       <td>
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 justify-end">
                           <button
                             type="button"
                             onClick={() => openMedModal(med)}
@@ -858,10 +870,10 @@ export default function TreatmentPlansPage() {
               type="select"
               required
               options={[
-                { value: "Chemotherapy", label: "Chemotherapy" },
-                { value: "Radiation", label: "Radiation" },
-                { value: "Surgery", label: "Surgery" },
-                { value: "Palliative", label: "Palliative" },
+                { value: "Chemotherapy", label: t("treatment.planTypes.chemotherapy") },
+                { value: "Radiation", label: t("treatment.planTypes.radiation") },
+                { value: "Surgery", label: t("treatment.planTypes.surgery") },
+                { value: "Palliative", label: t("treatment.planTypes.palliative") },
               ]}
             />
             <FormField
@@ -870,9 +882,9 @@ export default function TreatmentPlansPage() {
               type="select"
               required
               options={[
-                { value: "Curative", label: "Curative" },
-                { value: "Palliative", label: "Palliative" },
-                { value: "Preventive", label: "Preventive" },
+                { value: "Curative", label: t("treatment.goals.curative") },
+                { value: "Palliative", label: t("treatment.goals.palliative") },
+                { value: "Preventive", label: t("treatment.goals.preventive") },
               ]}
             />
             <FormField
@@ -881,10 +893,10 @@ export default function TreatmentPlansPage() {
               type="select"
               required
               options={[
-                { value: "low", label: "Low" },
-                { value: "medium", label: "Medium" },
-                { value: "high", label: "High" },
-                { value: "urgent", label: "Urgent" },
+                { value: "low", label: t("treatment.priorities.low") },
+                { value: "medium", label: t("treatment.priorities.medium") },
+                { value: "high", label: t("treatment.priorities.high") },
+                { value: "urgent", label: t("treatment.priorities.urgent") },
               ]}
             />
             <FormField
@@ -910,10 +922,10 @@ export default function TreatmentPlansPage() {
               type="select"
               required
               options={[
-                { value: "draft", label: "Draft" },
-                { value: "active", label: "Active" },
-                { value: "completed", label: "Completed" },
-                { value: "cancelled", label: "Cancelled" },
+                { value: "draft", label: t("common.status.draft") },
+                { value: "active", label: t("common.status.active") },
+                { value: "completed", label: t("common.status.completed") },
+                { value: "cancelled", label: t("common.status.cancelled") },
               ]}
             />
             <FormField
@@ -921,11 +933,11 @@ export default function TreatmentPlansPage() {
               label={t("treatment.responseStatus")}
               type="select"
               options={[
-                { value: "", label: "—" },
-                { value: "complete_response", label: "Complete Response" },
-                { value: "partial_response", label: "Partial Response" },
-                { value: "stable_disease", label: "Stable Disease" },
-                { value: "progressive_disease", label: "Progressive Disease" },
+                { value: "", label: t("common.notAvailable") },
+                { value: "complete_response", label: t("treatment.responseStatuses.completeResponse") },
+                { value: "partial_response", label: t("treatment.responseStatuses.partialResponse") },
+                { value: "stable_disease", label: t("treatment.responseStatuses.stableDisease") },
+                { value: "progressive_disease", label: t("treatment.responseStatuses.progressiveDisease") },
               ]}
             />
           </div>
@@ -978,10 +990,10 @@ export default function TreatmentPlansPage() {
             type="select"
             required
             options={[
-              { value: "scheduled", label: "Scheduled" },
-              { value: "completed", label: "Completed" },
-              { value: "skipped", label: "Skipped" },
-              { value: "delayed", label: "Delayed" },
+              { value: "scheduled", label: t("common.status.scheduled") },
+              { value: "completed", label: t("common.status.completed") },
+              { value: "skipped", label: t("common.status.skipped") },
+              { value: "delayed", label: t("common.status.delayed") },
             ]}
           />
           <FormField
@@ -1034,10 +1046,9 @@ export default function TreatmentPlansPage() {
           onSubmit={handleMedSubmit}
           className="space-y-4"
         >
-          <FormField
+          <FormSelectField
             name="medication_id"
             label={t("medications.title")}
-            type="select"
             required
             options={[
               { value: "", label: t("common.select") },

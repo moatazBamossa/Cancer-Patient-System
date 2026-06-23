@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 
 const planStatusStyles: Record<string, string> = {
@@ -17,6 +18,7 @@ const cycleStatusStyles: Record<string, string> = {
 };
 
 export function PlanStatusBadge({ status }: { status: string }) {
+  const { t } = useTranslation();
   return (
     <span
       className={cn(
@@ -24,12 +26,13 @@ export function PlanStatusBadge({ status }: { status: string }) {
         planStatusStyles[status] ?? 'bg-slate-500/10 text-slate-600'
       )}
     >
-      {status.replace(/_/g, ' ')}
+      {t(`common.status.${status}`, status.replace(/_/g, ' '))}
     </span>
   );
 }
 
 export function CycleStatusBadge({ status }: { status: string }) {
+  const { t } = useTranslation();
   return (
     <span
       className={cn(
@@ -37,7 +40,7 @@ export function CycleStatusBadge({ status }: { status: string }) {
         cycleStatusStyles[status] ?? 'bg-slate-500/10 text-slate-600'
       )}
     >
-      {status.replace(/_/g, ' ')}
+      {t(`common.status.${status}`, status.replace(/_/g, ' '))}
     </span>
   );
 }

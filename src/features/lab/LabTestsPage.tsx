@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { motion } from "framer-motion"
 import { Plus, FlaskConical, AlertCircle, Edit3, Trash2 } from "lucide-react"
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
 import { z } from "zod"
 import { useTranslation } from "react-i18next"
 import { DataTable, type Column } from "../../components/ui/DataTable"
@@ -23,17 +24,15 @@ import { doctorService } from "../../services/doctor.service"
 import type { LabTest, LabTestResult, Patient, Doctor } from "../../types"
 import { LabTestPatientDto } from "../../services/lab.service"
 
-const labResultSchema = z.object({
-  patient_id: z.string().min(1, "Patient is required"),
-  lab_test_id: z.string().min(1, "Lab test is required"),
-  test_date: z.string().min(1, "Test date is required"),
-  result_value: z.string().min(1, "Result value is required"),
-  is_abnormal: z.boolean(),
-  notes: z.string().optional(),
-  ordered_by: z.string().min(1, "Ordered by is required"),
-})
-
-type LabResultForm = z.infer<typeof labResultSchema>
+type LabResultForm = {
+  patient_id: string;
+  lab_test_id: string;
+  test_date: string;
+  result_value: string;
+  is_abnormal: boolean;
+  notes?: string;
+  ordered_by: string;
+}
 
 type FieldProps = {
   label: string
@@ -68,11 +67,24 @@ const emptyValues: LabResultForm = {
 
 export default function LabTestsPage() {
   const { t } = useTranslation()
+  const labResultSchema = z.object({
+    patient_id: z.string().min(1, t("lab.validation.patientRequired")),
+    lab_test_id: z.string().min(1, t("lab.validation.testRequired")),
+    test_date: z.string().min(1, t("lab.validation.testDateRequired")),
+    result_value: z.string().min(1, t("lab.validation.resultValueRequired")),
+    is_abnormal: z.boolean(),
+    notes: z.string().optional(),
+    ordered_by: z.string().min(1, t("lab.validation.orderedByRequired")),
+  })
   const navigate = useNavigate()
   const [editingResult, setEditingResult] = useState<LabTestPatientDto | null>(
     null,
   )
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<{
+    isOpen: boolean
+    id: string
+  }>({ isOpen: false, id: "" })
 
   const labTestsQuery = useLabTests()
   const labResultsQuery = useLabTestPatients()
@@ -182,11 +194,8 @@ export default function LabTestsPage() {
     closeForm()
   }
 
-  const handleDelete = async (lab_test_patient_id: string) => {
-    if (!window.confirm(t("lab.deleteResultConfirm"))) {
-      return
-    }
-    await deleteMutation.mutateAsync(lab_test_patient_id)
+  const handleDelete = async (id: string) => {
+    await deleteMutation.mutateAsync(id)
   }
 
   const columns: Column<LabTestPatientDto>[] = [
@@ -251,7 +260,12 @@ export default function LabTestsPage() {
           <button
             type="button"
             className="rounded-lg border border-red-300 bg-red-50 px-3 py-1 text-sm text-red-600 transition hover:bg-red-100"
-            onClick={() => handleDelete(String(row.lab_test_patient_id))}
+            onClick={() =>
+              setShowDeleteConfirm({
+                isOpen: true,
+                id: String(row.lab_test_patient_id),
+              })
+            }
           >
             <Trash2 size={14} className="inline-block mr-1" />
             {t("common.delete")}
@@ -470,6 +484,16 @@ export default function LabTestsPage() {
           </div>
         </form>
       </Modal>
+      <ConfirmDialog
+        isOpen={showDeleteConfirm.isOpen}
+        onClose={() => setShowDeleteConfirm({ isOpen: false, id: "" })}
+        onConfirm={() => {
+          if (showDeleteConfirm.id) handleDelete(showDeleteConfirm.id)
+        }}
+        title={t("common.delete")}
+        message={t("lab.deleteResultConfirm")}
+        variant="danger"
+      />
     </motion.div>
   )
 }

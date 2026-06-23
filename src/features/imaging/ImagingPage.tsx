@@ -24,22 +24,31 @@ import { formatDate } from "../../lib/utils"
 import { useModulePermissions } from "../../modules/roles/permissions"
 import type { ImagingReport } from "../../types"
 
-const imagingSchema = z.object({
-  patient_id: z.string().min(1),
-  diagnosis_id: z.string().optional(),
-  imaging_type: z.enum(["CT", "MRI", "PET", "X-Ray", "Ultrasound"]),
-  body_part: z.string().min(1),
-  imaging_date: z.string().min(1),
-  findings: z.string().min(1),
-  impression: z.string().min(1),
-  ordered_by: z.string().min(1),
-  report_text: z.string().optional().default(""),
-})
-
-type ImagingForm = z.infer<typeof imagingSchema>
+type ImagingForm = {
+  patient_id: string;
+  diagnosis_id?: string;
+  imaging_type: "CT" | "MRI" | "PET" | "X-Ray" | "Ultrasound";
+  body_part: string;
+  imaging_date: string;
+  findings: string;
+  impression: string;
+  ordered_by: string;
+  report_text: string;
+}
 
 export default function ImagingPage() {
   const { t } = useTranslation()
+  const imagingSchema = z.object({
+    patient_id: z.string().min(1, t("imaging.validation.patientRequired")),
+    diagnosis_id: z.string().optional(),
+    imaging_type: z.enum(["CT", "MRI", "PET", "X-Ray", "Ultrasound"]),
+    body_part: z.string().min(1, t("imaging.validation.bodyPartRequired")),
+    imaging_date: z.string().min(1, t("imaging.validation.dateRequired")),
+    findings: z.string().min(1, t("imaging.validation.findingsRequired")),
+    impression: z.string().min(1, t("imaging.validation.impressionRequired")),
+    ordered_by: z.string().min(1, t("imaging.validation.orderedByRequired")),
+    report_text: z.string().optional().default(""),
+  })
   const [searchTerm, setSearchTerm] = useState("")
   const [patientFilter, setPatientFilter] = useState("")
   const [doctorFilter, setDoctorFilter] = useState("")
@@ -50,6 +59,9 @@ export default function ImagingPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [activeReport, setActiveReport] = useState<ImagingReport | null>(null)
   const [selectedReport, setSelectedReport] = useState<ImagingReport | null>(
+    null,
+  )
+  const [reportToDelete, setReportToDelete] = useState<ImagingReport | null>(
     null,
   )
   const [formKey, setFormKey] = useState(0)
@@ -180,14 +192,19 @@ export default function ImagingPage() {
   }
 
   const confirmDelete = (report: ImagingReport) => {
-    setSelectedReport(report)
+    setSelectedReport(null)
+    setReportToDelete(report)
     setShowDeleteConfirm(true)
   }
 
   const handleDelete = () => {
-    if (!selectedReport) return
-    deleteMutation.mutate(selectedReport.image_id)
-    setSelectedReport(null)
+    if (!reportToDelete) return
+    deleteMutation.mutate(reportToDelete.image_id, {
+      onSuccess: () => {
+        setShowDeleteConfirm(false)
+        setReportToDelete(null)
+      },
+    })
   }
 
   const columns: Column<ImagingReport>[] = [
@@ -226,7 +243,7 @@ export default function ImagingPage() {
       header: t("imaging.modality"),
       render: (value) => (
         <span className="uppercase font-mono text-xs font-bold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-500">
-          {String(value)}
+          {t(`imaging.types.${String(value)}`, String(value))}
         </span>
       ),
     },
@@ -343,10 +360,14 @@ export default function ImagingPage() {
         columns={columns}
         data={filteredReports}
         isLoading={imagingQuery.isLoading}
-        onRowClick={(row) => setSelectedReport(row)}
+        onRowClick={(row) => {
+          setSelectedReport(row)
+          setShowDeleteConfirm(false)
+          setReportToDelete(null)
+        }}
         emptyMessage={t("imaging.noReports")}
         actions={(row) => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-6">
             {canUpdate && (
               <button
                 type="button"
@@ -579,7 +600,10 @@ export default function ImagingPage() {
 
       <ConfirmDialog
         isOpen={showDeleteConfirm}
-        onClose={() => setShowDeleteConfirm(false)}
+        onClose={() => {
+          setShowDeleteConfirm(false)
+          setReportToDelete(null)
+        }}
         onConfirm={handleDelete}
         title={t("common.delete")}
         message={

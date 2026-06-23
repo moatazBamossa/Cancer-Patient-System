@@ -73,7 +73,7 @@ export default function PatientVisitsLanding() {
             <option value="">{t('visits.selectPatient')}</option>
             {patients.map((patient) => (
               <option key={patient.patient_id} value={patient.patient_id}>
-                {patient.full_name} ({patient.patient_id})
+                {patient.full_name}
               </option>
             ))}
           </select>

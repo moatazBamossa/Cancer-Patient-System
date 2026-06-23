@@ -62,7 +62,12 @@
       "critical": "حرج",
       "cancelled": "ملغى",
       "chemo": "علاج كيماوي",
-      "transferred": "تم التحويل"
+      "transferred": "تم التحويل",
+      "draft": "مسودة",
+      "scheduled": "مجدول",
+      "skipped": "تم التجاهل",
+      "delayed": "متأخر",
+      "on-hold": "معلق"
     },
     "date": "التاريخ",
     "name": "الاسم",
@@ -97,7 +102,9 @@
     "endDate": "تاريخ الانتهاء",
     "notAvailable": "غير متاح",
     "startDate": "تاريخ البداية",
-    "view": "عرض"
+    "view": "عرض",
+    "switchLanguage": "تغيير للإنجليزية",
+    "languageAbbr": "EN"
   },
   "auth": {
     "welcome": "مرحباً بك مجدداً",
@@ -206,6 +213,7 @@
     "createDiagnosis": "إنشاء تشخيص",
     "created": "تم إنشاء التشخيص",
     "patient": "المريض",
+    "confirmDelete": "هل أنت متأكد من حذف هذا التشخيص؟",
     "cancerType": "نوع السرطان",
     "doctor": "الطبيب",
     "status": "الحالة",
@@ -275,6 +283,7 @@
     "cycles": "الدورات",
     "cycle": "دورة",
     "addCycle": "إضافة دورة",
+    "cycle_limit_reached": "لا يمكن إضافة دورة جديدة. تم الوصول إلى الحد الأقصى لعدد الدورات.",
     "addCycleTitle": "إضافة دورة علاج",
     "editCycleTitle": "تعديل دورة العلاج",
     "createCycle": "إنشاء دورة",
@@ -306,7 +315,47 @@
     "route": "طريقة الإعطاء",
     "frequency": "التكرار",
     "frequencyPlaceholder": "مثال: كل 3 أسابيع",
-    "routePlaceholder": "مثال: فموي، وريدي"
+    "routePlaceholder": "مثال: فموي، وريدي",
+    "planTypes": {
+      "chemotherapy": "علاج كيماوي",
+      "radiation": "علاج إشعاعي",
+      "surgery": "جراحة",
+      "palliative": "تلطيفي"
+    },
+    "goals": {
+      "curative": "شفائي",
+      "palliative": "تلطيفي",
+      "preventive": "وقائي"
+    },
+    "priorities": {
+      "low": "منخفض",
+      "medium": "متوسط",
+      "high": "مرتفع",
+      "urgent": "عاجل"
+    },
+    "responseStatuses": {
+      "completeResponse": "استجابة كاملة",
+      "partialResponse": "استجابة جزئية",
+      "stableDisease": "مرض مستقر",
+      "progressiveDisease": "مرض متقدم"
+    },
+    "validation": {
+      "diagnosisRequired": "التشخيص مطلوب",
+      "doctorRequired": "الطبيب مطلوب",
+      "planTypeRequired": "نوع الخطة مطلوب",
+      "protocolNameRequired": "اسم البروتوكول مطلوب",
+      "goalRequired": "هدف العلاج مطلوب",
+      "startDateRequired": "تاريخ البداية مطلوب",
+      "totalCyclesMin": "يجب أن يكون إجمالي الدورات 1 على الأقل",
+      "planRequired": "الخطة مطلوبة",
+      "cycleNumberRequired": "رقم الدورة مطلوب",
+      "cycleDateRequired": "تاريخ الدورة مطلوب",
+      "cycleRequired": "الدورة مطلوبة",
+      "medicationRequired": "الدواء مطلوب",
+      "doseUnitRequired": "وحدة الجرعة مطلوبة",
+      "routeRequired": "طريقة الإعطاء مطلوبة",
+      "frequencyRequired": "التكرار مطلوب"
+    }
   },
   "patients": {
     "gender": "الجنس",
@@ -400,7 +449,11 @@
     "loadingContacts": "جاري تحميل جهات الاتصال...",
     "notes": "ملاحظات",
     "phone": "الهاتف",
-    "relationship": "صلة القرابة"
+    "relationship": "صلة القرابة",
+    "validation": {
+      "nameRequired": "الاسم مطلوب",
+      "relationshipRequired": "صلة القرابة مطلوبة"
+    }
   },
   "doctors": {
     "title": "الفريق الطبي",
@@ -468,6 +521,7 @@
     "scheduleVisit": "جدولة زيارة",
     "scheduleTitle": "جدولة زيارة عيادة",
     "scheduleAppointment": "جدولة موعد",
+    "deleteConfirm":"هل انت متاكد من حذف الزياره",
     "visitScheduled": "تمت جدولة الزيارة",
     "dateTime": "التاريخ والوقت",
     "type": "النوع",
@@ -530,7 +584,15 @@
     "noPatientsForVisits": "لا يوجد مرضى متاحون للزيارات",
     "openVisits": "فتح الزيارات",
     "selectPatient": "اختر المريض",
-    "selectPatientToManage": "اختر مريضاً لإدارة زياراته وعلاماته الحيوية"
+    "selectPatientToManage": "اختر مريضاً لإدارة زياراته وعلاماته الحيوية",
+    "validation": {
+      "patientRequired": "المريض مطلوب",
+      "visitDateTimeRequired": "تاريخ ووقت الزيارة مطلوب",
+      "visitTypeRequired": "نوع الزيارة مطلوب",
+      "reasonRequired": "سبب الزيارة مطلوب",
+      "doctorRequired": "الطبيب مطلوب",
+      "diagnosisRequired": "التشخيص مطلوب"
+    }
   },
   "vitals": {
     "title": "العلامات الحيوية",
@@ -618,7 +680,26 @@
     "spo2Percent": "تشبع الأكسجين (%)",
     "temperatureCelsius": "درجة الحرارة (°م)",
     "unableSaveVitalSigns": "تعذر حفظ العلامات الحيوية",
-    "weightKg": "الوزن (كجم)"
+    "weightKg": "الوزن (كجم)",
+    "validation": {
+      "patientRequired": "المريض مطلوب",
+      "tempRequired": "درجة الحرارة مطلوبة",
+      "tempInvalid": "درجة الحرارة غير صالحة",
+      "sysRequired": "الضغط الانقباضي مطلوب",
+      "sysInvalid": "الضغط الانقباضي غير صالح",
+      "diaRequired": "الضغط الانبساطي مطلوب",
+      "diaInvalid": "الضغط الانبساطي غير صالح",
+      "heartRateRequired": "معدل ضربات القلب مطلوب",
+      "heartRateInvalid": "معدل ضربات القلب غير صالح",
+      "respRequired": "معدل التنفس مطلوب",
+      "respInvalid": "معدل التنفس غير صالح",
+      "spo2Required": "تشبع الأكسجين مطلوب",
+      "spo2Invalid": "تشبع الأكسجين غير صالح",
+      "weightRequired": "الوزن مطلوب",
+      "weightInvalid": "الوزن غير صالح",
+      "heightRequired": "الطول مطلوب",
+      "heightInvalid": "الطول غير صالح"
+    }
   },
   "medications": {
     "title": "الأدوية",
@@ -642,7 +723,16 @@
     "namePlaceholder": "مثال: دوكسوروبيسين",
     "searchByName": "ابحث باسم الدواء...",
     "unit": "الوحدة",
-    "unitPlaceholder": "مثال: ملغ، مل"
+    "unitPlaceholder": "مثال: ملغ، مل",
+    "totalMedications": "إجمالي الأدوية",
+    "categories": "الفئات",
+    "activeCount": "نشط",
+    "targeted": "علاج موجه",
+    "immunotherapy": "علاج مناعي",
+    "validation": {
+      "nameRequired": "الاسم مطلوب",
+      "categoryRequired": "الفئة مطلوبة"
+    }
   },
   "lab": {
     "title": "الفحوصات المخبرية",
@@ -715,7 +805,14 @@
     "unableDeleteTest": "تعذر حذف الفحص",
     "unableUpdateResult": "تعذر تحديث النتيجة",
     "unableUpdateTest": "تعذر تحديث الفحص",
-    "unitsRequired": "الوحدات مطلوبة"
+    "unitsRequired": "الوحدات مطلوبة",
+    "validation": {
+      "patientRequired": "المريض مطلوب",
+      "testRequired": "الفحص المخبري مطلوب",
+      "testDateRequired": "تاريخ الفحص مطلوب",
+      "resultValueRequired": "قيمة النتيجة مطلوبة",
+      "orderedByRequired": "الطبيب الآمر مطلوب"
+    }
   },
   "imaging": {
     "title": "تقارير الأشعة",
@@ -742,7 +839,24 @@
     "unableUpdate": "تعذر تحديث تقرير الأشعة",
     "unableUpload": "تعذر رفع تقرير الأشعة",
     "updateSuccess": "تم تحديث تقرير الأشعة بنجاح",
-    "uploadSuccess": "تم رفع تقرير الأشعة بنجاح"
+    "uploadSuccess": "تم رفع تقرير الأشعة بنجاح",
+    "validation": {
+      "patientRequired": "المريض مطلوب",
+      "diagnosisRequired": "التشخيص مطلوب",
+      "imagingTypeRequired": "نوع الأشعة مطلوب",
+      "bodyPartRequired": "جزء الجسم مطلوب",
+      "dateRequired": "التاريخ مطلوب",
+      "findingsRequired": "النتائج مطلوبة",
+      "impressionRequired": "الانطباع مطلوب",
+      "orderedByRequired": "الطبيب الآمر مطلوب"
+    },
+    "types": {
+      "CT": "أشعة مقطعية",
+      "MRI": "رنين مغناطيسي",
+      "PET": "مسح PET",
+      "X-Ray": "أشعة سينية",
+      "Ultrasound": "موجات فوق صوتية"
+    }
   },
   "roles": {
     "title": "الأدوار",
@@ -765,7 +879,13 @@
     "grantFullAccess": "منح صلاحية كاملة",
     "module": "الوحدة",
     "readOnly": "قراءة فقط",
-    "roleNamePlaceholder": "أدخل اسم الدور"
+    "roleNamePlaceholder": "أدخل اسم الدور",
+    "actions": {
+      "create": "إنشاء",
+      "list": "عرض",
+      "update": "تحديث",
+      "delete": "حذف"
+    }
   },
   "profile": {
     "title": "ملفي الشخصي",
@@ -784,8 +904,16 @@
     "nameRequired": "الاسم مطلوب",
     "invalidEmail": "بريد إلكتروني غير صالح",
     "phoneRequired": "رقم الهاتف مطلوب",
+    "phonePlaceholder": "أدخل رقم هاتفك",
     "saving": "جاري الحفظ...",
-    "saveChanges": "حفظ التغييرات"
+    "saveChanges": "حفظ التغييرات",
+    "usernameReadonly": "لا يمكن تغيير اسم المستخدم",
+    "roleAndStatus": "الدور والحالة",
+    "timeline": "الجدول الزمني",
+    "lastUpdated": "آخر تحديث",
+    "security": "الأمان",
+    "securityHint": "اتصل بمسؤول النظام لتغيير كلمة المرور أو إعدادات الأمان.",
+    "loadError": "فشل تحميل بيانات الملف الشخصي"
   },
   "dataTable": {
     "showing": "عرض {{start}}–{{end}} من {{total}}",

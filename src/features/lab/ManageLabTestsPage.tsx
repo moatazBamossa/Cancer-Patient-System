@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { DataTable, type Column } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { useLabTests, useCreateLabTest, useUpdateLabTest, useDeleteLabTest } from '../../hooks/useLabTests';
 import type { LabTest } from '../../types';
 
@@ -52,6 +53,10 @@ export default function ManageLabTestsPage() {
   const navigate = useNavigate();
   const [selectedTest, setSelectedTest] = useState<LabTest | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<{
+    isOpen: boolean;
+    testId: string;
+  }>({ isOpen: false, testId: '' });
 
   const labTestsQuery = useLabTests();
   const createMutation = useCreateLabTest();
@@ -108,11 +113,8 @@ export default function ManageLabTestsPage() {
     closeForm();
   };
 
-  const handleDelete = async (test: LabTest) => {
-    if (!window.confirm(t('lab.deleteTestConfirm'))) {
-      return;
-    }
-    await deleteMutation.mutateAsync(test.lab_test_id);
+  const handleDelete = async (testId: string) => {
+    await deleteMutation.mutateAsync(testId);
   };
 
   const columns: Column<LabTest>[] = [
@@ -141,7 +143,12 @@ export default function ManageLabTestsPage() {
           <button
             type="button"
             className="rounded-lg border border-red-300 bg-red-50 px-3 py-1 text-sm text-red-600 transition hover:bg-red-100"
-            onClick={() => handleDelete(row)}
+            onClick={() =>
+              setShowDeleteConfirm({
+                isOpen: true,
+                testId: String(row.lab_test_id),
+              })
+            }
           >
             <Trash2 size={14} className="inline-block mr-1" />
             {t('common.delete')}
@@ -234,7 +241,14 @@ export default function ManageLabTestsPage() {
               <button
                 type="button"
                 className="rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm text-red-600 transition hover:bg-red-100"
-                onClick={() => selectedTest && handleDelete(selectedTest)}
+                onClick={() => {
+                  if (selectedTest) {
+                    setShowDeleteConfirm({
+                      isOpen: true,
+                      testId: String(selectedTest.lab_test_id),
+                    })
+                  }
+                }}
                 disabled={deleteMutation.isPending}
               >
                 {t('common.delete')}
@@ -250,6 +264,20 @@ export default function ManageLabTestsPage() {
           </div>
         </form>
       </Modal>
+      <ConfirmDialog
+        isOpen={showDeleteConfirm.isOpen}
+        onClose={() =>
+          setShowDeleteConfirm({ isOpen: false, testId: '' })
+        }
+        onConfirm={() => {
+          if (showDeleteConfirm.testId) {
+            handleDelete(showDeleteConfirm.testId)
+          }
+        }}
+        title={t("common.delete")}
+        message={t("lab.deleteTestConfirm")}
+        variant="danger"
+      />
     </motion.div>
   );
 }

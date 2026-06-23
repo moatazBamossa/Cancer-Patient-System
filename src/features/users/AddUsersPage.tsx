@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Field } from 'react-final-form';
 import { useTranslation } from 'react-i18next';
-import { Plus, Eye, Edit2, Trash2, Search, X } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Plus, Eye, Edit2, Trash2, Search, X, Users, UserCheck, UserX } from 'lucide-react';
 import { AppForm } from '../../components/ui/AppForm';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { FormField } from '../../components/ui/FormField';
@@ -10,6 +11,7 @@ import { StatusBadge } from '../../components/ui/StatusBadge';
 import { DataTable, type Column } from '../../components/ui/DataTable';
 import { z } from 'zod';
 import { zodValidator } from '../../lib/zodValidator';
+import { cn } from '../../lib/utils';
 import { useRolesQuery } from '../../modules/roles/hooks/role.hooks';
 import {
   useCreateUserProfileMutation,
@@ -19,6 +21,14 @@ import {
 } from '../../hooks/useUserProfiles';
 import type { UserProfile } from '../../utils/user-profile-normalizers';
 import type { CreateUserProfileParams, UpdateUserProfileParams } from '../../types/user-profile';
+
+const roleBadgeColors: Record<string, string> = {
+  admin: 'bg-rose-500/10 text-rose-600 border-rose-200',
+  doctor: 'bg-blue-500/10 text-blue-600 border-blue-200',
+  nurse: 'bg-emerald-500/10 text-emerald-600 border-emerald-200',
+  staff: 'bg-amber-500/10 text-amber-600 border-amber-200',
+  super_admin: 'bg-purple-500/10 text-purple-600 border-purple-200',
+};
 
 const phoneSchema = (t: ReturnType<typeof useTranslation>['t']) => z
   .union([
@@ -313,7 +323,16 @@ export default function AddUsersPage() {
       key: 'role_id',
       header: t('common.role'),
       sortable: true,
-      render: (_value, row) => getRoleName(row.role_id),
+      render: (_value, row) => {
+        const roleName = getRoleName(row.role_id)
+        const roleKey = roleName.toLowerCase().replace(/\s+/g, '_')
+        const colorClass = roleBadgeColors[roleKey] || roleBadgeColors.staff || 'bg-slate-500/10 text-slate-600 border-slate-200'
+        return (
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${colorClass}`}>
+            {roleName}
+          </span>
+        )
+      },
     },
     { key: 'specialty', header: t('doctors.specialty'), sortable: true },
     {
@@ -330,16 +349,17 @@ export default function AddUsersPage() {
   ];
 
   const actions = (row: UserProfile) => (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex items-center gap-1">
       <button
         type="button"
         onClick={(event) => {
           event.stopPropagation();
           setDetailsUser(row);
         }}
-      className="text-xs px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-100"
+        className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+        title={t('common.view')}
       >
-        <Eye size={14} /> {t('common.view')}
+        <Eye size={15} />
       </button>
       <button
         type="button"
@@ -347,9 +367,10 @@ export default function AddUsersPage() {
           event.stopPropagation();
           setEditingUser(row);
         }}
-        className="text-xs px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-100"
+        className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
+        title={t('common.edit')}
       >
-        <Edit2 size={14} /> {t('common.edit')}
+        <Edit2 size={15} />
       </button>
       <button
         type="button"
@@ -358,16 +379,21 @@ export default function AddUsersPage() {
           setDeleteUserId(row.id);
           setDeleteConfirmOpen(true);
         }}
-        className="text-xs px-2 py-1 rounded-lg bg-red-500 text-white hover:bg-red-600"
+        className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+        title={t('common.delete')}
       >
-        <Trash2 size={14} /> {t('common.delete')}
+        <Trash2 size={15} />
       </button>
     </div>
   );
 
   return (
-    <div className="space-y-6 max-w-[1280px] mx-auto animate-in fade-in duration-500">
-      <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <div className="space-y-6 max-w-[1280px] mx-auto">
+      <motion.header
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col sm:flex-row sm:items-end justify-between gap-4"
+      >
         <div>
           <h1 className="text-2xl font-bold">{t('addUsers.userManagement')}</h1>
           <p className="text-sm text-slate-500">{t('addUsers.userManagementSubtitle')}</p>
@@ -381,10 +407,14 @@ export default function AddUsersPage() {
             <Plus size={16} /> {t('addUsers.createUser')}
           </button>
         </div>
-      </header>
+      </motion.header>
 
       {(generalError || successMessage || usersError) && (
-        <div className="space-y-3">
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="space-y-3"
+        >
           {successMessage && (
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">
               {successMessage}
@@ -400,101 +430,137 @@ export default function AddUsersPage() {
               {usersError.message || t('addUsers.unableLoadUsers')}
             </div>
           )}
-        </div>
+        </motion.div>
       )}
 
-      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="space-y-4">
-          <div className="rounded-xl border p-4 bg-white shadow-sm">
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="col-span-1 sm:col-span-2">
-                <label className="block text-sm font-medium text-slate-700">{t('common.searchAction')}</label>
-                <div className="relative mt-1">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    value={searchQuery}
-                    onChange={(event) => setSearchQuery(event.target.value)}
-                    placeholder={t('addUsers.searchPlaceholder')}
-                    className="input-field pl-10 w-full"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700">{t('common.role')}</label>
-                <select
-                  value={roleFilter ?? ''}
-                  onChange={(event) => setRoleFilter(event.target.value ? Number(event.target.value) : null)}
-                  className="input-field w-full mt-1"
-                >
-                  <option value="">{t('addUsers.allRoles')}</option>
-                  {roles.map((role) => (
-                    <option key={role.role_id} value={role.role_id}>
-                      {role.role_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700">{t('common.status.label')}</label>
-                <select
-                  value={statusFilter}
-                  onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
-                  className="input-field w-full mt-1"
-                >
-                  <option value="all">{t('addUsers.allStatuses')}</option>
-                  <option value="active">{t('common.status.active')}</option>
-                  <option value="inactive">{t('common.status.inactive')}</option>
-                </select>
-              </div>
-            </div>
+      <div className="grid gap-5 sm:grid-cols-3">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="glass-card p-5 flex items-center gap-4 border-l-4 border-indigo-500"
+        >
+          <div className="p-3 bg-indigo-500/10 rounded-xl text-indigo-500">
+            <Users size={22} />
           </div>
-
-          <div className="rounded-xl border bg-white p-4 shadow-sm">
-            <DataTable<UserProfile>
-              columns={columns}
-              data={currentPageData}
-              totalItems={totalItems}
-              page={page}
-              pageSize={pageSize}
-              onPageChange={(nextPage) => setPage(nextPage)}
-              onSearch={(value) => setSearchQuery(value)}
-              onSort={(key, order) => {
-                setSortKey(key);
-                setSortOrder(order);
-              }}
-              searchPlaceholder={t('addUsers.searchUsers')}
-              isLoading={usersLoading}
-              emptyMessage={t('addUsers.noUsersFound')}
-              actions={actions}
-            />
+          <div>
+            <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: 'var(--text-muted)' }}>
+              {t('addUsers.totalUsers')}
+            </p>
+            <p className="text-2xl font-bold">{profiles.length}</p>
           </div>
-        </div>
-
-        <aside className="space-y-4">
-          <div className="rounded-xl border bg-white p-4 shadow-sm">
-            <h2 className="text-lg font-semibold">{t('addUsers.summary')}</h2>
-            <div className="mt-4 space-y-3 text-sm text-slate-600">
-              <p>
-                <span className="font-semibold">{t('addUsers.totalUsers')}:</span> {profiles.length}
-              </p>
-              <p>
-                <span className="font-semibold">{t('addUsers.visibleResults')}:</span> {totalItems}
-              </p>
-              <p>
-                <span className="font-semibold">{t('addUsers.selectedRole')}:</span> {roleFilter ? getRoleName(roleFilter) : t('addUsers.allRoles')}
-              </p>
-              <p>
-                <span className="font-semibold">{t('addUsers.statusFilter')}:</span> {statusFilter === 'all' ? t('common.all') : statusFilter === 'active' ? t('common.status.active') : t('common.status.inactive')}
-              </p>
-            </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="glass-card p-5 flex items-center gap-4 border-l-4 border-emerald-500"
+        >
+          <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-500">
+            <UserCheck size={22} />
           </div>
-
-          <div className="rounded-xl border bg-white p-4 shadow-sm">
-            <h2 className="text-lg font-semibold">{t('addUsers.tips')}</h2>
-            <p className="mt-3 text-sm text-slate-600">{t('addUsers.tipsText')}</p>
+          <div>
+            <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: 'var(--text-muted)' }}>
+              {t('common.status.active')}
+            </p>
+            <p className="text-2xl font-bold">
+              {profiles.filter((p) => p.is_active).length}
+            </p>
           </div>
-        </aside>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="glass-card p-5 flex items-center gap-4 border-l-4 border-red-500"
+        >
+          <div className="p-3 bg-red-500/10 rounded-xl text-red-500">
+            <UserX size={22} />
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: 'var(--text-muted)' }}>
+              {t('common.status.inactive')}
+            </p>
+            <p className="text-2xl font-bold">
+              {profiles.filter((p) => !p.is_active).length}
+            </p>
+          </div>
+        </motion.div>
       </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="glass-card p-4"
+      >
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder={t('addUsers.searchPlaceholder')}
+              className="input-field pl-10 pr-9 w-full"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+          <select
+            value={roleFilter ?? ''}
+            onChange={(event) => setRoleFilter(event.target.value ? Number(event.target.value) : null)}
+            className="input-field sm:w-44"
+          >
+            <option value="">{t('addUsers.allRoles')}</option>
+            {roles.map((role) => (
+              <option key={role.role_id} value={role.role_id}>
+                {role.role_name}
+              </option>
+            ))}
+          </select>
+          <select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
+            className="input-field sm:w-40"
+          >
+            <option value="all">{t('addUsers.allStatuses')}</option>
+            <option value="active">{t('common.status.active')}</option>
+            <option value="inactive">{t('common.status.inactive')}</option>
+          </select>
+        </div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+        className="glass-card p-4"
+      >
+        <DataTable<UserProfile>
+          columns={columns}
+          data={currentPageData}
+          totalItems={totalItems}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={(nextPage) => setPage(nextPage)}
+          onSearch={(value) => setSearchQuery(value)}
+          onSort={(key, order) => {
+            setSortKey(key);
+            setSortOrder(order);
+          }}
+          searchPlaceholder={t('addUsers.searchUsers')}
+          isLoading={usersLoading}
+          emptyMessage={t('addUsers.noUsersFound')}
+          actions={actions}
+        />
+      </motion.div>
 
       <Modal isOpen={createModalOpen} onClose={() => setCreateModalOpen(false)} title={t('addUsers.createUser')} size="lg">
         <AppForm<CreateUserFormValues>
@@ -573,55 +639,81 @@ export default function AddUsersPage() {
         )}
       </Modal>
 
-      {detailsUser && (
-        <div className="fixed inset-0 z-50 flex items-stretch justify-end bg-black/40" onClick={() => setDetailsUser(null)}>
-          <div className="relative w-full max-w-md bg-white p-6 overflow-y-auto" onClick={(event) => event.stopPropagation()}>
-            <button type="button" onClick={() => setDetailsUser(null)} className="absolute top-4 right-4 text-slate-500 hover:text-slate-700">
-              <X size={20} />
-            </button>
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-xl font-semibold">{t('addUsers.userDetails')}</h2>
-                <p className="text-sm text-slate-500">{t('addUsers.userDetailsSubtitle')}</p>
+      <Modal
+        isOpen={!!detailsUser}
+        onClose={() => setDetailsUser(null)}
+        title={t('addUsers.userDetails')}
+        size="md"
+      >
+        {detailsUser && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4 pb-4 border-b" style={{ borderColor: 'var(--border-color)' }}>
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold shrink-0">
+                {detailsUser.full_name
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')
+                  .toUpperCase()
+                  .slice(0, 2)}
               </div>
-              <div className="grid gap-3">
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400">{t('profile.fullName')}</p>
-                  <p className="text-base font-medium">{detailsUser.full_name}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400">{t('profile.username')}</p>
-                  <p className="text-base font-medium">{detailsUser.user_name}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400">{t('common.role')}</p>
-                  <p className="text-base font-medium">{getRoleName(detailsUser.role_id)}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400">{t('common.phone')}</p>
-                  <p className="text-base font-medium">{detailsUser.phone || t('common.notAvailable')}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400">{t('doctors.specialty')}</p>
-                  <p className="text-base font-medium">{detailsUser.specialty || t('common.notAvailable')}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400">{t('common.status.label')}</p>
-                  <StatusBadge status={detailsUser.is_active ? 'active' : 'inactive'} />
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400">{t('addUsers.created')}</p>
-                  <p className="text-base font-medium">{new Date(detailsUser.created_at).toLocaleString()}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400">{t('addUsers.updated')}</p>
-                  <p className="text-base font-medium">{new Date(detailsUser.updated_at).toLocaleString()}</p>
-                </div>
+              <div className="min-w-0">
+                <p className="text-lg font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                  {detailsUser.full_name}
+                </p>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  @{detailsUser.user_name}
+                </p>
+              </div>
+              <div className="ml-auto">
+                <StatusBadge status={detailsUser.is_active ? 'active' : 'inactive'} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+              <div>
+                <p className="text-xs uppercase tracking-widest font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>
+                  {t('common.role')}
+                </p>
+                <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                  {getRoleName(detailsUser.role_id)}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-widest font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>
+                  {t('common.phone')}
+                </p>
+                <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                  {detailsUser.phone || t('common.notAvailable')}
+                </p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-xs uppercase tracking-widest font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>
+                  {t('doctors.specialty')}
+                </p>
+                <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                  {detailsUser.specialty || t('common.notAvailable')}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-widest font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>
+                  {t('addUsers.created')}
+                </p>
+                <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                  {new Date(detailsUser.created_at).toLocaleString()}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-widest font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>
+                  {t('addUsers.updated')}
+                </p>
+                <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                  {new Date(detailsUser.updated_at).toLocaleString()}
+                </p>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
 
       <ConfirmDialog
         isOpen={deleteConfirmOpen}

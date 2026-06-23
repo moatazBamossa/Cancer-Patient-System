@@ -389,7 +389,7 @@ export default function DiagnosesPage() {
 					deleteTarget && deleteMut.mutate(deleteTarget.diagnosis_id)
 				}
 				title={t('common.delete')}
-				message={t('common.confirm')}
+				message={t('diagnoses.confirmDelete')}
 			/>
 		</motion.div>
 	);

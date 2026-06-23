@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
 import { Modal } from './ui/Modal';
-import { vitalSignSchema, type VitalSignFormValues } from '../schemas/vitalSigns';
+import { createVitalSignSchema, type VitalSignFormValues } from '../schemas/vitalSigns';
 import { useCreateVital } from '../hooks/useClinicVisits';
 import { useTranslation } from 'react-i18next';
 
@@ -16,6 +16,7 @@ interface AddVitalSignsFormProps {
 
 export function AddVitalSignsForm({ visitId, isOpen, onClose, onSuccess }: AddVitalSignsFormProps) {
   const { t } = useTranslation();
+  const vitalSignSchema = createVitalSignSchema(t);
   const createVital = useCreateVital(visitId ?? 0);
 
   const { register, handleSubmit, formState, reset, watch, setValue } = useForm<VitalSignFormValues>({

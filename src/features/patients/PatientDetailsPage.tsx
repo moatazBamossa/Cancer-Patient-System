@@ -105,8 +105,8 @@ export default function PatientDetailsPage() {
   const contacts = patient?.contacts || []
 
   const contactSchema = z.object({
-    full_name: z.string().min(1, "Required"),
-    relationship: z.string().min(1, "Required"),
+    full_name: z.string().min(1, t("patientDetails.validation.nameRequired")),
+    relationship: z.string().min(1, t("patientDetails.validation.relationshipRequired")),
     phone: z.string().optional(),
     alt_phone: z.string().optional(),
     notes: z.string().optional(),

@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import { useVisitVitals, useDeleteVital } from '../hooks/useClinicVisits';
 import { ConfirmDialog } from './ui/ConfirmDialog';
+import { Tooltip } from './ui/Tooltip';
 import type { VitalSignRpcItem } from '../types/visitRpc';
 import { useTranslation } from 'react-i18next';
 
@@ -46,14 +47,16 @@ export function RecordedVitalSigns({ visitId, onAddVital }: RecordedVitalSignsPr
           </h2>
           <p className="text-sm text-slate-500">{t('vitals.viewReadingsForSelectedVisit')}</p>
         </div>
-        <button
-          type="button"
-          onClick={onAddVital}
-          className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
-          disabled={!visitId}
-        >
-          {t('vitals.addVitalSigns')}
-        </button>
+        <Tooltip position="right" text={t('vitals.selectVisitBeforeAdding')} show={!visitId}>
+          <button
+            type="button"
+            onClick={onAddVital}
+            className={`${visitId ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-300 cursor-not-allowed'} inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white transition`}
+            disabled={!visitId}
+          >
+            {t('vitals.addVitalSigns')}
+          </button>
+        </Tooltip>
       </div>
 
       {isLoading ? (
