@@ -300,6 +300,7 @@
     "goal": "هدف العلاج",
     "planType": "نوع الخطة",
     "priority": "الأولوية",
+    "stage": "المرحلة",
     "expectedEndDate": "تاريخ الانتهاء المتوقع",
     "totalCycles": "إجمالي الدورات",
     "responseStatus": "حالة الاستجابة",
@@ -320,7 +321,10 @@
       "chemotherapy": "علاج كيماوي",
       "radiation": "علاج إشعاعي",
       "surgery": "جراحة",
-      "palliative": "تلطيفي"
+      "palliative": "تلطيفي",
+      "surgery_chemotherapy_radiation": "جراحة + كيماوي + إشعاعي",
+      "chemotherapy_radiation": "كيماوي + إشعاعي",
+      "surgery_chemotherapy_radiation_palliative": "جراحة + كيماوي + إشعاعي + تلطيفي"
     },
     "goals": {
       "curative": "شفائي",
@@ -377,7 +381,7 @@
     },
     "nationality": "الجنسية",
     "deleteTitle": "حذف مريض",
-    "deleteConfirm": "هل أنت متأكد أنك تريد حذف المريض {{name}}؟ يمكن التراجع عن هذا الإجراء لاحقاً.",
+    "deleteConfirm": "هل أنت متأكد أنك تريد حذف المريض {{name}}؟",
     "deleteSuccess": "تم حذف المريض بنجاح",
     "deleteError": "فشل في حذف المريض",
     "createSuccess": "تم إنشاء المريض بنجاح",
@@ -607,6 +611,8 @@
     "tempAndBP": "درجة الحرارة وضغط الدم",
     "weightTrend": "اتجاه الوزن",
     "abnormal": "غير طبيعي",
+    "low": "منخفض",
+    "high": "مرتفع",
     "loadingVitals": "جاري تحميل العلامات الحيوية...",
     "noVitals": "لا توجد علامات حيوية مسجلة",
     "noVitalsForPatient": "لا توجد علامات حيوية مسجلة لهذا المريض",
@@ -630,6 +636,7 @@
     "showVitals": "إظهار العلامات الحيوية",
     "hideVitals": "إخفاء العلامات الحيوية",
     "unknownCancer": "سرطان غير معروف",
+    "recordedAt": "تم التسجيل في",
     "relatedDiagnosisOptional": "التشخيص المرتبط (اختياري)",
     "visitScheduledSuccess": "تمت جدولة الزيارة بنجاح",
     "scheduleVisitFailed": "فشلت جدولة الزيارة",
@@ -709,6 +716,7 @@
     "addMedicationTitle": "إضافة دواء",
     "genericName": "الاسم العلمي",
     "category": "الفئة",
+    "radiation_therapy": "علاج الإشعاعي",
     "form": "الشكل",
     "standardDose": "الجرعة القياسية",
     "dosageForm": "شكل الجرعة",
@@ -885,6 +893,23 @@
       "list": "عرض",
       "update": "تحديث",
       "delete": "حذف"
+    },
+    "modules": {
+      "patient": "المرضى",
+      "patient_visits": "زيارات المرضى",
+      "diagnoses": "التشخيصات",
+      "cancer_types": "أنواع السرطان",
+      "treatment_plans": "خطط العلاج",
+      "clinic_visits_and_vitals": "العلامات الحيوية وزيارات العيادة",
+      "medications": "الأدوية",
+      "laboratory_tests": "الفحوصات المخبرية",
+      "imaging_reports": "تقارير التصوير",
+      "doctor": "الأطباء",
+      "clinics": "العيادات",
+      "visits": "ملاحظات الزيارات",
+      "roles": "الأدوار",
+      "user_management": "إدارة المستخدمين",
+      "dashboard": "لوحة القيادة"
     }
   },
   "profile": {

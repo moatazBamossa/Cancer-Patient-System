@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { doctorService, type DoctorWithClinic } from '../../services/doctor.service';
 import { Modal } from '../../components/ui/Modal';
 import { AppForm } from '../../components/ui/AppForm';
-import { FormField } from '../../components/ui/FormField';
+import { FormField, FormSelectField } from '../../components/ui/FormField';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { zodValidator } from '../../lib/zodValidator';
 import { getInitials } from '../../lib/utils';
@@ -359,13 +359,12 @@ export default function DoctorsPage() {
         >
           <FormField name="full_name" label={t('doctors.fullName')} required />
           <FormField name="specialty" label={t('doctors.specialization')} required />
-          <FormField
-            name="clinic_id"
-            label={t('doctors.primaryClinic')}
-            type="select"
-            required
-            options={clinicOptions}
-          />
+          <FormSelectField
+							name="clinic_id"
+							label={t('doctors.primaryClinic')}
+							required
+							options={clinicOptions}
+						/>
           <FormField name="license_number" label={t('doctors.licenseNumber')} required />
           <FormField name="phone" label={t('common.phone')} type="tel" required />
           <FormField name="email" label={t('common.email')} type="email" required />

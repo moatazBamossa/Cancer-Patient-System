@@ -14,11 +14,13 @@ import {
   FileText,
   ChevronDown,
   ChevronUp,
+  Ruler,
+  Divide,
 } from "lucide-react"
 import { z } from "zod"
 import toast from "react-hot-toast"
 import { useTranslation } from "react-i18next"
-import { Field, useField } from "react-final-form"
+import { useField } from "react-final-form"
 import { visitService } from "../../services/visit.service"
 import { patientService } from "../../services/patient.service"
 import { doctorService } from "../../services/doctor.service"
@@ -28,7 +30,8 @@ import { AppForm } from "../../components/ui/AppForm"
 import { FormField, FormSelectField } from "../../components/ui/FormField"
 import { zodValidator } from "../../lib/zodValidator"
 import { formatDate, formatTime } from "../../lib/utils"
-import type { ClinicVisitRpcItem } from "../../types/visitRpc"
+import type { ClinicVisitRpcItem, VitalSignRpcItem } from "../../types/visitRpc"
+import { useVisitVitals } from "../../hooks/useClinicVisits";
 
 type CombinedVisitForm = {
   p_patient_id: string;
@@ -76,78 +79,189 @@ const DEFAULT_FORM_VALUES: CombinedVisitForm = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function isAbnormal(type: string, value: number, val2?: number): boolean {
-  switch (type) {
-    case "temp":
-      return value < 36.1 || value > 37.5
-    case "sys":
-      return value < 90 || value > 140
-    case "dia":
-      return value < 60 || value > 90
-    case "hr":
-      return value < 60 || value > 100
-    case "rr":
-      return value < 12 || value > 20
-    case "spo2":
-      return value < 95
-    default:
-      return false
-  }
+const VITAL_RANGES = {
+  temperature: { min: 36.5, max: 37.5 },
+  blood_pressure_sys: { min: 90, max: 120 },
+  blood_pressure_dia: { min: 60, max: 80 },
+  heart_rate: { min: 60, max: 100 },
+  respiratory_rate: { min: 12, max: 20 },
+  spo2: { min: 95, max: 100 },
+  weight_kg: { min: 65, max: 75 },
+  height_cm: { min: 170, max: 180 },
+  bmi: { min: 18.5, max: 24.9 },
+} as const
+
+type VitalStatus = "low" | "normal" | "high"
+
+function getVitalStatus(type: keyof typeof VITAL_RANGES, value: number): VitalStatus {
+  const range = VITAL_RANGES[type]
+  if (value < range.min) return "low"
+  if (value > range.max) return "high"
+  return "normal"
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
+
+const STATUS_STYLES = {
+  low: {
+    card: "bg-blue-500/10 border-blue-500/30 shadow-[0_0_12px_-4px_rgba(59,130,246,0.3)]",
+    icon: "bg-blue-500/20 text-blue-500",
+    label: "bg-blue-500/20 text-blue-500",
+    value: "text-blue-500",
+    badge: "LOW",
+  },
+  normal: {
+    card: "glass-card",
+    icon: "bg-indigo-500/10 text-indigo-500",
+    label: "",
+    value: "text-slate-900 dark:text-white",
+    badge: "",
+  },
+  high: {
+    card: "bg-red-500/10 border-red-500/30 shadow-[0_0_12px_-4px_rgba(239,68,68,0.3)]",
+    icon: "bg-red-500/20 text-red-500",
+    label: "bg-red-500/20 text-red-500",
+    value: "text-red-500",
+    badge: "HIGH",
+  },
+} as const
 
 function VitalCard({
   title,
   value,
   unit,
   icon,
-  abnormal,
+  status,
 }: {
   title: string
   value: string | number
   unit: string
   icon: React.ReactNode
-  abnormal: boolean
+  status: VitalStatus
 }) {
   const { t } = useTranslation()
+  const styles = STATUS_STYLES[status]
+
   return (
-    <div
-      className={`p-4 rounded-xl border transition-all ${abnormal ? "bg-red-500/10 border-red-500/30" : "glass-card"}`}
-    >
+    <div className={`p-4 rounded-xl border transition-all ${styles.card}`}>
       <div className="flex items-center justify-between mb-2">
-        <div
-          className={`p-2 rounded-lg ${abnormal ? "bg-red-500/20 text-red-500" : "bg-indigo-500/10 text-indigo-500"}`}
-        >
-          {icon}
-        </div>
-        {abnormal && (
-          <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-wider">
-            {t("vitals.abnormal")}
+        <div className={`p-2 rounded-lg ${styles.icon}`}>{icon}</div>
+        {status !== "normal" && (
+          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${styles.label}`}>
+            {status === "low" ? t("vitals.low") : t("vitals.high")}
           </span>
         )}
       </div>
       <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
         {title}
       </p>
-      <div className="flex items-baseline gap-1 mt-1">
-        <span
-          className={`text-2xl font-bold ${abnormal ? "text-red-500" : "text-slate-900 dark:text-white"}`}
-        >
-          {value}
-        </span>
+      <div className="flex items-baseline flex-wrap gap-1 mt-1">
+        <span className={`text-2xl font-bold ${styles.value}`}>{value}</span>
         <span className="text-sm font-medium text-slate-500">{unit}</span>
       </div>
     </div>
   )
 }
 
+function VitalsRow({ v }: { v: VitalSignRpcItem }) {
+  const { t } = useTranslation()
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {v.blood_pressure_sys && v.blood_pressure_dia && (
+          <VitalCard
+            title={t("vitals.bloodPressure")}
+            value={`${v.blood_pressure_sys}/${v.blood_pressure_dia}`}
+            unit="mmHg"
+            icon={<Heart size={18} />}
+            status={(() => {
+              const sys = getVitalStatus("blood_pressure_sys", v.blood_pressure_sys!)
+              const dia = getVitalStatus("blood_pressure_dia", v.blood_pressure_dia!)
+              if (sys === "high" || dia === "high") return "high"
+              if (sys === "low" || dia === "low") return "low"
+              return "normal"
+            })()}
+          />
+        )}
+        {v.heart_rate && (
+          <VitalCard
+            title={t("vitals.heartRateLabel")}
+            value={v.heart_rate}
+            unit="bpm"
+            icon={<Activity size={18} />}
+            status={getVitalStatus("heart_rate", v.heart_rate)}
+          />
+        )}
+        {v.temperature && (
+          <VitalCard
+            title={t("vitals.temperatureLabel")}
+            value={v.temperature}
+            unit="°C"
+            icon={<Thermometer size={18} />}
+            status={getVitalStatus("temperature", v.temperature)}
+          />
+        )}
+        {v.spo2 && (
+          <VitalCard
+            title={t("vitals.spo2")}
+            value={v.spo2}
+            unit="%"
+            icon={<Droplet size={18} />}
+            status={getVitalStatus("spo2", v.spo2)}
+          />
+        )}
+        {v.respiratory_rate && (
+          <VitalCard
+            title={t("vitals.respiratoryRateLabel")}
+            value={v.respiratory_rate}
+            unit={t("vitals.breathsPerMin")}
+            icon={<Wind size={18} />}
+            status={getVitalStatus("respiratory_rate", v.respiratory_rate)}
+          />
+        )}
+        {v.weight_kg && (
+          <VitalCard
+            title={t("vitals.weightLabel")}
+            value={v.weight_kg}
+            unit="kg"
+            icon={<Scale size={18} />}
+            status={getVitalStatus("weight_kg", v.weight_kg)}
+          />
+        )}
+        {v.height_cm && (
+          <VitalCard
+            title={t("vitals.height")}
+            value={v.height_cm}
+            unit="cm"
+            icon={<Ruler size={18} />}
+            status={getVitalStatus("height_cm", v.height_cm)}
+          />
+        )}
+        {v.bmi && (
+          <VitalCard
+            title={t("vitals.bmi")}
+            value={Number(v.bmi).toFixed(1)}
+            unit="kg/m²"
+            icon={<Divide size={18} />}
+            status={getVitalStatus("bmi", v.bmi)}
+          />
+        )}
+      </div>
+      {v.notes && (
+        <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg text-sm text-slate-600 dark:text-slate-400 break-words">
+          <span className="font-semibold text-slate-700 dark:text-slate-300">
+            {t("common.notes")}:{" "}
+          </span>
+          {v.notes}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function VitalsDisplay({ visitId }: { visitId: number }) {
   const { t } = useTranslation()
-  const { data: vitals, isLoading } = useQuery({
-    queryKey: ["vitals", visitId],
-    queryFn: () => visitService.listVitalsByVisit(visitId),
-  })
+  const { data: vitals = [], isLoading } = useVisitVitals(visitId);
 
   if (isLoading)
     return (
@@ -162,86 +276,32 @@ function VitalsDisplay({ visitId }: { visitId: number }) {
       </div>
     )
 
-  const v = vitals[0] // Assuming one vitals record per visit for display simplicity
-
   return (
     <motion.div
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: "auto" }}
       exit={{ opacity: 0, height: 0 }}
-      className="pt-4 border-t border-slate-200 dark:border-slate-800 mt-4"
+      className="pt-4 border-t border-slate-200 dark:border-slate-800 mt-4 space-y-4"
     >
-      <h4 className="text-sm font-semibold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
+      <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
         <Activity size={16} className="text-indigo-500" />
         {t("vitals.recordedVitalSigns")}
+        <span className="text-xs font-normal text-slate-400">({vitals.length})</span>
       </h4>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {v.blood_pressure_sys && v.blood_pressure_dia && (
-          <VitalCard
-            title={t("vitals.bloodPressure")}
-            value={`${v.blood_pressure_sys}/${v.blood_pressure_dia}`}
-            unit="mmHg"
-            icon={<Heart size={18} />}
-            abnormal={
-              isAbnormal("sys", v.blood_pressure_sys) ||
-              isAbnormal("dia", v.blood_pressure_dia)
-            }
-          />
-        )}
-        {v.heart_rate && (
-          <VitalCard
-            title={t("vitals.heartRateLabel")}
-            value={v.heart_rate}
-            unit="bpm"
-            icon={<Activity size={18} />}
-            abnormal={isAbnormal("hr", v.heart_rate)}
-          />
-        )}
-        {v.temperature && (
-          <VitalCard
-            title={t("vitals.temperatureLabel")}
-            value={v.temperature}
-            unit="°C"
-            icon={<Thermometer size={18} />}
-            abnormal={isAbnormal("temp", v.temperature)}
-          />
-        )}
-        {v.spo2 && (
-          <VitalCard
-            title={t("vitals.spo2")}
-            value={v.spo2}
-            unit="%"
-            icon={<Droplet size={18} />}
-            abnormal={isAbnormal("spo2", v.spo2)}
-          />
-        )}
-        {v.respiratory_rate && (
-          <VitalCard
-            title={t("vitals.respiratoryRateLabel")}
-            value={v.respiratory_rate}
-            unit={t("vitals.breathsPerMin")}
-            icon={<Wind size={18} />}
-            abnormal={isAbnormal("rr", v.respiratory_rate)}
-          />
-        )}
-        {v.weight_kg && (
-          <VitalCard
-            title={t("vitals.weightLabel")}
-            value={v.weight_kg}
-            unit="kg"
-            icon={<Scale size={18} />}
-            abnormal={false}
-          />
-        )}
-      </div>
-      {v.notes && (
-        <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg text-sm text-slate-600 dark:text-slate-400">
-          <span className="font-semibold text-slate-700 dark:text-slate-300">
-            {t("common.notes")}:{" "}
-          </span>
-          {v.notes}
+      {vitals.map((v, idx) => (
+        <div key={v.vital_id}>
+          {idx > 0 && (
+            <div className="mb-4 pt-4 border-t border-dashed border-slate-200 dark:border-slate-700">
+              {v.recorded_at && (
+                <p className="text-xs text-slate-400 mb-3">
+                  {t("vitals.recordedAt")}: {formatDate(v.recorded_at)} {formatTime(v.recorded_at)}
+                </p>
+              )}
+            </div>
+          )}
+          <VitalsRow v={v} />
         </div>
-      )}
+      ))}
     </motion.div>
   )
 }
@@ -256,29 +316,29 @@ function VisitCard({ visit }: { visit: ClinicVisitRpcItem }) {
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer"
         onClick={() => setExpanded(!expanded)}
       >
-        <div className="flex items-start gap-4">
-          <div className="p-3 bg-indigo-500/10 text-indigo-500 rounded-xl">
+        <div className="flex items-start gap-4 min-w-0">
+          <div className="p-3 bg-indigo-500/10 text-indigo-500 rounded-xl shrink-0">
             <Calendar size={24} />
           </div>
-          <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              {formatDate(visit.visit_date)}
-              <span className="text-sm font-normal text-slate-500">
+          <div className="min-w-0">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex flex-wrap items-center gap-x-2 gap-y-1">
+              <span className="whitespace-nowrap">{formatDate(visit.visit_date)}</span>
+              <span className="text-sm font-normal text-slate-500 whitespace-nowrap">
                 {t("vitals.atTime", { time: formatTime(visit.visit_date) })}
               </span>
             </h3>
-            <div className="flex items-center gap-4 mt-1 text-sm text-slate-600 dark:text-slate-400">
-              <span className="flex items-center gap-1">
-                <UserIcon size={14} /> {t("common.doctorPrefix")}{" "}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm text-slate-600 dark:text-slate-400">
+              <span className="flex items-center gap-1 truncate max-w-[200px] sm:max-w-[300px]">
+                <UserIcon size={14} className="shrink-0" /> {t("common.doctorPrefix")}{" "}
                 {visit.doctor_name || visit.doctor_id}
               </span>
-              <span className="flex items-center gap-1">
-                <FileText size={14} /> {visit.reason_for_visit}
+              <span className="flex items-center gap-1 truncate max-w-[200px] sm:max-w-[300px]">
+                <FileText size={14} className="shrink-0" /> {visit.reason_for_visit}
               </span>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <button className="text-sm font-medium text-indigo-500 hover:text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
             {expanded ? (
               <>

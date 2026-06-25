@@ -300,6 +300,7 @@
     "goal": "Treatment Goal",
     "planType": "Plan Type",
     "priority": "Priority",
+    "stage": "Stage",
     "expectedEndDate": "Expected End Date",
     "totalCycles": "Total Cycles",
     "responseStatus": "Response Status",
@@ -320,7 +321,10 @@
       "chemotherapy": "Chemotherapy",
       "radiation": "Radiation",
       "surgery": "Surgery",
-      "palliative": "Palliative"
+      "palliative": "Palliative",
+      "surgery_chemotherapy_radiation": "Surgery + Chemotherapy + Radiation",
+      "chemotherapy_radiation": "Chemotherapy + Radiation",
+      "surgery_chemotherapy_radiation_palliative": "Surgery + Chemotherapy + Radiation + Palliative"
     },
     "goals": {
       "curative": "Curative",
@@ -607,6 +611,8 @@
     "tempAndBP": "Temperature & Blood Pressure",
     "weightTrend": "Weight Trend",
     "abnormal": "Abnormal",
+    "low": "Low",
+    "high": "High",
     "loadingVitals": "Loading vitals...",
     "noVitals": "No vitals recorded",
     "noVitalsForPatient": "No vitals recorded for this patient",
@@ -630,6 +636,7 @@
     "showVitals": "Show Vitals",
     "hideVitals": "Hide Vitals",
     "unknownCancer": "Unknown Cancer",
+    "recordedAt": "Recorded at",
     "relatedDiagnosisOptional": "Related Diagnosis (Optional)",
     "visitScheduledSuccess": "Visit scheduled successfully",
     "scheduleVisitFailed": "Failed to schedule visit",
@@ -710,6 +717,7 @@
     "genericName": "Generic Name",
     "category": "Category",
     "form": "Form",
+    "radiation_therapy": "Radiation Therapy",
     "standardDose": "Standard Dose",
     "dosageForm": "Dosage Form",
     "sideEffects": "Side Effects",
@@ -885,6 +893,23 @@
       "list": "List",
       "update": "Update",
       "delete": "Delete"
+    },
+    "modules": {
+      "patient": "Patients",
+      "patient_visits": "Patient Visits",
+      "diagnoses": "Diagnoses",
+      "cancer_types": "Cancer Types",
+      "treatment_plans": "Treatment Plans",
+      "clinic_visits_and_vitals": "Vitals & Clinic Visits",
+      "medications": "Medications",
+      "laboratory_tests": "Lab Tests",
+      "imaging_reports": "Imaging Reports",
+      "doctor": "Doctors",
+      "clinics": "Clinics",
+      "visits": "Visit Notes",
+      "roles": "Roles",
+      "user_management": "User Management",
+      "dashboard": "Dashboard"
     }
   },
   "profile": {

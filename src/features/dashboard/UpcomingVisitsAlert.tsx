@@ -34,7 +34,6 @@ export default function UpcomingVisitsAlert({
   onViewPatient,
 }: UpcomingVisitsAlertProps) {
   const { t } = useTranslation()
-  const [dismissed, setDismissed] = useState(false)
   const [filterValues, setFilterValues] = useState<ClinicVisitsUpcomingFilters>(
     {},
   )
@@ -114,7 +113,6 @@ export default function UpcomingVisitsAlert({
     setFilterValues({})
   }
 
-  if (dismissed) return null
 
   const getUrgency = (visitDate: number | string | Date) => {
     const visit = new Date(visitDate)
@@ -196,14 +194,7 @@ export default function UpcomingVisitsAlert({
                 count: upcomingVisits.length,
               })}
             </span>
-            <button
-              onClick={() => setDismissed(true)}
-              className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label={t("common.dismiss")}
-              style={{ color: "var(--text-muted)" }}
-            >
-              <X size={18} />
-            </button>
+
           </div>
         </div>
 
@@ -228,13 +219,7 @@ export default function UpcomingVisitsAlert({
                 <RefreshCcw size={16} />
                 {t("upcomingVisits.resetFilters")}
               </button>
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-                {activeFilterCount === 0
-                  ? t("upcomingVisits.allVisits")
-                  : t("upcomingVisits.activeFilters", {
-                      count: activeFilterCount,
-                    })}
-              </span>
+
             </div>
           </div>
 
