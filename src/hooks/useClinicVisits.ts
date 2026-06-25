@@ -10,9 +10,18 @@ import type {
   VitalSignUpdateInput,
 } from '../types/visitRpc';
 
+// Query key creators
+export const createClinicVisitsQueryKey = (patientId: number) => ['clinic-visits-by-patient', patientId];
+export const createVisitDetailQueryKey = (visitId: number) => ['clinic-visit-detail', visitId];
+export const createAllClinicVisitsQueryKey = () => ['clinic-visits-all'];
+export const createUpcomingClinicVisitsQueryKey = (filters?: ClinicVisitsUpcomingFilters) =>
+  ['clinic-visits-upcoming', filters ?? {}];
+export const createVisitVitalsQueryKey = (visitId?: number | null) => ['visit-vitals', visitId];
+
+// Query hooks
 export function useClinicVisits(patientId: number) {
   return useQuery<ClinicVisitRpcItem[], Error>({
-    queryKey: ['clinic-visits-by-patient', patientId],
+    queryKey: createClinicVisitsQueryKey(patientId),
     queryFn: () => visitService.listVisitsByPatient(patientId),
     enabled: patientId > 0,
     staleTime: 1000 * 60 * 2,
@@ -21,7 +30,7 @@ export function useClinicVisits(patientId: number) {
 
 export function useVisitDetail(visitId: number | null) {
   return useQuery<ClinicVisitRpcItem | null, Error>({
-    queryKey: ['clinic-visit-detail', visitId],
+    queryKey: createVisitDetailQueryKey(visitId!),
     queryFn: () => visitService.getVisitById(visitId!),
     enabled: !!visitId,
     staleTime: 1000 * 60 * 2,
@@ -34,7 +43,7 @@ export function useCreateVisit(patientId: number) {
   return useMutation({
     mutationFn: (input: ClinicVisitCreateInput) => visitService.createVisit(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clinic-visits-by-patient', patientId] });
+      queryClient.invalidateQueries({ queryKey: createClinicVisitsQueryKey(patientId) });
     },
   });
 }
@@ -45,7 +54,7 @@ export function useUpdateVisit(patientId: number) {
   return useMutation({
     mutationFn: (input: ClinicVisitUpdateInput) => visitService.updateVisit(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clinic-visits-by-patient', patientId] });
+      queryClient.invalidateQueries({ queryKey: createClinicVisitsQueryKey(patientId) });
     },
   });
 }
@@ -56,14 +65,14 @@ export function useDeleteVisit(patientId: number) {
   return useMutation({
     mutationFn: (visitId: number) => visitService.deleteVisit(visitId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clinic-visits-by-patient', patientId] });
+      queryClient.invalidateQueries({ queryKey: createClinicVisitsQueryKey(patientId) });
     },
   });
 }
 
 export function useAllClinicVisits() {
   return useQuery<ClinicVisitRpcItem[], Error>({
-    queryKey: ['clinic-visits-all'],
+    queryKey: createAllClinicVisitsQueryKey(),
     queryFn: () => visitService.listAllVisits(),
     staleTime: 1000 * 60 * 2,
   });
@@ -71,7 +80,7 @@ export function useAllClinicVisits() {
 
 export function useClinicVisitsUpcoming(filters?: ClinicVisitsUpcomingFilters) {
   return useQuery<any[], Error>({
-    queryKey: ['clinic-visits-upcoming', filters ?? {}],
+    queryKey: createUpcomingClinicVisitsQueryKey(filters),
     queryFn: () => visitService.listUpcomingDualDate(filters ?? {}),
     staleTime: 1000 * 60,
   });
@@ -79,7 +88,7 @@ export function useClinicVisitsUpcoming(filters?: ClinicVisitsUpcomingFilters) {
 
 export function useVisitVitals(visitId: number | null) {
   return useQuery<VitalSignRpcItem[], Error>({
-    queryKey: ['visit-vitals', visitId],
+    queryKey: createVisitVitalsQueryKey(visitId),
     queryFn: () => visitService.listVitalsByVisit(visitId!),
     enabled: !!visitId,
     staleTime: 1000 * 60 * 2,
@@ -92,7 +101,7 @@ export function useCreateVital(visitId: number) {
   return useMutation({
     mutationFn: (input: VitalSignCreateInput) => visitService.createVitalSign(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['visit-vitals', visitId] });
+      queryClient.invalidateQueries({ queryKey: createVisitVitalsQueryKey(visitId) });
     },
   });
 }
@@ -103,7 +112,7 @@ export function useUpdateVital(visitId: number) {
   return useMutation({
     mutationFn: (input: VitalSignUpdateInput) => visitService.updateVitalSign(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['visit-vitals', visitId] });
+      queryClient.invalidateQueries({ queryKey: createVisitVitalsQueryKey(visitId) });
     },
   });
 }
@@ -114,7 +123,7 @@ export function useDeleteVital(visitId: number) {
   return useMutation({
     mutationFn: (vitalId: number) => visitService.deleteVitalSign(vitalId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['visit-vitals', visitId] });
+      queryClient.invalidateQueries({ queryKey: createVisitVitalsQueryKey(visitId) });
     },
   });
 }

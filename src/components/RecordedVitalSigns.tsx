@@ -1,11 +1,12 @@
 import React from 'react';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
-import { useVisitVitals, useDeleteVital } from '../hooks/useClinicVisits';
+import { useVisitVitals, useDeleteVital, createVisitVitalsQueryKey } from '../hooks/useClinicVisits';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { Tooltip } from './ui/Tooltip';
 import type { VitalSignRpcItem } from '../types/visitRpc';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface RecordedVitalSignsProps {
   visitId: number | null;
@@ -14,6 +15,7 @@ interface RecordedVitalSignsProps {
 
 export function RecordedVitalSigns({ visitId, onAddVital }: RecordedVitalSignsProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const { data: vitals = [], isLoading, error } = useVisitVitals(visitId);
   const deleteVital = useDeleteVital(visitId ?? 0);
   const [confirmVitalId, setConfirmVitalId] = React.useState<number | null>(null);
@@ -33,6 +35,7 @@ export function RecordedVitalSigns({ visitId, onAddVital }: RecordedVitalSignsPr
       await deleteVital.mutateAsync(confirmVitalId);
       toast.success(t('vitals.vitalSignRecordDeleted'));
       setConfirmVitalId(null);
+      queryClient.invalidateQueries({ queryKey: [createVisitVitalsQueryKey()[0]] });
     } catch (err) {
       toast.error((err as Error).message || t('vitals.unableDeleteVitalSign'));
     }

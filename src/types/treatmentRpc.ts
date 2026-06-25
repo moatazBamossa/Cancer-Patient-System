@@ -79,7 +79,6 @@ export interface TreatmentPlanCreateInput {
 
 export interface TreatmentPlanUpdateInput extends TreatmentPlanCreateInput {
   p_plan_id: number;
-  p_end_date?: string;
 }
 
 export interface TreatmentCycleCreateInput {

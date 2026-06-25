@@ -273,12 +273,6 @@ export default function MedicationsPage() {
     p_is_active:   z.boolean().optional().default(true),
   })
 
-  // ── category options from DB ──
-  const { data: dbCategories = [] } = useQuery({
-    queryKey: ['medication-categories'],
-    queryFn:  () => medicationService.listCategories(),
-    staleTime: 10 * 60 * 1000,
-  })
 
   // Static known categories + any extras returned by the DB
   const STATIC_CATS = ['chemo', 'chemotherapy', 'hormonal', 'supportive', 'targeted', 'immunotherapy']
@@ -288,9 +282,7 @@ export default function MedicationsPage() {
     { value: 'Supportive',    label: t('medications.supportive') },
     { value: 'Targeted',      label: t('medications.targeted') },
     { value: 'Immunotherapy', label: t('medications.immunotherapy') },
-    ...dbCategories
-      .filter((c) => !STATIC_CATS.includes(c.toLowerCase()))
-      .map((c) => ({ value: c, label: c })),
+    { value: 'radiation_therapy', label: t('medications.radiation_therapy') },
   ]
 
   // ── main medications query — switches on active filter ──

@@ -159,7 +159,6 @@ export default function TreatmentPlansPage() {
       p_response_status: values.response_status || "complete_response",
       p_notes: values.notes || "",
       p_plan_id: editPlan?.plan_id ?? undefined,
-      p_end_date: values.expected_end_date || "",
     }
 
     if (editPlan) {
@@ -874,6 +873,9 @@ export default function TreatmentPlansPage() {
                 { value: "Radiation", label: t("treatment.planTypes.radiation") },
                 { value: "Surgery", label: t("treatment.planTypes.surgery") },
                 { value: "Palliative", label: t("treatment.planTypes.palliative") },
+                { value: "Surgery + Chemotherapy + Radiation", label: t("treatment.planTypes.surgery_chemotherapy_radiation") },
+                { value: "Chemotherapy + Radiation", label: t("treatment.planTypes.chemotherapy_radiation") },
+                { value: "Surgery + Chemotherapy + Radiation + Palliative", label: t("treatment.planTypes.surgery_chemotherapy_radiation_palliative") },
               ]}
             />
             <FormField
@@ -884,12 +886,11 @@ export default function TreatmentPlansPage() {
               options={[
                 { value: "Curative", label: t("treatment.goals.curative") },
                 { value: "Palliative", label: t("treatment.goals.palliative") },
-                { value: "Preventive", label: t("treatment.goals.preventive") },
               ]}
             />
             <FormField
               name="priority"
-              label={t("treatment.priority")}
+              label={t("treatment.stage")}
               type="select"
               required
               options={[
