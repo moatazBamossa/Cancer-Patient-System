@@ -160,21 +160,6 @@ export default function LoginPage() {
             )}
           </button>
         </AppForm>
-
-        {/* Demo credentials */}
-        <div className="mt-6 p-4 rounded-xl" style={{ background: 'var(--bg-tertiary)' }}>
-          <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-muted)' }}>
-            {t('auth.demoCredentials')}
-          </p>
-          <div className="space-y-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
-            <p>
-              <span className="font-medium">{t('common.admin')}:</span> 1 / 1
-            </p>
-            <p>
-              <span className="font-medium">{t('common.doctor')}:</span> dr.ahmed / doctor123
-            </p>
-          </div>
-        </div>
       </motion.div>
     </div>
   );

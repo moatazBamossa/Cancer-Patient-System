@@ -1,10 +1,18 @@
 // ─── Medication RPC Types ─────────────────────────────────────────────────────
 
+export type MedicationCategory =
+  | 'Chemotherapy'
+  | 'Hormonal'
+  | 'Supportive'
+  | 'Targeted'
+  | 'Immunotherapy'
+  | 'radiation_therapy';
+
 /** Row shape returned by list / search / get / create / update RPCs */
 export interface MedicationRpcItem {
   medication_id: number;
   name:          string;
-  category:      string;
+  category:      MedicationCategory;
   unit:          string | null;
   description:   string | null;
   is_active:     boolean;

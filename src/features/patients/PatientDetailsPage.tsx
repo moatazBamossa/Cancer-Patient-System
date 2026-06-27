@@ -71,9 +71,23 @@ export default function PatientDetailsPage() {
     { id: "contacts", label: t("patientDetails.contacts"), icon: Phone },
   ]
 
+  const categoryStatusMap: Record<string, string> = {
+    Chemotherapy: t("medications.chemotherapy"),
+    chemo: t("medications.chemotherapy"),
+    Hormonal: t("medications.hormonal"),
+    hormonal: t("medications.hormonal"),
+    Supportive: t("medications.supportive"),
+    supportive: t("medications.supportive"),
+    Targeted: t("medications.targeted"),
+    targeted: t("medications.targeted"),
+    Immunotherapy: t("medications.immunotherapy"),
+    immunotherapy: t("medications.immunotherapy"),
+    radiation_therapy: t("medications.radiation_therapy"),
+  }
+
   const patientIdNum = id ? Number(id) : undefined
 
-  const { data: emergencyContacts = [], isLoading: contactsLoading } =
+  const { data: emergencyContacts = [], isLoading: contactsLoading, refetch } =
     useEmergencyContactsByPatientQuery(patientIdNum)
 
   const createContactMutation = useCreateEmergencyContactMutation()
@@ -103,6 +117,7 @@ export default function PatientDetailsPage() {
   const imaging = patient?.imaging_reports || []
   const visits = patient?.visits || []
   const contacts = patient?.contacts || []
+
 
   const contactSchema = z.object({
     full_name: z.string().min(1, t("patientDetails.validation.nameRequired")),
@@ -549,7 +564,7 @@ export default function PatientDetailsPage() {
                           {t("vitals.bmi")}
                         </span>
                         <p className={`font-semibold ${bmiCat.color}`}>
-                          {v.bmi} ({bmiCat.label})
+                          {Number(v?.bmi?.toFixed(2))} ({bmiCat.label})
                         </p>
                       </div>
                       <div>
@@ -615,7 +630,7 @@ export default function PatientDetailsPage() {
                               </p>
                             </div>
                             <StatusBadge
-                              status={(med.category as any) || "chemo"}
+                              status={categoryStatusMap[med.category] ?? t("common.unknown")}
                             />
                           </div>
                         ))}
@@ -909,6 +924,7 @@ export default function PatientDetailsPage() {
                     setShowContactModal(false)
                     setEditingContact(null)
                     form.restart()
+                    refetch()
                     return
                   }
                   if (!!patientIdNum)

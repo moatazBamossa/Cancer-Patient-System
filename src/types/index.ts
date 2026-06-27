@@ -321,11 +321,55 @@ export interface LabTestResult {
 // ─── TABLE: imaging_reports ─────────────────────────────────
 export type ImagingType = 'CT' | 'MRI' | 'PET' | 'X-Ray' | 'Ultrasound';
 
+export interface ImagingReportPatient {
+  patient_id: number | string;
+  full_name?: string;
+  email?: string;
+  notes?: string | null;
+  phone?: string;
+  gender?: string;
+  status?: PatientStatus;
+  address?: string;
+  birth_date?: string;
+  blood_type?: BloodType;
+  national_id?: string;
+  nationality?: string;
+  mobile_number?: string;
+}
+
+export interface ImagingReportCancer {
+  cancer_id?: number | string;
+  cancer_name?: string;
+  color?: string;
+  icd10_code?: string;
+  description?: string;
+}
+
+export interface ImagingReportDiagnosis {
+  diagnosis_id?: number | string;
+  diagnosis_date?: string;
+  notes?: string;
+  status?: string;
+  cancer?: ImagingReportCancer;
+  cancer_name?: string;
+}
+
+export interface ImagingReportDoctor {
+  doctor_id?: number | string;
+  full_name?: string | null;
+  clinic_id?: number | string;
+  email?: string | null;
+  phone?: string | null;
+  specialty?: string | null;
+  license_number?: string | null;
+  is_active?: boolean;
+}
+
 export interface ImagingReport {
   image_id: string;
-  patient_id: string;
-  diagnosis_id: string | null;
-  ordered_by: string;
+  patient_id: string | number;
+  diagnosis_id: string | number | null;
+  ordered_by: string | number;
   imaging_type: ImagingType;
   body_part: string;
   report_text: string;
@@ -333,6 +377,9 @@ export interface ImagingReport {
   impression: string;
   imaging_date: string;
   created_at: string;
+  patient?: ImagingReportPatient | null;
+  diagnosis?: ImagingReportDiagnosis | null;
+  ordered_doctor?: ImagingReportDoctor | null;
   patient_name?: string;
   radiologist_name?: string;
 }
@@ -351,6 +398,9 @@ export interface ImagingReportRpcItem {
   created_at?: string | null;
   patient_name?: string | null;
   radiologist_name?: string | null;
+  patient?: ImagingReportPatient | null;
+  diagnosis?: ImagingReportDiagnosis | null;
+  ordered_doctor?: ImagingReportDoctor | null;
 }
 
 export interface ImagingReportsListPayload {
@@ -476,7 +526,7 @@ export type PatientDetailsRpcResponse = {
           route: string | null;
           frequency: string | null;
           name: string | null;
-          category: string | null;
+          category: MedicationCategory
         }>;
       }>;
     }>;

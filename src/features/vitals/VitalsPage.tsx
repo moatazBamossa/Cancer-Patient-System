@@ -31,7 +31,8 @@ import { FormField, FormSelectField } from "../../components/ui/FormField"
 import { zodValidator } from "../../lib/zodValidator"
 import { formatDate, formatTime } from "../../lib/utils"
 import type { ClinicVisitRpcItem, VitalSignRpcItem } from "../../types/visitRpc"
-import { useVisitVitals } from "../../hooks/useClinicVisits";
+import { useVisitVitals } from "../../hooks/useClinicVisits"
+import { AddVitalSignsForm } from "../../components/AddVitalSignsForm"
 
 type CombinedVisitForm = {
   p_patient_id: string;
@@ -240,7 +241,7 @@ function VitalsRow({ v }: { v: VitalSignRpcItem }) {
         {v.bmi && (
           <VitalCard
             title={t("vitals.bmi")}
-            value={Number(v.bmi).toFixed(1)}
+            value={Number(v.bmi).toFixed(2)}
             unit="kg/m²"
             icon={<Divide size={18} />}
             status={getVitalStatus("bmi", v.bmi)}
@@ -306,7 +307,13 @@ function VitalsDisplay({ visitId }: { visitId: number }) {
   )
 }
 
-function VisitCard({ visit }: { visit: ClinicVisitRpcItem }) {
+function VisitCard({
+  visit,
+  onAddVital,
+}: {
+  visit: ClinicVisitRpcItem
+  onAddVital: (visitId: number) => void
+}) {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
 
@@ -354,7 +361,21 @@ function VisitCard({ visit }: { visit: ClinicVisitRpcItem }) {
       </div>
 
       <AnimatePresence>
-        {expanded && <VitalsDisplay visitId={visit.visit_id} />}
+        {expanded && (
+          <div className="space-y-4">
+            <VitalsDisplay visitId={visit.visit_id} />
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onAddVital(visit.visit_id)
+              }}
+              className="flex items-center gap-1.5 text-sm font-medium text-green-600 hover:text-green-700 bg-green-50 dark:bg-green-500/10 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <Plus size={16} /> {t("vitals.addVitalSigns")}
+            </button>
+          </div>
+        )}
       </AnimatePresence>
     </div>
   )
@@ -362,20 +383,15 @@ function VisitCard({ visit }: { visit: ClinicVisitRpcItem }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
-function FormDiagnosisSelect({ patientsData }: { patientsData: any }) {
+function FormDiagnosisSelect() {
   const { t } = useTranslation()
   const { input } = useField("p_patient_id")
   const patientId = input.value
 
-  const patientName =
-    patientsData?.data?.find(
-      (p: any) => String(p.patient_id) === String(patientId),
-    )?.full_name || ""
-
   const { data: diagnosesData } = useQuery({
-    queryKey: ["diagnoses-list", patientName],
-    queryFn: () => diagnosisService.getByPatientName(patientName),
-    enabled: !!patientName,
+    queryKey: ["diagnoses-list", patientId],
+    queryFn: () => diagnosisService.getByPatientID(Number(patientId)),
+    enabled: !!patientId,
   })
 
   const diagnosisOptions =
@@ -388,7 +404,7 @@ function FormDiagnosisSelect({ patientsData }: { patientsData: any }) {
 
   return (
     <FormSelectField
-      options={diagnosisOptions || []}
+      options={diagnosisOptions}
       name="p_diagnosis_id"
       label={t("vitals.relatedDiagnosisOptional")}
       required
@@ -427,6 +443,7 @@ export default function VitalsPage() {
     null,
   )
   const [showForm, setShowForm] = useState(false)
+  const [addVitalForVisitId, setAddVitalForVisitId] = useState<number | null>(null)
 
   // Fetch Options
   const { data: patientsData, isLoading: isLoadingPatients } = useQuery({
@@ -515,11 +532,6 @@ export default function VitalsPage() {
       label: d.full_name,
     })) || []
 
-  const defaultPatientIdFormValue =
-    patientsData?.data.find(
-      (p) => String(p.patient_id) === String(selectedPatientId),
-    )?.patient_id ?? ""
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -535,12 +547,7 @@ export default function VitalsPage() {
             {t("vitals.manageVisitsAndTrackVitals")}
           </p>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5"
-        >
-          <Plus size={16} /> {t("visits.scheduleVisit")}
-        </button>
+
       </div>
 
       <div className="glass-card p-4">
@@ -589,7 +596,11 @@ export default function VitalsPage() {
       ) : visits && visits.length > 0 ? (
         <div className="space-y-4">
           {visits.map((visit) => (
-            <VisitCard key={visit.visit_id} visit={visit} />
+            <VisitCard
+              key={visit.visit_id}
+              visit={visit}
+              onAddVital={(id) => setAddVitalForVisitId(id)}
+            />
           ))}
         </div>
       ) : (
@@ -617,7 +628,7 @@ export default function VitalsPage() {
         <AppForm<CombinedVisitForm>
           initialValues={{
             ...DEFAULT_FORM_VALUES,
-            p_patient_id: String(defaultPatientIdFormValue),
+            p_patient_id: selectedPatientId ? String(selectedPatientId) : "",
           }}
           validate={zodValidator(combinedVisitSchema)}
           onSubmit={(d) => createMut.mutate(d)}
@@ -631,10 +642,11 @@ export default function VitalsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormSelectField
                 options={formPatientOptions || []}
-                name="patient_id"
+                name="p_patient_id"
                 label={t("diagnoses.patient")}
                 placeholder={t("vitals.selectPatientPlaceholder")}
                 required
+                disabled
               />
               <FormSelectField
                 options={doctorOptions || []}
@@ -661,7 +673,7 @@ export default function VitalsPage() {
                 ]}
               />
 
-              <FormDiagnosisSelect patientsData={patientsData} />
+              <FormDiagnosisSelect />
             </div>
             <FormField
               name="p_reason_for_visit"
@@ -701,6 +713,16 @@ export default function VitalsPage() {
           </div>
         </AppForm>
       </Modal>
+
+      <AddVitalSignsForm
+        visitId={addVitalForVisitId}
+        isOpen={addVitalForVisitId !== null}
+        onClose={() => setAddVitalForVisitId(null)}
+        onSuccess={() => {
+          setAddVitalForVisitId(null)
+          qc.invalidateQueries({ queryKey: ["visit-vitals"] })
+        }}
+      />
     </motion.div>
   )
 }

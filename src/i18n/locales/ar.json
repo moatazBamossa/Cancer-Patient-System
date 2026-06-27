@@ -461,6 +461,7 @@
   },
   "doctors": {
     "title": "الفريق الطبي",
+    "TheTreatingPhysician": "الطبيب المعالج",
     "subtitle": "أخصائيون مؤهلون وطاقم طبي",
     "newDoctor": "طبيب جديد",
     "addTitle": "إضافة أخصائي طبي",

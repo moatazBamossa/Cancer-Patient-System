@@ -41,7 +41,7 @@ export function PatientVisitsPage({ patientId }: PatientVisitsPageProps) {
     staleTime: 1000 * 60 * 10,
   })
   const { data: diagnoses } = useQuery({
-    queryKey: ["diagnoses"],
+    queryKey: ["diagnoses", patientId],
     queryFn: () => diagnosisService.getByPatientID(patientId ?? NaN),
     staleTime: 1000 * 60 * 10,
     enabled: !!patientId,
