@@ -21,6 +21,7 @@ import {
 } from '../../hooks/useUserProfiles';
 import type { UserProfile } from '../../utils/user-profile-normalizers';
 import type { CreateUserProfileParams, UpdateUserProfileParams } from '../../types/user-profile';
+import { useModulePermissions } from '../../modules/roles/permissions';
 
 const roleBadgeColors: Record<string, string> = {
   admin: 'bg-rose-500/10 text-rose-600 border-rose-200',
@@ -119,6 +120,7 @@ export default function AddUsersPage() {
   const createMutation = useCreateUserProfileMutation();
   const updateMutation = useUpdateUserProfileMutation();
   const deleteMutation = useDeleteUserProfileMutation();
+  const { canList, canCreate, canUpdate, canDelete } = useModulePermissions("user_management");
 
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -361,29 +363,33 @@ export default function AddUsersPage() {
       >
         <Eye size={15} />
       </button>
-      <button
-        type="button"
-        onClick={(event) => {
-          event.stopPropagation();
-          setEditingUser(row);
-        }}
-        className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
-        title={t('common.edit')}
-      >
-        <Edit2 size={15} />
-      </button>
-      <button
-        type="button"
-        onClick={(event) => {
-          event.stopPropagation();
-          setDeleteUserId(row.id);
-          setDeleteConfirmOpen(true);
-        }}
-        className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-        title={t('common.delete')}
-      >
-        <Trash2 size={15} />
-      </button>
+      {canUpdate && (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            setEditingUser(row);
+          }}
+          className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
+          title={t('common.edit')}
+        >
+          <Edit2 size={15} />
+        </button>
+      )}
+      {canDelete && (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            setDeleteUserId(row.id);
+            setDeleteConfirmOpen(true);
+          }}
+          className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+          title={t('common.delete')}
+        >
+          <Trash2 size={15} />
+        </button>
+      )}
     </div>
   );
 
@@ -399,13 +405,15 @@ export default function AddUsersPage() {
           <p className="text-sm text-slate-500">{t('addUsers.userManagementSubtitle')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setCreateModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
-          >
-            <Plus size={16} /> {t('addUsers.createUser')}
-          </button>
+          {canCreate && (
+            <button
+              type="button"
+              onClick={() => setCreateModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+            >
+              <Plus size={16} /> {t('addUsers.createUser')}
+            </button>
+          )}
         </div>
       </motion.header>
 

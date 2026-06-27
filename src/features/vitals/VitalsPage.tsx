@@ -33,6 +33,7 @@ import { formatDate, formatTime } from "../../lib/utils"
 import type { ClinicVisitRpcItem, VitalSignRpcItem } from "../../types/visitRpc"
 import { useVisitVitals } from "../../hooks/useClinicVisits"
 import { AddVitalSignsForm } from "../../components/AddVitalSignsForm"
+import { useModulePermissions } from "../../modules/roles/permissions"
 
 type CombinedVisitForm = {
   p_patient_id: string;
@@ -315,6 +316,7 @@ function VisitCard({
   onAddVital: (visitId: number) => void
 }) {
   const { t } = useTranslation()
+  const { canCreate } = useModulePermissions("clinic_visits_and_vitals")
   const [expanded, setExpanded] = useState(false)
 
   return (
@@ -364,16 +366,18 @@ function VisitCard({
         {expanded && (
           <div className="space-y-4">
             <VitalsDisplay visitId={visit.visit_id} />
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                onAddVital(visit.visit_id)
-              }}
-              className="flex items-center gap-1.5 text-sm font-medium text-green-600 hover:text-green-700 bg-green-50 dark:bg-green-500/10 px-3 py-1.5 rounded-lg transition-colors"
-            >
-              <Plus size={16} /> {t("vitals.addVitalSigns")}
-            </button>
+            {canCreate && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onAddVital(visit.visit_id)
+                }}
+                className="flex items-center gap-1.5 text-sm font-medium text-green-600 hover:text-green-700 bg-green-50 dark:bg-green-500/10 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                <Plus size={16} /> {t("vitals.addVitalSigns")}
+              </button>
+            )}
           </div>
         )}
       </AnimatePresence>
@@ -414,6 +418,8 @@ function FormDiagnosisSelect() {
 
 export default function VitalsPage() {
   const { t } = useTranslation()
+  const { canCreate } = useModulePermissions("clinic_visits_and_vitals")
+  const { canCreate:canCreatevisits } = useModulePermissions("visits")
   const combinedVisitSchema = z.object({
     p_patient_id: z.string().min(1, t("vitals.validation.patientRequired") ?? "Patient is required"),
     p_doctor_id: z.string().min(1, t("visits.validation.doctorRequired") ?? "Doctor is required"),
@@ -609,12 +615,14 @@ export default function VitalsPage() {
             {t("vitals.noVisitsFound")}
           </h3>
           <p className="text-slate-500">{t("vitals.noRecordedClinicVisits")}</p>
-          <button
-            onClick={() => setShowForm(true)}
-            className="mt-4 text-indigo-500 font-medium hover:underline"
-          >
-            {t("vitals.scheduleFirstVisit")}
-          </button>
+          {canCreatevisits && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="mt-4 text-indigo-500 font-medium hover:underline"
+            >
+              {t("vitals.scheduleFirstVisit")}
+            </button>
+          )}
         </div>
       )}
 

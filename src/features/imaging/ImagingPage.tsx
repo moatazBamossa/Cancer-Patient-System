@@ -23,17 +23,18 @@ import { zodValidator } from "../../lib/zodValidator"
 import { formatDate } from "../../lib/utils"
 import { useModulePermissions } from "../../modules/roles/permissions"
 import type { ImagingReport } from "../../types"
+import UploadField from "../../components/ui/UploadField"
 
 type ImagingForm = {
-  patient_id: string;
-  diagnosis_id?: string;
-  imaging_type: "CT" | "MRI" | "PET" | "X-Ray" | "Ultrasound";
-  body_part: string;
-  imaging_date: string;
-  findings: string;
-  impression: string;
-  ordered_by: string;
-  report_text: string;
+  patient_id: string
+  diagnosis_id?: string
+  imaging_type: "CT" | "MRI" | "PET" | "X-Ray" | "Ultrasound"
+  body_part: string
+  imaging_date: string
+  findings: string
+  impression: string
+  ordered_by: string
+  report_text: string
 }
 
 function FormDiagnosisSelect() {
@@ -51,10 +52,12 @@ function FormDiagnosisSelect() {
     <FormSelectField
       name="diagnosis_id"
       label={t("diagnoses.diagnosis")}
-      options={(diagnosesData?.map((d) => ({
-      value: d.diagnosis_id,
-      label: d.cancer_name || t("common.unknown"),
-    })) || [])}
+      options={
+        diagnosesData?.map((d) => ({
+          value: d.diagnosis_id,
+          label: d.cancer_name || t("common.unknown"),
+        })) || []
+      }
       placeholder={t("common.optional")}
     />
   )
@@ -267,7 +270,9 @@ export default function ImagingPage() {
       header: t("diagnoses.cancerType"),
       render: (_value, row) => (
         <span>
-          {row.diagnosis?.cancer?.cancer_name ?? row.diagnosis?.cancer_name ?? t("common.unknown")}
+          {row.diagnosis?.cancer?.cancer_name ??
+            row.diagnosis?.cancer_name ??
+            t("common.unknown")}
         </span>
       ),
     },
@@ -350,7 +355,7 @@ export default function ImagingPage() {
           onChange={(event) => setDoctorFilter(event.target.value)}
           className="input-field"
         >
-          <option value="">{t("imaging.radiologist")}</option>
+          <option value="">{t("doctors.TheTreatingPhysician")}</option>
           {doctors.map((doctor) => (
             <option key={doctor.doctor_id} value={doctor.doctor_id}>
               {doctor.full_name}
@@ -582,7 +587,7 @@ export default function ImagingPage() {
                 />
                 <FormSelectField
                   name="ordered_by"
-                  label={t("imaging.radiologist")}
+                  label={t("doctors.TheTreatingPhysician")}
                   options={doctors.map((doctor) => ({
                     value: doctor.doctor_id,
                     label: doctor.full_name,
@@ -607,6 +612,13 @@ export default function ImagingPage() {
                 label={t("imaging.reportSummary") ?? "Report Summary"}
                 type="textarea"
               />
+              <UploadField
+              label="اختر صوره الاشعه"
+                onChange={() => {
+                  //
+                }}
+              />
+
               <div className="flex justify-end pt-4">
                 <button
                   type="submit"

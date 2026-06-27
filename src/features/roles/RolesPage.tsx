@@ -28,9 +28,11 @@ import {
   FULL_ACCESS,
 } from "../../modules/roles/rolePermissions"
 import { normalizePermissions } from "../../modules/roles/utils/role-normalizer"
+import { useModulePermissions } from "../../modules/roles/permissions"
 
 export default function RolesPage() {
   const { t } = useTranslation()
+  const { canList, canCreate, canUpdate, canDelete } = useModulePermissions("roles")
   const qc = useQueryClient()
   const [showForm, setShowForm] = useState(false)
   const [editItem, setEditItem] = useState<Role | null>(null)
@@ -141,46 +143,52 @@ console.log("localPermissions", localPermissions);
         data={roles || []}
         isLoading={isLoading}
         headerActions={
-          <button
-            onClick={() => {
-              setEditItem(null)
-              setFormInitialValues({ role_name: "" })
-              setLocalPermissions(defaultRolePermissions() as any)
-              setFormKey((k) => k + 1)
-              setShowForm(true)
-            }}
-            className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5"
-          >
-            <Plus size={16} /> {t("roles.addRole")}
-          </button>
-        }
-        actions={(row) => (
-          <div className="flex gap-1">
+          canCreate && (
             <button
               onClick={() => {
-                setEditItem(row)
-                setFormInitialValues({ role_name: row.role_name })
-                setLocalPermissions(
-                  (row as any).permissions ?? (defaultRolePermissions() as any),
-                )
+                setEditItem(null)
+                setFormInitialValues({ role_name: "" })
+                setLocalPermissions(defaultRolePermissions() as any)
                 setFormKey((k) => k + 1)
                 setShowForm(true)
               }}
-              className="p-1.5 rounded-lg hover:bg-amber-500/10 text-amber-500"
+              className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5"
             >
-              <Edit2 size={16} />
+              <Plus size={16} /> {t("roles.addRole")}
             </button>
+          )
+        }
+        actions={(row) => (
+          <div className="flex gap-1">
+            {canUpdate && (
+              <button
+                onClick={() => {
+                  setEditItem(row)
+                  setFormInitialValues({ role_name: row.role_name })
+                  setLocalPermissions(
+                    (row as any).permissions ?? (defaultRolePermissions() as any),
+                  )
+                  setFormKey((k) => k + 1)
+                  setShowForm(true)
+                }}
+                className="p-1.5 rounded-lg hover:bg-amber-500/10 text-amber-500"
+              >
+                <Edit2 size={16} />
+              </button>
+            )}
 
-            <button
-              onClick={() => {
-                if(row?.role_id) {
-                  setDeleteId(`${row.role_id}`)
-                }
-              }}
-              className="p-1.5 rounded-lg hover:bg-amber-500/10 text-red-600"
-            >
-              <Trash2 size={16} />
-            </button>
+            {canDelete && (
+              <button
+                onClick={() => {
+                  if(row?.role_id) {
+                    setDeleteId(`${row.role_id}`)
+                  }
+                }}
+                className="p-1.5 rounded-lg hover:bg-amber-500/10 text-red-600"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
           </div>
         )}
       />

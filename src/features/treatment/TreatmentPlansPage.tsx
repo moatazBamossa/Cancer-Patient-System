@@ -41,6 +41,7 @@ import type {
 import { CycleStatusBadge, PlanStatusBadge } from "./treatmentBadges"
 import { medicationService } from "../../services/medication.service"
 import { Tooltip } from "../../components/ui/Tooltip"
+import { useModulePermissions } from "../../modules/roles/permissions"
 
 type ModalType = "plan" | "cycle" | "medication" | null
 type DeleteTarget =
@@ -51,6 +52,7 @@ type DeleteTarget =
 
 export default function TreatmentPlansPage() {
   const { t } = useTranslation()
+  const { canList, canCreate, canUpdate, canDelete } = useModulePermissions("treatment_plans")
   const treatmentPlanSchema = createTreatmentPlanSchema(t)
   const treatmentCycleSchema = createTreatmentCycleSchema(t)
   const cycleMedicationSchema = createCycleMedicationSchema(t)
@@ -480,7 +482,7 @@ export default function TreatmentPlansPage() {
               </span>
             )}
           </h2>
-          {diagnosisId && (
+          {diagnosisId && canCreate && (
             <button
               type="button"
               onClick={() => openPlanModal()}
@@ -580,15 +582,17 @@ export default function TreatmentPlansPage() {
                 >
                   {t("treatment.viewCycles")}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => openPlanModal(plan)}
-                  className="p-1.5 rounded-lg hover:bg-amber-500/10"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  <Edit2 size={14} />
-                </button>
-                {selectedPlanId && !cyclesLoading && cycles.length === 0 && (
+                {canUpdate && (
+                  <button
+                    type="button"
+                    onClick={() => openPlanModal(plan)}
+                    className="p-1.5 rounded-lg hover:bg-amber-500/10"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    <Edit2 size={14} />
+                  </button>
+                )}
+                {canDelete && selectedPlanId && !cyclesLoading && cycles.length === 0 && (
                   <button
                     type="button"
                     onClick={() =>
@@ -621,18 +625,20 @@ export default function TreatmentPlansPage() {
               {t("treatment.cycles")}
             </h2>
 
-            <Tooltip position="right" text={t("treatment.cycle_limit_reached")} show={(selectedPlan?.total_cycles ?? 0) <= cycles.length}>
-              <button
-                type="button"
-                disabled={(selectedPlan?.total_cycles ?? 0) <= cycles.length}
-                onClick={() => {
-                  openCycleModal()
-                }}
-                className={`${(selectedPlan?.total_cycles ?? 0) <= cycles.length ? "opacity-50 cursor-not-allowed" : ""} gradient-btn px-4 py-2 text-sm flex items-center gap-1.5`}
-              >
-                <Plus size={16} /> {t("treatment.addCycle")}
-              </button>
-            </Tooltip>
+            {canCreate && (
+              <Tooltip position="right" text={t("treatment.cycle_limit_reached")} show={(selectedPlan?.total_cycles ?? 0) <= cycles.length}>
+                <button
+                  type="button"
+                  disabled={(selectedPlan?.total_cycles ?? 0) <= cycles.length}
+                  onClick={() => {
+                    openCycleModal()
+                  }}
+                  className={`${(selectedPlan?.total_cycles ?? 0) <= cycles.length ? "opacity-50 cursor-not-allowed" : ""} gradient-btn px-4 py-2 text-sm flex items-center gap-1.5`}
+                >
+                  <Plus size={16} /> {t("treatment.addCycle")}
+                </button>
+              </Tooltip>
+            )}
           </div>
 
           {cyclesLoading && <TableSkeleton rows={3} cols={4} />}
@@ -690,22 +696,26 @@ export default function TreatmentPlansPage() {
                     >
                       {t("treatment.viewMedications")}
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => openCycleModal(cycle)}
-                      className="p-1.5 rounded-lg hover:bg-amber-500/10"
-                    >
-                      <Edit2 size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setDeleteTarget({ type: "cycle", item: cycle })
-                      }
-                      className="p-1.5 rounded-lg hover:bg-red-500/10"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    {canUpdate && (
+                      <button
+                        type="button"
+                        onClick={() => openCycleModal(cycle)}
+                        className="p-1.5 rounded-lg hover:bg-amber-500/10"
+                      >
+                        <Edit2 size={14} />
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setDeleteTarget({ type: "cycle", item: cycle })
+                        }
+                        className="p-1.5 rounded-lg hover:bg-red-500/10"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
                   </div>
                 </div>
                 {cycle.side_effects && (
@@ -741,13 +751,15 @@ export default function TreatmentPlansPage() {
               <Pill size={18} className="text-blue-500" />
               {t("medications.title")}
             </h2>
-            <button
-              type="button"
-              onClick={() => openMedModal()}
-              className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5"
-            >
-              <Plus size={16} /> {t("treatment.addMedication")}
-            </button>
+            {canCreate && (
+              <button
+                type="button"
+                onClick={() => openMedModal()}
+                className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5"
+              >
+                <Plus size={16} /> {t("treatment.addMedication")}
+              </button>
+            )}
           </div>
 
           {medsLoading && <TableSkeleton rows={4} cols={7} />}
@@ -793,22 +805,26 @@ export default function TreatmentPlansPage() {
                       <td>{med.note || "—"}</td>
                       <td>
                         <div className="flex gap-1 justify-end">
-                          <button
-                            type="button"
-                            onClick={() => openMedModal(med)}
-                            className="p-1 hover:bg-amber-500/10 rounded"
-                          >
-                            <Edit2 size={14} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setDeleteTarget({ type: "medication", item: med })
-                            }
-                            className="p-1 hover:bg-red-500/10 rounded"
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                          {canUpdate && (
+                            <button
+                              type="button"
+                              onClick={() => openMedModal(med)}
+                              className="p-1 hover:bg-amber-500/10 rounded"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                          )}
+                          {canDelete && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setDeleteTarget({ type: "medication", item: med })
+                              }
+                              className="p-1 hover:bg-red-500/10 rounded"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -1001,6 +1017,7 @@ export default function TreatmentPlansPage() {
             name="administered_by"
             label={t("diagnoses.doctor")}
             type="select"
+            required
             options={[
               { value: "", label: "—" },
               ...doctors.map((d) => ({

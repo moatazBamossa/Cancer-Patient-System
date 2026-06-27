@@ -23,6 +23,7 @@ import { patientService } from "../../services/patient.service"
 import { doctorService } from "../../services/doctor.service"
 import type { LabTest, LabTestResult, Patient, Doctor } from "../../types"
 import { LabTestPatientDto } from "../../services/lab.service"
+import { useModulePermissions } from "../../modules/roles/permissions"
 
 type LabResultForm = {
   patient_id: string;
@@ -67,6 +68,7 @@ const emptyValues: LabResultForm = {
 
 export default function LabTestsPage() {
   const { t } = useTranslation()
+  const { canList, canCreate, canUpdate, canDelete } = useModulePermissions("laboratory_tests")
   const labResultSchema = z.object({
     patient_id: z.string().min(1, t("lab.validation.patientRequired")),
     lab_test_id: z.string().min(1, t("lab.validation.testRequired")),
@@ -250,27 +252,31 @@ export default function LabTestsPage() {
       header: t("common.actions"),
       render: (_, row) => (
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            className="rounded-lg border border-slate-300 px-3 py-1 text-sm text-slate-700 transition hover:bg-slate-50"
-            onClick={() => openEditForm(row)}
-          >
-            <Edit3 size={14} className="inline-block mr-1" />
-            {t("common.edit")}
-          </button>
-          <button
-            type="button"
-            className="rounded-lg border border-red-300 bg-red-50 px-3 py-1 text-sm text-red-600 transition hover:bg-red-100"
-            onClick={() =>
-              setShowDeleteConfirm({
-                isOpen: true,
-                id: String(row.lab_test_patient_id),
-              })
-            }
-          >
-            <Trash2 size={14} className="inline-block mr-1" />
-            {t("common.delete")}
-          </button>
+          {canUpdate && (
+            <button
+              type="button"
+              className="rounded-lg border border-slate-300 px-3 py-1 text-sm text-slate-700 transition hover:bg-slate-50"
+              onClick={() => openEditForm(row)}
+            >
+              <Edit3 size={14} className="inline-block mr-1" />
+              {t("common.edit")}
+            </button>
+          )}
+          {canDelete && (
+            <button
+              type="button"
+              className="rounded-lg border border-red-300 bg-red-50 px-3 py-1 text-sm text-red-600 transition hover:bg-red-100"
+              onClick={() =>
+                setShowDeleteConfirm({
+                  isOpen: true,
+                  id: String(row.lab_test_patient_id),
+                })
+              }
+            >
+              <Trash2 size={14} className="inline-block mr-1" />
+              {t("common.delete")}
+            </button>
+          )}
         </div>
       ),
     },
@@ -295,20 +301,24 @@ export default function LabTestsPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => navigate("/lab-tests/manage")}
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-          >
-            {t("lab.manageTests")}
-          </button>
-          <button
-            type="button"
-            onClick={openAddForm}
-            className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5"
-          >
-            <Plus size={16} /> {t("lab.addResult")}
-          </button>
+          {canUpdate && (
+            <button
+              type="button"
+              onClick={() => navigate("/lab-tests/manage")}
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              {t("lab.manageTests")}
+            </button>
+          )}
+          {canCreate && (
+            <button
+              type="button"
+              onClick={openAddForm}
+              className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5"
+            >
+              <Plus size={16} /> {t("lab.addResult")}
+            </button>
+          )}
         </div>
       </div>
 
@@ -445,21 +455,7 @@ export default function LabTestsPage() {
                 placeholder={t("lab.resultValuePlaceholder")}
               />
             </FormField>
-            <div className="space-y-1.5">
-              {formState.errors.is_abnormal && (
-                <p className="text-xs text-red-500">{formState.errors.is_abnormal.message?.toString()}</p>
-              )}
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  {...register("is_abnormal")}
-                  className="w-4 h-4 rounded border-slate-300 text-red-500 focus:ring-red-500/20"
-                />
-                <span className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-                  {t("lab.isAbnormal")}
-                </span>
-              </label>
-            </div>
+
           </div>
 
           <FormField

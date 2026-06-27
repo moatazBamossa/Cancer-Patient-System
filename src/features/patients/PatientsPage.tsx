@@ -10,11 +10,13 @@ import { StatusBadge } from "../../components/ui/StatusBadge"
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
 import { Modal } from "../../components/ui/Modal"
 import { PatientForm } from "./PatientForm"
-import { formatDate, exportToCSV, debounce } from "../../lib/utils"
+import { formatDate, exportToCSV, exportToExcel, debounce } from "../../lib/utils"
 import type { Patient } from "../../types"
 import { useTranslation } from "react-i18next"
 import { useModulePermissions } from "../../modules/roles/permissions"
 import { NoListPermission } from "../../components/guards"
+
+type StatusFilter = "all" | "active"
 
 export default function PatientsPage() {
   const { t } = useTranslation()
@@ -22,7 +24,7 @@ export default function PatientsPage() {
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
-  const [statusFilter, setStatusFilter] = useState("active")
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
   const [sortBy, setSortBy] = useState("")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
   const [showForm, setShowForm] = useState(false)
@@ -48,7 +50,7 @@ export default function PatientsPage() {
         search,
         sortBy,
         sortOrder,
-        status: statusFilter || undefined,
+        status: statusFilter === "all" ? undefined : statusFilter,
       }),
     enabled: canList,
   })
@@ -73,6 +75,26 @@ export default function PatientsPage() {
   const handleExport = () => {
     if (data?.data) {
       exportToCSV(
+        data.data.map((p) => ({
+          [t("common.name")]: p.full_name,
+          [t("patients.nationalId")]: p.national_id,
+          [t("patients.gender")]: p.gender,
+          [t("patients.dob")]: p.birth_date,
+          [t("common.phone")]: p.phone,
+          [t("common.email")]: p.email,
+          [t("common.status.label")]: p.status,
+          [t("patients.bloodType")]: p.blood_type,
+          [t("patients.nationality")]: p.nationality,
+        })),
+        "patients_export",
+      )
+      toast.success(t("common.exportSuccess"))
+    }
+  }
+
+  const handleExportExcel = () => {
+    if (data?.data) {
+      exportToExcel(
         data.data.map((p) => ({
           [t("common.name")]: p.full_name,
           [t("patients.nationalId")]: p.national_id,
@@ -150,7 +172,11 @@ export default function PatientsPage() {
       key: "status",
       header: t("common.status.label"),
       sortable: true,
-      render: (v) => <StatusBadge status={String(v)} />,
+      render: (v) => {
+        console.log("v", v);
+
+        return <StatusBadge status={String(v)} />
+      },
     },
   ]
 
@@ -196,7 +222,21 @@ export default function PatientsPage() {
             navigate(`/patients/${(row as unknown as Patient).patient_id}`)
           }
           headerActions={
-            <div className="flex gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={statusFilter}
+                onChange={(event) => {
+                  setStatusFilter(event.target.value as StatusFilter)
+                  setPage(1)
+                }}
+                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none"
+              >
+                <option value="all">{t("common.all", { defaultValue: "All" })}</option>
+                <option value="active">
+                  {t("common.status.active", { defaultValue: "Active" })}
+                </option>
+
+              </select>
               <button
                 onClick={handleExport}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
@@ -206,6 +246,16 @@ export default function PatientsPage() {
                 }}
               >
                 <Download size={16} /> CSV
+              </button>
+              <button
+                onClick={handleExportExcel}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                style={{
+                  background: "var(--bg-tertiary)",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                <Download size={16} /> Excel
               </button>
               {canCreate && (
                 <button

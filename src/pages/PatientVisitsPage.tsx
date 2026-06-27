@@ -15,6 +15,7 @@ import { diagnosisService } from "../services/diagnosis.service"
 import { ConfirmDialog } from "../components/ui/ConfirmDialog"
 import type { Doctor, Diagnosis } from "../types"
 import { useTranslation } from "react-i18next"
+import { useModulePermissions } from "../modules/roles/permissions"
 
 interface PatientVisitsPageProps {
   patientId: number
@@ -30,6 +31,7 @@ function formatDateTime(value?: string) {
 
 export function PatientVisitsPage({ patientId }: PatientVisitsPageProps) {
   const { t } = useTranslation()
+  const { canList, canCreate, canUpdate, canDelete } = useModulePermissions("patient_visits")
   const {
     data: visits = [],
     isLoading: visitsLoading,
@@ -143,13 +145,15 @@ export function PatientVisitsPage({ patientId }: PatientVisitsPageProps) {
             {t("visits.managePatientVisits")}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setIsAddVisitOpen(true)}
-          className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
-        >
-          {t("visits.addNewVisit")}
-        </button>
+        {canCreate && (
+          <button
+            type="button"
+            onClick={() => setIsAddVisitOpen(true)}
+            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+          >
+            {t("visits.addNewVisit")}
+          </button>
+        )}
       </div>
 
       {visitsError ? (
@@ -291,15 +295,17 @@ export function PatientVisitsPage({ patientId }: PatientVisitsPageProps) {
                         t("visits.clinicVisit")}
                     </h2>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setConfirmDeleteVisit(selectedVisit.visit_id)
-                    }
-                    className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600"
-                  >
-                    {t("visits.deleteVisit")}
-                  </button>
+                  {canDelete && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setConfirmDeleteVisit(selectedVisit.visit_id)
+                      }
+                      className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600"
+                    >
+                      {t("visits.deleteVisit")}
+                    </button>
+                  )}
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">

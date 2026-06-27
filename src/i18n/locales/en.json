@@ -418,6 +418,7 @@
   "patientDetails": {
     "overview": "Overview",
     "diagnoses": "Diagnoses",
+    "viewAllVisits":"view all Visits",
     "treatment": "Treatment",
     "vitals": "Vitals",
     "medications": "Medications",
