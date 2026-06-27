@@ -4,6 +4,7 @@ export interface UserProfileDto {
   role_id: number | null;
   specialty: string | null;
   phone: string | null;
+  email: string | null;
   user_name: string;
   password: string;
   is_active: boolean;
@@ -17,6 +18,7 @@ export interface UserProfile {
   role_id: number | null;
   specialty: string | null;
   phone: string | null;
+  email: string | null;
   user_name: string;
   is_active: boolean;
   created_at: string;
@@ -41,6 +43,7 @@ export interface CreateUserProfileParams {
   role_id?: number | null;
   specialty?: string | null;
   phone?: string | null;
+  email?: string | null;
   user_name: string;
   password: string;
   is_active?: boolean;
@@ -52,6 +55,7 @@ export interface UpdateUserProfileParams {
   role_id?: number | null;
   specialty?: string | null;
   phone?: string | null;
+  email?: string | null;
   user_name?: string;
   password?: string;
   is_active?: boolean;
