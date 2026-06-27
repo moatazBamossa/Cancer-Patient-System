@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { patientService } from '../services/patient.service';
@@ -16,12 +16,6 @@ export default function PatientVisitsLanding() {
     queryFn: () => patientService.getAll({ page: 1, pageSize: 250 }).then((result) => result.data),
     staleTime: 1000 * 60 * 5,
   });
-
-  useEffect(() => {
-    if (!selectedPatientId && patients.length > 0) {
-      setSelectedPatientId(patients[0].patient_id);
-    }
-  }, [patients, selectedPatientId]);
 
   const handleOpenVisits = () => {
     if (selectedPatientId) {

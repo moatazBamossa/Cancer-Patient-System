@@ -53,7 +53,7 @@ export default function DiagnosisDoctorHistoryPanel({ diagnosisId }: Props) {
       value: String(doctor.doctor_id),
       label: doctor.full_name,
     })) ?? []
-
+console.log("activeAssignment", activeAssignment)
   return (
     <div className="space-y-4">
       <div className="p-4 bg-white rounded shadow">

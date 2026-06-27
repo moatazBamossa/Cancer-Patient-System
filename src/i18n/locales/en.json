@@ -461,6 +461,7 @@
   },
   "doctors": {
     "title": "Medical Team",
+    "TheTreatingPhysician":"The treating physician",
     "subtitle": "Qualified specialists and medical staff",
     "newDoctor": "New Doctor",
     "addTitle": "Add Medical Specialist",

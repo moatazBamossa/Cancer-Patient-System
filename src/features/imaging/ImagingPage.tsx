@@ -17,7 +17,7 @@ import { diagnosisService } from "../../services/diagnosis.service"
 import { DataTable, type Column } from "../../components/ui/DataTable"
 import { Modal } from "../../components/ui/Modal"
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
-import { Form } from "react-final-form"
+import { Form, useField } from "react-final-form"
 import { FormField, FormSelectField } from "../../components/ui/FormField"
 import { zodValidator } from "../../lib/zodValidator"
 import { formatDate } from "../../lib/utils"
@@ -34,6 +34,30 @@ type ImagingForm = {
   impression: string;
   ordered_by: string;
   report_text: string;
+}
+
+function FormDiagnosisSelect() {
+  const { t } = useTranslation()
+  const { input } = useField("patient_id")
+  const patientId = input.value
+
+  const { data: diagnosesData } = useQuery({
+    queryKey: ["diagnoses-list", patientId],
+    queryFn: () => diagnosisService.getByPatientID(Number(patientId)),
+    enabled: !!patientId,
+  })
+
+  return (
+    <FormSelectField
+      name="diagnosis_id"
+      label={t("diagnoses.diagnosis")}
+      options={(diagnosesData?.map((d) => ({
+      value: d.diagnosis_id,
+      label: d.cancer_name || t("common.unknown"),
+    })) || [])}
+      placeholder={t("common.optional")}
+    />
+  )
 }
 
 export default function ImagingPage() {
@@ -86,16 +110,6 @@ export default function ImagingPage() {
     retry: 1,
   })
 
-  const { data: diagnoses = [] } = useQuery({
-    queryKey: ["diagnoses", "imaging-dropdowns"],
-    queryFn: async () => {
-      const response = await diagnosisService.getAll({ page: 1, pageSize: 500 })
-      return response.data
-    },
-    staleTime: 5 * 60 * 1000,
-    retry: 1,
-  })
-
   const imagingQuery = useImagingReports({
     p_patient_id: patientFilter || null,
     p_doctors_id: doctorFilter || null,
@@ -127,13 +141,19 @@ export default function ImagingPage() {
     return reports.filter((report) => {
       if (!lowerSearch) return true
       const patientName =
+        report.patient?.full_name ??
         report.patient_name ??
         patientsResponse?.find((p) => p.patient_id === report.patient_id)
           ?.full_name ??
         ""
       const doctorName =
+        report.ordered_doctor?.full_name ??
         report.radiologist_name ??
         doctors.find((d) => d.doctor_id === report.ordered_by)?.full_name ??
+        ""
+      const cancerName =
+        report.diagnosis?.cancer?.cancer_name ??
+        report.diagnosis?.cancer_name ??
         ""
       return [
         patientName,
@@ -142,6 +162,7 @@ export default function ImagingPage() {
         report.body_part,
         report.findings,
         report.impression,
+        cancerName,
       ]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(lowerSearch))
@@ -218,9 +239,11 @@ export default function ImagingPage() {
       header: t("diagnoses.patient"),
       render: (_value, row) => {
         const patientName =
+          row.patient?.full_name ??
           row.patient_name ??
           patientsResponse?.find((p) => p.patient_id === row.patient_id)
-            ?.full_name
+            ?.full_name ??
+          ""
         return (
           <span className="font-medium text-emerald-500">
             {patientName || t("common.unknown")}
@@ -233,10 +256,20 @@ export default function ImagingPage() {
       header: t("imaging.radiologist"),
       render: (_value, row) => {
         const doctorName =
+          row.ordered_doctor?.full_name ??
           row.radiologist_name ??
           doctors.find((d) => d.doctor_id === row.ordered_by)?.full_name
         return <span>{doctorName || t("common.unknown")}</span>
       },
+    },
+    {
+      key: "diagnosis",
+      header: t("diagnoses.cancerType"),
+      render: (_value, row) => (
+        <span>
+          {row.diagnosis?.cancer?.cancer_name ?? row.diagnosis?.cancer_name ?? t("common.unknown")}
+        </span>
+      ),
     },
     {
       key: "imaging_type",
@@ -412,7 +445,8 @@ export default function ImagingPage() {
                   {t("diagnoses.patient")}
                 </p>
                 <p className="font-medium text-indigo-500">
-                  {selectedReport.patient_name ??
+                  {selectedReport.patient?.full_name ??
+                    selectedReport.patient_name ??
                     patientsResponse?.find(
                       (p) => p.patient_id === selectedReport.patient_id,
                     )?.full_name ??
@@ -523,18 +557,7 @@ export default function ImagingPage() {
                 required
               />
 
-              <FormSelectField
-                name="diagnosis_id"
-                label={t("diagnoses.diagnosis")}
-                options={[
-                  { value: "", label: t("common.none") ?? "None" },
-                  ...diagnoses.map((diag) => ({
-                    value: diag.diagnosis_id,
-                    label: String(diag.cancer_name),
-                  })),
-                ]}
-                placeholder={t("common.optional") as string}
-              />
+              <FormDiagnosisSelect />
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <FormSelectField
                   name="imaging_type"

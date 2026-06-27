@@ -67,7 +67,7 @@ function extractImagingReport(response: unknown, rpcKey: string): ImagingReport 
 
 export const imagingService = {
   async getAll(filters: ImagingReportListFilters = {}): Promise<ImagingReport[]> {
-    const response = await rpcCall('get_imaging_reports_with_details', {
+    const response = await rpcCall<{ imaging_reports?: ImagingReport[] }>('get_imaging_reports_with_details', {
       p_patient_id: filters.p_patient_id ?? undefined,
       p_diagnosis_id: filters.p_diagnosis_id ?? undefined,
       p_doctors_id: filters.p_doctors_id ?? undefined,
@@ -77,7 +77,7 @@ export const imagingService = {
       p_search: filters.p_search ?? undefined,
     });
 
-    return response.imaging_reports
+    return response.imaging_reports ?? [];
   },
 
   async create(data: ImagingReportCreateInput): Promise<ImagingReport> {

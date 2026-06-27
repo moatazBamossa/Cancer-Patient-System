@@ -143,9 +143,9 @@ export default function LabTestsPage() {
         lab_test_id: String(editingResult.lab_test_id),
         test_date: editingResult.test_date,
         result_value: editingResult.result_value,
-        is_abnormal: editingResult.is_abnormal,
+        is_abnormal: editingResult.is_abnormal ?? false,
         notes: editingResult.notes,
-        ordered_by: String(editingResult.ordered_by),
+        ordered_by: editingResult.ordered_by ? String(editingResult.ordered_by) : "",
       })
     } else {
       reset(emptyValues)
@@ -170,6 +170,7 @@ export default function LabTestsPage() {
   }
 
   const onSubmit = async (values: LabResultForm) => {
+
     const payload = {
       ...values,
       notes: values.notes ?? "",
@@ -414,7 +415,7 @@ export default function LabTestsPage() {
               />
             </FormField>
             <FormField
-              label={t("imaging.radiologist")}
+              label={t("doctors.TheTreatingPhysician")}
               error={formState.errors.ordered_by?.message?.toString()}
             >
               <select
@@ -444,15 +445,19 @@ export default function LabTestsPage() {
                 placeholder={t("lab.resultValuePlaceholder")}
               />
             </FormField>
-
-            <div className="space-y-1.5 flex flex-col justify-end">
-              <label className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-2">
+            <div className="space-y-1.5">
+              {formState.errors.is_abnormal && (
+                <p className="text-xs text-red-500">{formState.errors.is_abnormal.message?.toString()}</p>
+              )}
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
-                  {...register("is_abnormal")}
                   type="checkbox"
-                  className="rounded border-slate-300"
+                  {...register("is_abnormal")}
+                  className="w-4 h-4 rounded border-slate-300 text-red-500 focus:ring-red-500/20"
                 />
-                {t("lab.isAbnormal")}
+                <span className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
+                  {t("lab.isAbnormal")}
+                </span>
               </label>
             </div>
           </div>

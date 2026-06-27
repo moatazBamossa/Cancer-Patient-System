@@ -149,9 +149,15 @@ export function RecordedVitalSigns({ visitId, onAddVital }: RecordedVitalSignsPr
                   </p>
                 </div>
                 <div className="rounded-2xl border p-3" style={{ borderColor: 'var(--border-color)' }}>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('vitals.heightBmi')}</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('vitals.bmi')}</p>
                   <p className="mt-2 font-semibold" style={{ color: 'var(--text-primary)' }}>
-                    {vital.height_cm ?? '-'} cm / {vital.bmi ?? '-'}
+                    {Number(vital.bmi).toFixed(2) ?? '-'}
+                  </p>
+                </div>
+                <div className="rounded-2xl border p-3" style={{ borderColor: 'var(--border-color)' }}>
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('vitals.height')}</p>
+                  <p className="mt-2 font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    {vital.height_cm ?? '-'}
                   </p>
                 </div>
               </div>
