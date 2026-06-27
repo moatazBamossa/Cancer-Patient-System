@@ -19,9 +19,11 @@ import type { Diagnosis } from '../../types';
 import { FilterSelect } from '../../components/ui/FilterSelect';
 import { patientService } from '../../services/patient.service';
 import { doctorService } from '../../services/doctor.service';
+import { useModulePermissions } from '../../modules/roles/permissions';
 
 export default function DiagnosesPage() {
 	const { t } = useTranslation();
+	const { canList, canCreate, canUpdate, canDelete } = useModulePermissions('diagnoses');
 	const qc = useQueryClient();
 	const store = getDataStore();
 	const [showForm, setShowForm] = useState(false);
@@ -278,32 +280,38 @@ export default function DiagnosesPage() {
 					doctorsLoading
 				}
 				headerActions={
-					<button
-						onClick={openAddForm}
-						className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5">
-						<Plus size={16} /> {t('diagnoses.addDiagnosis')}
-					</button>
+					canCreate && (
+						<button
+							onClick={openAddForm}
+							className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5">
+							<Plus size={16} /> {t('diagnoses.addDiagnosis')}
+						</button>
+					)
 				}
 				actions={(row) => (
 					<div className="flex items-center gap-1">
-						<button
-							onClick={(e) => {
-								e.stopPropagation();
-								handleEdit(row);
-							}}
-							className="p-1.5 rounded-lg transition-colors hover:bg-amber-500/10"
-							style={{ color: 'var(--text-muted)' }}>
-							<Edit2 size={16} />
-						</button>
-						<button
-							onClick={(e) => {
-								e.stopPropagation();
-								setDeleteTarget(row);
-							}}
-							className="p-1.5 rounded-lg transition-colors hover:bg-red-500/10"
-							style={{ color: 'var(--text-muted)' }}>
-							<Trash2 size={16} />
-						</button>
+						{canUpdate && (
+							<button
+								onClick={(e) => {
+									e.stopPropagation();
+									handleEdit(row);
+								}}
+								className="p-1.5 rounded-lg transition-colors hover:bg-amber-500/10"
+								style={{ color: 'var(--text-muted)' }}>
+								<Edit2 size={16} />
+							</button>
+						)}
+						{canDelete && (
+							<button
+								onClick={(e) => {
+									e.stopPropagation();
+									setDeleteTarget(row);
+								}}
+								className="p-1.5 rounded-lg transition-colors hover:bg-red-500/10"
+								style={{ color: 'var(--text-muted)' }}>
+								<Trash2 size={16} />
+							</button>
+						)}
 					</div>
 				)}
 			/>

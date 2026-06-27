@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import i18next from 'i18next';
+import * as XLSX from 'xlsx';
 
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
@@ -87,6 +88,17 @@ export function getStatusColor(status: string): string {
     cancelled: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
   };
   return colors[status] || 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+}
+
+export function exportToExcel<T extends Record<string, unknown>>(
+  data: T[],
+  filename: string
+): void {
+  if (data.length === 0) return;
+  const ws = XLSX.utils.json_to_sheet(data)
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, "Sheet1")
+  XLSX.writeFile(wb, `${filename}.xlsx`)
 }
 
 export function exportToCSV<T extends Record<string, unknown>>(

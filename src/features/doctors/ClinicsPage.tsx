@@ -13,11 +13,13 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { zodValidator } from '../../lib/zodValidator';
 import { formatDate } from '../../lib/utils';
 import type { Clinic, ClinicFormInput } from '../../types';
+import { useModulePermissions } from '../../modules/roles/permissions';
 
 type ClinicForm = ClinicFormInput;
 
 export default function ClinicsPage() {
   const { t } = useTranslation();
+  const { canList, canCreate, canUpdate, canDelete } = useModulePermissions("clinics");
   const qc = useQueryClient();
 
   const [showForm, setShowForm] = useState(false);
@@ -152,12 +154,14 @@ export default function ClinicsPage() {
             {t('clinics.subtitle')}
           </p>
         </div>
-        <button
-          onClick={openAddForm}
-          className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5 self-start"
-        >
-          <Plus size={16} /> {t('clinics.newClinic')}
-        </button>
+        {canCreate && (
+          <button
+            onClick={openAddForm}
+            className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5 self-start"
+          >
+            <Plus size={16} /> {t('clinics.newClinic')}
+          </button>
+        )}
       </div>
 
       {/* Search */}
@@ -246,24 +250,28 @@ export default function ClinicsPage() {
               className="group glass-card p-6 border-b-4 border-indigo-500 hover:shadow-xl transition-all relative"
             >
               <div className="absolute top-3 left-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  type="button"
-                  onClick={() => openEditForm(clinic)}
-                  className="p-1.5 rounded-lg hover:bg-amber-500/10"
-                  style={{ color: 'var(--text-muted)' }}
-                  aria-label={t('common.edit')}
-                >
-                  <Edit2 size={16} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDeleteTarget(clinic)}
-                  className="p-1.5 rounded-lg hover:bg-red-500/10"
-                  style={{ color: 'var(--text-muted)' }}
-                  aria-label={t('common.delete')}
-                >
-                  <Trash2 size={16} />
-                </button>
+                {canUpdate && (
+                  <button
+                    type="button"
+                    onClick={() => openEditForm(clinic)}
+                    className="p-1.5 rounded-lg hover:bg-amber-500/10"
+                    style={{ color: 'var(--text-muted)' }}
+                    aria-label={t('common.edit')}
+                  >
+                    <Edit2 size={16} />
+                  </button>
+                )}
+                {canDelete && (
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(clinic)}
+                    className="p-1.5 rounded-lg hover:bg-red-500/10"
+                    style={{ color: 'var(--text-muted)' }}
+                    aria-label={t('common.delete')}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
               </div>
 
               <div className="flex items-start justify-between mb-4">

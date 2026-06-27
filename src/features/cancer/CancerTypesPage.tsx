@@ -14,9 +14,11 @@ import { FormField } from "../../components/ui/FormField"
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
 import { zodValidator } from "../../lib/zodValidator"
 import type { CancerType } from "../../types"
+import { useModulePermissions } from "../../modules/roles/permissions"
 
 export default function CancerTypesPage() {
   const { t } = useTranslation()
+  const { canList, canCreate, canUpdate, canDelete } = useModulePermissions("cancer_types")
   const qc = useQueryClient()
   const [showForm, setShowForm] = useState(false)
   const [editItem, setEditItem] = useState<CancerType | null>(null)
@@ -200,28 +202,34 @@ export default function CancerTypesPage() {
         data={data || []}
         isLoading={isLoading || isPending}
         headerActions={
-          <button
-            onClick={openAdd}
-            className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5 rounded-lg"
-          >
-            <Plus size={16} /> {t("cancer.addType")}
-          </button>
+          canCreate && (
+            <button
+              onClick={openAdd}
+              className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5 rounded-lg"
+            >
+              <Plus size={16} /> {t("cancer.addType")}
+            </button>
+          )
         }
         actions={(row) => (
           <div className="flex items-center gap-1 justify-end">
-            <button
-              onClick={() => openEdit(row)}
-              className="p-1.5 rounded-lg hover:bg-amber-500/10"
-              style={{ color: "var(--text-muted)" }}
-            >
-              <Edit2 size={16} />
-            </button>
-            <button
-              onClick={() => confirmDelete(row)}
-              className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors"
-            >
-              <Trash2 size={16} />
-            </button>
+            {canUpdate && (
+              <button
+                onClick={() => openEdit(row)}
+                className="p-1.5 rounded-lg hover:bg-amber-500/10"
+                style={{ color: "var(--text-muted)" }}
+              >
+                <Edit2 size={16} />
+              </button>
+            )}
+            {canDelete && (
+              <button
+                onClick={() => confirmDelete(row)}
+                className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
           </div>
         )}
       />

@@ -85,6 +85,16 @@ export default function PatientDetailsPage() {
     radiation_therapy: t("medications.radiation_therapy"),
   }
 
+   const visitTypeLabels: Record<string, string> = {
+    new_visit: t("visits.newVisit"),
+    follow_up: t("visits.visitTypeLabels.followUp"),
+    emergency: t("visits.visitTypeLabels.emergency"),
+    treatment_session: t("visits.treatmentSession"),
+    consultation: t("visits.visitTypeLabels.consultation"),
+    Routine: t("visits.visitTypeLabels.routine"),
+  }
+
+
   const patientIdNum = id ? Number(id) : undefined
 
   const { data: emergencyContacts = [], isLoading: contactsLoading, refetch } =
@@ -762,7 +772,7 @@ export default function PatientDetailsPage() {
                 onClick={() => navigate(`/patients/${id}/visits`)}
                 className="text-sm font-semibold text-blue-600 transition hover:text-blue-700"
               >
-                View full visits
+        {t("patientDetails.viewAllVisits")}
               </button>
             </div>
             {visits.length === 0 && (
@@ -775,7 +785,7 @@ export default function PatientDetailsPage() {
                     className="text-xs font-semibold uppercase"
                     style={{ color: "var(--accent-primary)" }}
                   >
-                    {v.visit_type?.replace("_", " ")}
+                    {visitTypeLabels[v?.visit_type|| ''] || v.visit_type?.replace("_", " ")}
                   </span>
                   <span
                     className="text-xs"

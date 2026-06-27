@@ -20,9 +20,11 @@ import { diagnosisService } from "../../services/diagnosis.service"
 import { FormSpy } from "react-final-form"
 import { format, set } from "date-fns"
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
+import { useModulePermissions } from "../../modules/roles/permissions"
 
 export default function VisitsPage() {
   const { t } = useTranslation()
+  const { canList, canCreate, canUpdate, canDelete } = useModulePermissions("visits")
   const visitSchema = z.object({
     patient_id: z.string().min(1, t("visits.validation.patientRequired") ?? "Patient is required"),
     doctor_id: z.string().min(1, t("visits.validation.doctorRequired") ?? "Doctor is required"),
@@ -108,6 +110,15 @@ export default function VisitsPage() {
         label: p.full_name ?? "",
       })),
   })
+
+   const visitTypeLabels: Record<string, string> = {
+    new_visit: t("visits.newVisit"),
+    follow_up: t("visits.visitTypeLabels.followUp"),
+    emergency: t("visits.visitTypeLabels.emergency"),
+    treatment_session: t("visits.treatmentSession"),
+    consultation: t("visits.visitTypeLabels.consultation"),
+    Routine: t("visits.visitTypeLabels.routine"),
+  }
 
   const createMut = useMutation({
     mutationFn: (d: VisitForm) =>
@@ -200,17 +211,12 @@ export default function VisitsPage() {
           Routine: "bg-blue-500/10 text-blue-500",
           "Post-treatment": "bg-purple-500/10 text-purple-500",
         }
-        const typeLabels: Record<string, string> = {
-          "Follow-up": t("visits.visitTypeLabels.followUp"),
-          Emergency: t("visits.visitTypeLabels.emergency"),
-          Routine: t("visits.visitTypeLabels.routine"),
-          "Post-treatment": t("visits.postTreatment"),
-        }
+
         return (
           <span
             className={`text-[10px] items-center gap-1.5 px-2 py-0.5 rounded-full font-bold uppercase ${colors[String(v)] || colors.Routine}`}
           >
-            {typeLabels[String(v)] || String(v)}
+            {visitTypeLabels[String(v)] || String(v)}
           </span>
         )
       },
@@ -280,12 +286,14 @@ export default function VisitsPage() {
             {t("visits.subtitle")}
           </p>
         </div>
-        <button
-          onClick={openForm}
-          className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5"
-        >
-          <Plus size={16} /> {t("visits.scheduleVisit")}
-        </button>
+        {canCreate && (
+          <button
+            onClick={openForm}
+            className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5"
+          >
+            <Plus size={16} /> {t("visits.scheduleVisit")}
+          </button>
+        )}
       </div>
 
       <DataTable<ClinicVisitRpcItem>
@@ -300,31 +308,35 @@ export default function VisitsPage() {
         emptyMessage={t("visits.noVisits")}
         actions={(row) => (
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="text-slate-600 hover:text-slate-900"
-              onClick={(event) => {
-                event.stopPropagation()
-                setSelectedVisit(row)
-                setIsEditing(true)
-                setFormKey((k) => k + 1)
-                setShowForm(true)
-              }}
-            >
-              <Pencil size={16} />
-            </button>
-            <button
-              type="button"
-              className="text-red-500 hover:text-red-700"
-              onClick={() => {
-                setShowDeleteConfirm({
-                  isOpen: true,
-                  id: Number(row.visit_id),
-                })
-              }}
-            >
-              <Trash2 size={16} />
-            </button>
+            {canUpdate && (
+              <button
+                type="button"
+                className="text-slate-600 hover:text-slate-900"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  setSelectedVisit(row)
+                  setIsEditing(true)
+                  setFormKey((k) => k + 1)
+                  setShowForm(true)
+                }}
+              >
+                <Pencil size={16} />
+              </button>
+            )}
+            {canDelete && (
+              <button
+                type="button"
+                className="text-red-500 hover:text-red-700"
+                onClick={() => {
+                  setShowDeleteConfirm({
+                    isOpen: true,
+                    id: Number(row.visit_id),
+                  })
+                }}
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
           </div>
         )}
       />

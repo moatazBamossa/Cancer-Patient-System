@@ -27,6 +27,7 @@ import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
 import { StatusBadge } from "../../components/ui/StatusBadge"
 import { DataTable, Column } from "../../components/ui/DataTable"
 import type { MedicationRpcItem } from "../../types/medicationRpc"
+import { useModulePermissions } from "../../modules/roles/permissions"
 
 type MedForm = {
   p_name: string
@@ -155,6 +156,7 @@ interface MedCardProps {
 
 function MedicationCard({ med, index, onEdit, onDelete }: MedCardProps) {
   const { t } = useTranslation()
+  const { canUpdate, canDelete } = useModulePermissions("medications")
   const tk = getToken(med.category)
 
   return (
@@ -213,22 +215,26 @@ function MedicationCard({ med, index, onEdit, onDelete }: MedCardProps) {
 
           {/* Hover-reveal action buttons */}
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex-shrink-0">
-            <button
-              onClick={() => onEdit(med)}
-              className="p-1.5 rounded-lg transition-colors"
-              style={{ color: "#94a3b8", background: tk.chip }}
-              title={t("common.edit")}
-            >
-              <Edit2 size={13} />
-            </button>
-            <button
-              onClick={() => onDelete(med)}
-              className="p-1.5 rounded-lg transition-colors"
-              style={{ color: "#94a3b8", background: "rgba(239,68,68,0.12)" }}
-              title={t("common.delete")}
-            >
-              <Trash2 size={13} />
-            </button>
+            {canUpdate && (
+              <button
+                onClick={() => onEdit(med)}
+                className="p-1.5 rounded-lg transition-colors"
+                style={{ color: "#94a3b8", background: tk.chip }}
+                title={t("common.edit")}
+              >
+                <Edit2 size={13} />
+              </button>
+            )}
+            {canDelete && (
+              <button
+                onClick={() => onDelete(med)}
+                className="p-1.5 rounded-lg transition-colors"
+                style={{ color: "#94a3b8", background: "rgba(239,68,68,0.12)" }}
+                title={t("common.delete")}
+              >
+                <Trash2 size={13} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -314,6 +320,7 @@ function SkeletonCard() {
 // ─── Main page component ──────────────────────────────────────────────────────
 export default function MedicationsPage() {
   const { t } = useTranslation()
+  const { canList, canCreate, canUpdate, canDelete } = useModulePermissions("medications")
   const qc = useQueryClient()
 
   // ── local state ──
@@ -504,13 +511,15 @@ export default function MedicationsPage() {
             {t("medications.subtitle")}
           </p>
         </div>
-        <button
-          onClick={openAdd}
-          className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5 self-start sm:self-auto"
-        >
-          <Plus size={16} />
-          {t("medications.addMedication")}
-        </button>
+        {canCreate && (
+          <button
+            onClick={openAdd}
+            className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5 self-start sm:self-auto"
+          >
+            <Plus size={16} />
+            {t("medications.addMedication")}
+          </button>
+        )}
       </div>
 
       {/* ── Stats strip ── */}
@@ -615,31 +624,35 @@ export default function MedicationsPage() {
         data={medications}
         isLoading={isLoading}
         emptyMessage={t("medications.noData") ?? "No medications found"}
-        onRowClick={openEdit}
+        onRowClick={canUpdate ? openEdit : undefined}
         actions={(row) => (
           <div className="flex items-center gap-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                openEdit(row)
-              }}
-              className="p-1.5 rounded-lg"
-              title={t("common.edit")}
-              style={{ color: "var(--text-muted)" }}
-            >
-              <Edit2 size={14} />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setDeleteTarget(row)
-              }}
-              className="p-1.5 rounded-lg"
-              title={t("common.delete")}
-              style={{ color: "var(--text-muted)" }}
-            >
-              <Trash2 size={14} />
-            </button>
+            {canUpdate && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  openEdit(row)
+                }}
+                className="p-1.5 rounded-lg"
+                title={t("common.edit")}
+                style={{ color: "var(--text-muted)" }}
+              >
+                <Edit2 size={14} />
+              </button>
+            )}
+            {canDelete && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setDeleteTarget(row)
+                }}
+                className="p-1.5 rounded-lg"
+                title={t("common.delete")}
+                style={{ color: "var(--text-muted)" }}
+              >
+                <Trash2 size={14} />
+              </button>
+            )}
           </div>
         )}
       />

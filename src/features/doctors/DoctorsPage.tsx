@@ -13,11 +13,13 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { zodValidator } from '../../lib/zodValidator';
 import { getInitials } from '../../lib/utils';
 import type { DoctorFormInput } from '../../types';
+import { useModulePermissions } from '../../modules/roles/permissions';
 
 type DoctorForm = DoctorFormInput;
 
 export default function DoctorsPage() {
   const { t } = useTranslation();
+  const { canList, canCreate, canUpdate, canDelete } = useModulePermissions("doctor");
   const qc = useQueryClient();
 
   const [showForm, setShowForm] = useState(false);
@@ -183,9 +185,11 @@ export default function DoctorsPage() {
             {t('doctors.subtitle')}
           </p>
         </div>
-        <button onClick={openAddForm} className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5 self-start">
-          <Plus size={16} /> {t('doctors.newDoctor')}
-        </button>
+        {canCreate && (
+          <button onClick={openAddForm} className="gradient-btn px-4 py-2 text-sm flex items-center gap-1.5 self-start">
+            <Plus size={16} /> {t('doctors.newDoctor')}
+          </button>
+        )}
       </div>
 
       {/* Search */}
@@ -274,24 +278,28 @@ export default function DoctorsPage() {
               className="glass-card overflow-hidden flex flex-col items-center text-center p-8 group relative"
             >
               <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  type="button"
-                  onClick={() => openEditForm(doc)}
-                  className="p-1.5 rounded-lg hover:bg-amber-500/10"
-                  style={{ color: 'var(--text-muted)' }}
-                  aria-label={t('common.edit')}
-                >
-                  <Edit2 size={16} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDeleteTarget(doc)}
-                  className="p-1.5 rounded-lg hover:bg-red-500/10"
-                  style={{ color: 'var(--text-muted)' }}
-                  aria-label={t('common.delete')}
-                >
-                  <Trash2 size={16} />
-                </button>
+                {canUpdate && (
+                  <button
+                    type="button"
+                    onClick={() => openEditForm(doc)}
+                    className="p-1.5 rounded-lg hover:bg-amber-500/10"
+                    style={{ color: 'var(--text-muted)' }}
+                    aria-label={t('common.edit')}
+                  >
+                    <Edit2 size={16} />
+                  </button>
+                )}
+                {canDelete && (
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(doc)}
+                    className="p-1.5 rounded-lg hover:bg-red-500/10"
+                    style={{ color: 'var(--text-muted)' }}
+                    aria-label={t('common.delete')}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
               </div>
 
               <div className="relative mb-6">
