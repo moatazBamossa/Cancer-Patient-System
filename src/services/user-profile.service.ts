@@ -32,6 +32,7 @@ export const userProfileService = {
       p_role_id: params.role_id ?? null,
       p_specialty: params.specialty ?? null,
       p_phone: params.phone ?? null,
+      p_email: params.email ?? null,
       p_password: params.password,
       p_is_active: params.is_active ?? true,
     });
@@ -45,6 +46,7 @@ export const userProfileService = {
       p_role_id: params.role_id ?? null,
       p_specialty: params.specialty ?? null,
       p_phone: params.phone ?? null,
+      p_email: params.email ?? null,
       p_password: params.password ?? null,
       p_is_active: params.is_active ?? null,
     });

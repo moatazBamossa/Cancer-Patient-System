@@ -8,6 +8,7 @@ export function normalizeUserProfile(item: UserProfileDto): UserProfile {
     role_id: item.role_id,
     specialty: item.specialty,
     phone: item.phone,
+    email: item.email,
     user_name: item.user_name,
     is_active: item.is_active,
     created_at: item.created_at,

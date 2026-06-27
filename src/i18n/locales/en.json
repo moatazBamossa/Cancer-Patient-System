@@ -932,6 +932,7 @@
     "invalidEmail": "Invalid email",
     "phoneRequired": "Phone is required",
     "phonePlaceholder": "Enter your phone number",
+    "emailPlaceholder": "Enter your email address",
     "saving": "Saving...",
     "saveChanges": "Save Changes",
     "usernameReadonly": "Username cannot be changed",

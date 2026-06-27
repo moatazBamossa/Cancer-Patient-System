@@ -23,6 +23,7 @@ export interface User {
   password: string; // hashed — NEVER display
   is_active: boolean;
   created_at: string;
+  email: string;
   updated_at: string;
   role_name?: string;
 }

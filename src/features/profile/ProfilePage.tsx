@@ -40,6 +40,7 @@ export default function ProfilePage() {
   const profileSchema = z.object({
     full_name: z.string().min(1, t('profile.nameRequired')),
     phone: z.string().min(1, t('profile.phoneRequired')),
+    email: z.string().email(t('common.invalidEmail')).optional().or(z.literal('')),
   });
 
   type ProfileForm = z.infer<typeof profileSchema>;
@@ -60,9 +61,11 @@ export default function ProfilePage() {
     return found?.role_name || role?.role_name || t('common.unknown');
   };
 
+  const profileEmail = profile?.email || user?.email || '';
   const profileInitialValues: ProfileForm = {
     full_name: profileName,
     phone: profilePhone,
+    email: profileEmail,
   };
 
   const formKey = profile?.id || user?.id || 'profile';
@@ -73,6 +76,7 @@ export default function ProfilePage() {
       id: user.id,
       full_name: data.full_name,
       phone: data.phone || null,
+      email: data.email?.trim() || null,
     });
   };
 
@@ -148,6 +152,10 @@ export default function ProfilePage() {
                   <Phone size={13} />
                   {profilePhone || t('common.notAvailable')}
                 </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <AtSign size={13} />
+                  {profileEmail || t('common.notAvailable')}
+                </span>
                 {profileSpecialty && (
                   <span className="inline-flex items-center gap-1.5">
                     <Stethoscope size={13} />
@@ -218,6 +226,12 @@ export default function ProfilePage() {
                   label={t('profile.phone')}
                   placeholder={t('profile.phonePlaceholder')}
                   required
+                />
+
+                <FormField
+                  name="email"
+                  label={t('common.email')}
+                  placeholder={t('profile.emailPlaceholder', { defaultValue: 'Enter your email address' })}
                 />
 
                 {/* Role – readonly */}

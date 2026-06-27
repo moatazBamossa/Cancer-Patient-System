@@ -933,6 +933,7 @@
     "invalidEmail": "بريد إلكتروني غير صالح",
     "phoneRequired": "رقم الهاتف مطلوب",
     "phonePlaceholder": "أدخل رقم هاتفك",
+    "emailPlaceholder": "أدخل بريدك الإلكتروني",
     "saving": "جاري الحفظ...",
     "saveChanges": "حفظ التغييرات",
     "usernameReadonly": "لا يمكن تغيير اسم المستخدم",

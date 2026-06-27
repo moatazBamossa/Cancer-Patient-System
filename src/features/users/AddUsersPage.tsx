@@ -54,6 +54,7 @@ const createUserSchema = (t: ReturnType<typeof useTranslation>['t']) => z
       .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, t('addUsers.passwordSpecial')),
     confirm_password: z.string(),
     phone: phoneSchema(t),
+    email: z.string().email(t('common.invalidEmail')).optional().or(z.literal('')),
     role_id: z.number().nullable().optional(),
     specialty: z.string().optional(),
     is_active: z.boolean().default(true),
@@ -70,6 +71,7 @@ const editUserSchema = (t: ReturnType<typeof useTranslation>['t']) => z
     password: z.string().optional(),
     confirm_password: z.string().optional(),
     phone: phoneSchema(t),
+    email: z.string().email(t('common.invalidEmail')).optional().or(z.literal('')),
     role_id: z.number().nullable().optional(),
     specialty: z.string().optional(),
     is_active: z.boolean().default(true),
@@ -227,6 +229,7 @@ export default function AddUsersPage() {
     password: '',
     confirm_password: '',
     phone: '',
+    email: '',
     role_id: undefined,
     specialty: '',
     is_active: true,
@@ -238,6 +241,7 @@ export default function AddUsersPage() {
     password: '',
     confirm_password: '',
     phone: editingUser?.phone ?? '',
+    email: editingUser?.email ?? '',
     role_id: editingUser?.role_id ?? undefined,
     specialty: editingUser?.specialty ?? '',
     is_active: editingUser?.is_active ?? true,
@@ -261,6 +265,7 @@ export default function AddUsersPage() {
         role_id: data.role_id ?? null,
         specialty: data.specialty?.trim() ? data.specialty.trim() : null,
         phone: data.phone?.trim() ? data.phone.trim() : null,
+        email: data.email?.trim() ? data.email.trim() : null,
         is_active: data.is_active,
       });
       setSuccessMessage(t('addUsers.userCreated'));
@@ -285,6 +290,8 @@ export default function AddUsersPage() {
       if (specialty !== editingUser.specialty) payload.specialty = specialty;
       const phone = data.phone?.trim() ? data.phone.trim() : null;
       if (phone !== editingUser.phone) payload.phone = phone;
+      const email = data.email?.trim() ? data.email.trim() : null;
+      if (email !== editingUser.email) payload.email = email;
       if (data.password?.trim()) payload.password = data.password.trim();
       if (data.is_active !== editingUser.is_active) payload.is_active = data.is_active;
 
@@ -321,6 +328,7 @@ export default function AddUsersPage() {
     { key: 'full_name', header: t('profile.fullName'), sortable: true },
     { key: 'user_name', header: t('profile.username'), sortable: true },
     { key: 'phone', header: t('common.phone'), sortable: true },
+    { key: 'email', header: t('common.email'), sortable: true },
     {
       key: 'role_id',
       header: t('common.role'),
@@ -587,9 +595,12 @@ export default function AddUsersPage() {
           </div>
           <div className="grid gap-4 lg:grid-cols-2">
             <FormField name="phone" label={t('common.phone')} placeholder={t('addUsers.phoneNumber')} />
-            <FormField name="role_id" type="select" label={t('common.role')} options={roleOptions} disabled={rolesLoading} placeholder={t('addUsers.selectRole')} />
+            <FormField name="email" label={t('common.email')} placeholder={t('addUsers.placeholders.email')} />
           </div>
-          <FormField name="specialty" label={t('doctors.specialty')} placeholder={t('addUsers.specialtyDepartment')} />
+          <div className="grid gap-4 lg:grid-cols-2">
+            <FormField name="role_id" type="select" label={t('common.role')} options={roleOptions} disabled={rolesLoading} placeholder={t('addUsers.selectRole')} />
+            <FormField name="specialty" label={t('doctors.specialty')} placeholder={t('addUsers.specialtyDepartment')} />
+          </div>
           <Field name="is_active" type="checkbox">
             {({ input }) => (
               <div className="flex items-center gap-2">
@@ -622,9 +633,12 @@ export default function AddUsersPage() {
             </div>
             <div className="grid gap-4 lg:grid-cols-2">
               <FormField name="phone" label={t('common.phone')} placeholder={t('addUsers.phoneNumber')} />
-              <FormField name="role_id" type="select" label={t('common.role')} options={roleOptions} disabled={rolesLoading} placeholder={t('addUsers.selectRole')} />
+              <FormField name="email" label={t('common.email')} placeholder={t('addUsers.placeholders.email')} />
             </div>
-            <FormField name="specialty" label={t('doctors.specialty')} placeholder={t('addUsers.specialtyDepartment')} />
+            <div className="grid gap-4 lg:grid-cols-2">
+              <FormField name="role_id" type="select" label={t('common.role')} options={roleOptions} disabled={rolesLoading} placeholder={t('addUsers.selectRole')} />
+              <FormField name="specialty" label={t('doctors.specialty')} placeholder={t('addUsers.specialtyDepartment')} />
+            </div>
             <div className="grid gap-4 lg:grid-cols-2">
               <FormField name="password" type="password" label={t('addUsers.newPassword')} placeholder={t('addUsers.keepCurrentPassword')} />
               <FormField name="confirm_password" type="password" label={t('addUsers.confirmNewPassword')} placeholder={t('addUsers.confirmNewPassword')} />
@@ -694,7 +708,15 @@ export default function AddUsersPage() {
                   {detailsUser.phone || t('common.notAvailable')}
                 </p>
               </div>
-              <div className="col-span-2">
+              <div>
+                <p className="text-xs uppercase tracking-widest font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>
+                  {t('common.email')}
+                </p>
+                <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                  {detailsUser.email || t('common.notAvailable')}
+                </p>
+              </div>
+              <div>
                 <p className="text-xs uppercase tracking-widest font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>
                   {t('doctors.specialty')}
                 </p>
