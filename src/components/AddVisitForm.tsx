@@ -27,6 +27,7 @@ export function AddVisitForm({ patientId, doctors, diagnoses, isOpen, onClose, o
     defaultValues: {
       p_visit_date: '',
       p_visit_type: '',
+      p_dose_given: false,
       p_reason_for_visit: '',
       p_clinical_notes: '',
       p_recommendations: '',
@@ -44,6 +45,7 @@ export function AddVisitForm({ patientId, doctors, diagnoses, isOpen, onClose, o
         p_diagnosis_id: Number(values.p_diagnosis_id),
         p_visit_date: new Date(values.p_visit_date).toISOString(),
         p_visit_type: values.p_visit_type,
+        p_dose_given: values.p_dose_given ?? null,
         p_reason_for_visit: values.p_reason_for_visit,
         p_clinical_notes: values.p_clinical_notes || '',
         p_recommendations: values.p_recommendations || '',
@@ -104,6 +106,13 @@ export function AddVisitForm({ patientId, doctors, diagnoses, isOpen, onClose, o
             {formState.errors.p_visit_type && (
               <span className="text-xs text-red-500">{formState.errors.p_visit_type.message}</span>
             )}
+          </label>
+
+          <label className="flex items-center gap-2 p-3 rounded-lg border cursor-pointer" style={{ borderColor: 'var(--border-color)' }}>
+            <input type="checkbox" {...register('p_dose_given')} className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
+            <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+              {t('visits.doseGiven')}
+            </span>
           </label>
         </div>
 

@@ -341,7 +341,7 @@ export function PatientVisitsPage({ patientId }: PatientVisitsPageProps) {
                   </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-3">
                   <div
                     className="rounded-3xl border p-4"
                     style={{ borderColor: "var(--border-color)" }}
@@ -370,6 +370,24 @@ export function PatientVisitsPage({ patientId }: PatientVisitsPageProps) {
                       {selectedDiagnosis?.cancer_name ??
                         selectedDiagnosis?.notes ??
                         t("common.unknown")}
+                    </p>
+                  </div>
+                  <div
+                    className="rounded-3xl border p-4"
+                    style={{ borderColor: "var(--border-color)" }}
+                  >
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                      {t("visits.doseGiven")}
+                    </p>
+                    <p
+                      className="mt-2 font-semibold"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${selectedVisit.dose_given ? "bg-emerald-500/10 text-emerald-600" : "bg-slate-500/10 text-slate-500"}`}
+                      >
+                        {selectedVisit.dose_given ? t("common.yes") : t("common.no")}
+                      </span>
                     </p>
                   </div>
                 </div>

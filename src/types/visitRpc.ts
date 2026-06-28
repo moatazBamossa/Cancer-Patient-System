@@ -7,6 +7,7 @@ export interface ClinicVisitRpcItem {
   diagnosis_id: number | null;
   visit_date: string;
   visit_type?: string;
+  dose_given?: boolean;
   reason_for_visit: string;
   clinical_notes?: string;
   recommendations?: string;
@@ -67,6 +68,7 @@ export interface ClinicVisitCreateInput {
   p_diagnosis_id?: number | null;
   p_visit_date: string;
   p_visit_type?: string;
+  p_dose_given?: boolean | null;
   p_reason_for_visit: string;
   p_clinical_notes?: string;
   p_recommendations?: string;
@@ -80,6 +82,7 @@ export interface ClinicVisitUpdateInput {
   p_diagnosis_id?: number | null;
   p_visit_date: string;
   p_visit_type?: string;
+  p_dose_given?: boolean | null;
   p_reason_for_visit: string;
   p_clinical_notes?: string;
   p_recommendations?: string;
@@ -123,6 +126,7 @@ export interface ClinicVisitWithVitalsCreateInput {
   p_diagnosis_id?: number | null;
   p_visit_date: string;
   p_visit_type?: string;
+  p_dose_given?: boolean | null;
   p_reason_for_visit: string;
   p_clinical_notes?: string;
   p_recommendations?: string;

@@ -17,7 +17,7 @@ import type { ClinicVisitRpcItem } from "../../types/visitRpc"
 import { patientService } from "../../services/patient.service"
 import { doctorService } from "../../services/doctor.service"
 import { diagnosisService } from "../../services/diagnosis.service"
-import { FormSpy } from "react-final-form"
+import { Field, FormSpy } from "react-final-form"
 import { format, set } from "date-fns"
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
 import { useModulePermissions } from "../../modules/roles/permissions"
@@ -30,6 +30,7 @@ export default function VisitsPage() {
     doctor_id: z.string().min(1, t("visits.validation.doctorRequired") ?? "Doctor is required"),
     visit_date: z.string().min(1, t("visits.validation.visitDateTimeRequired") ?? "Visit date is required"),
     visit_type: z.string().min(1, t("visits.validation.visitTypeRequired") ?? "Visit type is required"),
+    dose_given: z.boolean().optional().default(false),
     reason_for_visit: z.string().min(1, t("visits.validation.reasonRequired") ?? "Reason is required"),
     clinical_notes: z.string().optional().default(""),
     recommendations: z.string().optional().default(""),
@@ -62,6 +63,7 @@ export default function VisitsPage() {
     doctor_id: string;
     visit_date: string;
     visit_type: string;
+    dose_given: boolean;
     reason_for_visit: string;
     clinical_notes: string;
     recommendations: string;
@@ -128,6 +130,7 @@ export default function VisitsPage() {
         p_diagnosis_id: d.diagnosis_id ? Number(d.diagnosis_id) : null,
         p_visit_date: d.visit_date,
         p_visit_type: d.visit_type,
+        p_dose_given: d.dose_given ?? null,
         p_reason_for_visit: d.reason_for_visit,
         p_clinical_notes: d.clinical_notes || undefined,
         p_recommendations: d.recommendations || undefined,
@@ -160,6 +163,7 @@ export default function VisitsPage() {
           ? format(new Date(selectedVisit.visit_date), "yyyy-MM-dd")
           : "",
         visit_type: selectedVisit.visit_type as VisitForm["visit_type"],
+        dose_given: selectedVisit.dose_given ?? false,
         reason_for_visit: selectedVisit.reason_for_visit,
         clinical_notes: selectedVisit.clinical_notes ?? "",
         recommendations: selectedVisit.recommendations ?? "",
@@ -170,6 +174,7 @@ export default function VisitsPage() {
         doctor_id: "",
         visit_date: "",
         visit_type: "Routine",
+        dose_given: false,
         reason_for_visit: "",
         clinical_notes: "",
         recommendations: "",
@@ -266,6 +271,17 @@ export default function VisitsPage() {
         </div>
       ),
     },
+    {
+      key: "dose_given",
+      header: t("visits.doseGiven"),
+      render: (v) => (
+        <span
+          className={`text-xs font-semibold px-2 py-0.5 rounded-full ${v ? "bg-emerald-500/10 text-emerald-600" : "bg-slate-500/10 text-slate-500"}`}
+        >
+          {v ? t("common.yes") : t("common.no")}
+        </span>
+      ),
+    },
   ]
 
   return (
@@ -360,6 +376,7 @@ export default function VisitsPage() {
                 p_diagnosis_id: d.diagnosis_id ? Number(d.diagnosis_id) : null,
                 p_visit_date: d.visit_date,
                 p_visit_type: d.visit_type,
+                p_dose_given: d.dose_given ?? null,
                 p_reason_for_visit: d.reason_for_visit,
                 p_clinical_notes: d.clinical_notes || undefined,
                 p_recommendations: d.recommendations || undefined,
@@ -442,6 +459,16 @@ export default function VisitsPage() {
                 { value: "Routine", label: t("visits.regular") },
               ]}
             />
+            <label className="flex items-center gap-2 p-3 rounded-lg border cursor-pointer" style={{ borderColor: "var(--border-color)" }}>
+              <Field name="dose_given" type="checkbox">
+                {({ input }) => (
+                  <input {...input} type="checkbox" className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
+                )}
+              </Field>
+              <span className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
+                {t("visits.doseGiven")}
+              </span>
+            </label>
           </div>
           <FormField
             name="reason_for_visit"

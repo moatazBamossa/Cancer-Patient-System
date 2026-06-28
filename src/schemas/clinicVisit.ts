@@ -6,6 +6,7 @@ export function createClinicVisitSchema(t: TFunction) {
   return z.object({
     p_visit_date: z.string().min(1, t('visits.validation.visitDateTimeRequired')),
     p_visit_type: z.string().min(1, t('visits.validation.visitTypeRequired')),
+    p_dose_given: z.boolean().optional(),
     p_reason_for_visit: z.string().min(1, t('visits.validation.reasonRequired')),
     p_clinical_notes: z.string().optional().default(''),
     p_recommendations: z.string().optional().default(''),

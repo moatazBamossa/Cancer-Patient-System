@@ -20,7 +20,7 @@ import {
 import { z } from "zod"
 import toast from "react-hot-toast"
 import { useTranslation } from "react-i18next"
-import { useField } from "react-final-form"
+import { useField, Field } from "react-final-form"
 import { visitService } from "../../services/visit.service"
 import { patientService } from "../../services/patient.service"
 import { doctorService } from "../../services/doctor.service"
@@ -41,6 +41,7 @@ type CombinedVisitForm = {
   p_diagnosis_id?: string;
   p_visit_date: string;
   p_visit_type: "Routine" | "Follow-up" | "Emergency" | "Post-treatment";
+  p_dose_given?: boolean;
   p_reason_for_visit: string;
   p_clinical_notes?: string;
   p_recommendations?: string;
@@ -63,6 +64,7 @@ const DEFAULT_FORM_VALUES: CombinedVisitForm = {
   p_diagnosis_id: "",
   p_visit_date: "",
   p_visit_type: "Routine",
+  p_dose_given: false,
   p_reason_for_visit: "",
   p_clinical_notes: "",
   p_recommendations: "",
@@ -428,6 +430,7 @@ export default function VitalsPage() {
     p_visit_type: z
       .enum(["Routine", "Follow-up", "Emergency", "Post-treatment"])
       .default("Routine"),
+    p_dose_given: z.boolean().optional(),
     p_reason_for_visit: z.string().min(1, t("visits.validation.reasonRequired") ?? "Reason is required"),
     p_clinical_notes: z.string().optional(),
     p_recommendations: z.string().optional(),
@@ -479,6 +482,7 @@ export default function VitalsPage() {
           p_diagnosis_id: d.p_diagnosis_id ? Number(d.p_diagnosis_id) : null,
           p_visit_date: d.p_visit_date,
           p_visit_type: d.p_visit_type || undefined,
+          p_dose_given: d.p_dose_given || null,
           p_reason_for_visit: d.p_reason_for_visit,
           p_clinical_notes: d.p_clinical_notes || undefined,
           p_recommendations: d.p_recommendations || undefined,
@@ -506,6 +510,7 @@ export default function VitalsPage() {
           p_diagnosis_id: d.p_diagnosis_id ? Number(d.p_diagnosis_id) : null,
           p_visit_date: d.p_visit_date,
           p_visit_type: d.p_visit_type || undefined,
+          p_dose_given: d.p_dose_given ?? null,
           p_reason_for_visit: d.p_reason_for_visit,
           p_clinical_notes: d.p_clinical_notes || undefined,
           p_recommendations: d.p_recommendations || undefined,
@@ -680,6 +685,16 @@ export default function VitalsPage() {
                   { value: "Post-treatment", label: t("visits.postTreatment") },
                 ]}
               />
+              <label className="flex items-center gap-2 p-3 rounded-lg border cursor-pointer" style={{ borderColor: "var(--border-color)" }}>
+                <Field name="p_dose_given" type="checkbox">
+                  {({ input }) => (
+                    <input {...input} type="checkbox" className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
+                  )}
+                </Field>
+                <span className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
+                  {t("visits.doseGiven")}
+                </span>
+              </label>
 
               <FormDiagnosisSelect />
             </div>
