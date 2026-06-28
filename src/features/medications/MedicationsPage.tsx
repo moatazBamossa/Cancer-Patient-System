@@ -474,7 +474,7 @@ export default function MedicationsPage() {
       key: "category",
       header: t("common.category"),
       sortable: true,
-      render: (_v, row) => <StatusBadge status={categoryStatusMap[row.category]} />,
+      render: (_v, row) => <StatusBadge isTranslated status={categoryStatusMap[row.category]} />,
     },
     { key: "unit", header: t("medications.unit"), sortable: false },
     {

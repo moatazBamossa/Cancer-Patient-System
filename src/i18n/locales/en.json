@@ -546,6 +546,7 @@
     "routine": "Routine",
     "postTreatment": "Post-treatment",
     "editVisit": "Edit Visit",
+    "doseGiven": "Dose Given",
     "visitDeleted": "Visit deleted successfully",
     "visitUpdated": "Visit updated successfully",
     "clinicVisits": "Clinic visits",

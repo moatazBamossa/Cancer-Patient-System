@@ -547,6 +547,7 @@
     "routine": "روتينية",
     "postTreatment": "ما بعد العلاج",
     "editVisit": "تعديل الزيارة",
+    "doseGiven": "الجرعة المعطاة",
     "visitDeleted": "تم حذف الزيارة بنجاح",
     "visitUpdated": "تم تحديث الزيارة بنجاح",
     "clinicVisits": "زيارات العيادة",
