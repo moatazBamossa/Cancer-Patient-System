@@ -99,6 +99,7 @@ export function AddVisitForm({ patientId, doctors, diagnoses, isOpen, onClose, o
               <option value="emergency">{t('visits.visitTypeLabels.emergency')}</option>
               <option value="treatment_session">{t('visits.treatmentSession')}</option>
               <option value="consultation">{t('visits.visitTypeLabels.consultation')}</option>
+              <option value="Routine">{t('visits.regular')}</option>
             </select>
             {formState.errors.p_visit_type && (
               <span className="text-xs text-red-500">{formState.errors.p_visit_type.message}</span>

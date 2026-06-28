@@ -29,7 +29,7 @@ export default function VisitsPage() {
     patient_id: z.string().min(1, t("visits.validation.patientRequired") ?? "Patient is required"),
     doctor_id: z.string().min(1, t("visits.validation.doctorRequired") ?? "Doctor is required"),
     visit_date: z.string().min(1, t("visits.validation.visitDateTimeRequired") ?? "Visit date is required"),
-    visit_type: z.enum(["Follow-up", "Emergency", "Routine", "Post-treatment"]),
+    visit_type: z.string().min(1, t("visits.validation.visitTypeRequired") ?? "Visit type is required"),
     reason_for_visit: z.string().min(1, t("visits.validation.reasonRequired") ?? "Reason is required"),
     clinical_notes: z.string().optional().default(""),
     recommendations: z.string().optional().default(""),
@@ -61,7 +61,7 @@ export default function VisitsPage() {
     patient_id: string;
     doctor_id: string;
     visit_date: string;
-    visit_type: "Follow-up" | "Emergency" | "Routine" | "Post-treatment";
+    visit_type: string;
     reason_for_visit: string;
     clinical_notes: string;
     recommendations: string;
@@ -434,10 +434,12 @@ export default function VisitsPage() {
               type="select"
               required
               options={[
-                { value: "Follow-up", label: t("visits.followUp") },
-                { value: "Emergency", label: t("visits.emergency") },
+                { value: "new_visit", label: t("visits.newVisit") },
+                { value: "follow_up", label: t("visits.visitTypeLabels.followUp") },
+                { value: "emergency", label: t("visits.visitTypeLabels.emergency") },
+                { value: "treatment_session", label: t("visits.treatmentSession") },
+                { value: "consultation", label: t("visits.visitTypeLabels.consultation") },
                 { value: "Routine", label: t("visits.regular") },
-                { value: "Post-treatment", label: t("visits.postTreatment") },
               ]}
             />
           </div>
